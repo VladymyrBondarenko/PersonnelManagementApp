@@ -1,5 +1,6 @@
 ﻿using PersonnelManagement.Domain.Departments;
 using PersonnelManagement.Domain.Employees;
+using PersonnelManagement.Domain.Models.Originals;
 using PersonnelManagement.Domain.Positions;
 using System;
 using System.Collections.Generic;
@@ -51,5 +52,7 @@ namespace PersonnelManagement.Domain.Orders
         public OrderDescription OrderDescription { get; set; }
 
         public OrderState OrderState { get; set; }
+
+        public ICollection<Original> Originals { get; set; }
     }
 }

@@ -6,8 +6,10 @@ using PersonnelManagement.Application.Positions;
 using PersonnelManagement.Domain.Departments;
 using PersonnelManagement.Domain.Orders;
 using PersonnelManagement.Domain.Positions;
+using PersonnelManagement.Infrastracture.FileOperations;
 using PersonnelManagement.UI.Models;
 using System.Diagnostics;
+using System.IO;
 
 namespace PersonnelManagement.UI.Controllers
 {
@@ -19,11 +21,12 @@ namespace PersonnelManagement.UI.Controllers
         private readonly IOrderDescriptionService orderDescription;
         private readonly IPositionService positionService;
         private readonly IDepartmentService departmentService;
+        private readonly IFtpService ftpService;
 
         public HomeController(ILogger<HomeController> logger,
             IEmployeeService employeeService, IOrderService orderService, 
             IOrderDescriptionService orderDescription, IPositionService positionService, 
-            IDepartmentService departmentService)
+            IDepartmentService departmentService, IFtpService ftpService)
         {
             _logger = logger;
             this.employeeService = employeeService;
@@ -31,9 +34,19 @@ namespace PersonnelManagement.UI.Controllers
             this.orderDescription = orderDescription;
             this.positionService = positionService;
             this.departmentService = departmentService;
+            this.ftpService = ftpService;
         }
 
         public async Task<IActionResult> Index()
+        {
+            //testOrders();
+
+            testFileManager();
+
+            return View();
+        }
+
+        private async Task testOrders()
         {
             var dep = await departmentService.CreateAsync(new Department { DepartmentTitle = "Department 1" });
             var pos = await positionService.CreateAsync(new Position { PositionTitle = "Department 1" });
@@ -65,8 +78,16 @@ namespace PersonnelManagement.UI.Controllers
             //    DateFrom = DateTime.Now
             //});
             //order?.AcceptOrderAsync();
+        }
 
-            return View();
+        private void testFileManager()
+        {
+            //var files = ftpService.GetFileNames();
+            var path = @"C:\Users\38095\Desktop\Перевод.txt";
+            var bytes = System.IO.File.ReadAllBytes(path);
+
+            //ftpService.SaveFileToFtp(bytes, @"‪C:\Users\38095\Desktop\ftp\Orders");
+            ftpService.SaveFileToFtp(bytes, @"Orders\Переводы.txt");
         }
 
         public IActionResult Privacy()

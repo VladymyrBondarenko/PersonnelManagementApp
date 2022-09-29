@@ -1,23 +1,30 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PersonnelManagement.Application.DbContexts;
 using PersonnelManagement.Application.Employees;
+using PersonnelManagement.Application.FileOperations.Originals;
 using PersonnelManagement.Application.Orders.Interfaces;
 using PersonnelManagement.Domain.Employees;
+using PersonnelManagement.Domain.Models.Originals;
 
 namespace PersonnelManagement.Infrastracture.Employees
 {
     public class EmployeeService : IEmployeeService
     {
         private readonly IApplicationDbContext _dbContext;
+        private readonly IOriginalService _originalService;
 
-        public EmployeeService(IApplicationDbContext dbContext)
+        public EmployeeService(IApplicationDbContext dbContext, IOriginalService originalService)
         {
             _dbContext = dbContext;
+            _originalService = originalService;
         }
 
         public async Task<Employee> CreateAsync(Employee employee)
         {
             var addedEmployee = await _dbContext.Employees.AddAsync(employee);
+
+            await _dbContext.SaveChangesAsync();
+
             return addedEmployee.Entity;
         }
 
@@ -77,7 +84,36 @@ namespace PersonnelManagement.Infrastracture.Employees
                 .Include(x => x.Department)
                 .Include(x => x.Position)
                 .Include(x => x.Orders)
+                .Include(x => x.Originals)
                 .FirstOrDefaultAsync(x => x.Id == id);
+        }
+
+        public async Task<Original> AddOriginalAsync(OriginalCreateParams createParams)
+        {
+            var employee = await GetAsync(createParams.EmployeeId);
+
+            if (employee == null)
+            {
+                return null;
+            }
+
+            var original = await _originalService.AddOriginalAsync(
+                createParams.SourceFilePath, OriginalType.Employees, employee.Id);
+
+            return original;
+        }
+
+        public async Task<bool> DeleteOriginalAsync(OriginalDeleteParams deleteParams)
+        {
+            var original = await _originalService.GetOriginalAsync(deleteParams.OriginalId);
+
+            if (original == null || original.EmployeeId != deleteParams.EmployeeId)
+            {
+                return false;
+            }
+
+            var origDeleted = await _originalService.DeleteOriginalAsync(original);
+            return origDeleted;
         }
     }
 }

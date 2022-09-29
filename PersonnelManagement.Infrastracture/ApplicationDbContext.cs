@@ -2,6 +2,7 @@
 using PersonnelManagement.Application.DbContexts;
 using PersonnelManagement.Domain.Departments;
 using PersonnelManagement.Domain.Employees;
+using PersonnelManagement.Domain.Models.Originals;
 using PersonnelManagement.Domain.Orders;
 using PersonnelManagement.Domain.Positions;
 using System;
@@ -38,6 +39,12 @@ namespace PersonnelManagement.Infrastructure
                 .HasForeignKey<Employee>(x => x.PositionId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<Employee>()
+                .HasMany(x => x.Originals)
+                .WithOne(x => x.Employee)
+                .HasForeignKey(x => x.EmployeeId)
+                .OnDelete(DeleteBehavior.Restrict);
+
             modelBuilder.Entity<Order>()
                 .HasOne(x => x.Department)
                 .WithOne()
@@ -61,6 +68,12 @@ namespace PersonnelManagement.Infrastructure
                 .WithMany(x => x.Orders)
                 .HasForeignKey(x => x.EmployeeId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Order>()
+                .HasMany(x => x.Originals)
+                .WithOne(x => x.Order)
+                .HasForeignKey(x => x.OrderId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
 
         public DbSet<Order> Orders { get; set; }
@@ -72,5 +85,7 @@ namespace PersonnelManagement.Infrastructure
         public DbSet<Department> Departments { get; set; }
 
         public DbSet<Position> Positions { get; set; }
+
+        public DbSet<Original> Originals { get; set; }
     }
 }

@@ -77,6 +77,37 @@ namespace PersonnelManagement.Infrastracture.Migrations
                     b.ToTable("Employees");
                 });
 
+            modelBuilder.Entity("PersonnelManagement.Domain.Models.Originals.Original", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("EmployeeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("OrderId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("OriginalFileExtension")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OriginalPath")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OriginalTitle")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EmployeeId");
+
+                    b.HasIndex("OrderId");
+
+                    b.ToTable("Originals");
+                });
+
             modelBuilder.Entity("PersonnelManagement.Domain.Orders.Order", b =>
                 {
                     b.Property<Guid>("Id")
@@ -180,6 +211,23 @@ namespace PersonnelManagement.Infrastracture.Migrations
                     b.Navigation("Position");
                 });
 
+            modelBuilder.Entity("PersonnelManagement.Domain.Models.Originals.Original", b =>
+                {
+                    b.HasOne("PersonnelManagement.Domain.Employees.Employee", "Employee")
+                        .WithMany("Originals")
+                        .HasForeignKey("EmployeeId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("PersonnelManagement.Domain.Orders.Order", "Order")
+                        .WithMany("Originals")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Employee");
+
+                    b.Navigation("Order");
+                });
+
             modelBuilder.Entity("PersonnelManagement.Domain.Orders.Order", b =>
                 {
                     b.HasOne("PersonnelManagement.Domain.Departments.Department", "Department")
@@ -215,6 +263,13 @@ namespace PersonnelManagement.Infrastracture.Migrations
             modelBuilder.Entity("PersonnelManagement.Domain.Employees.Employee", b =>
                 {
                     b.Navigation("Orders");
+
+                    b.Navigation("Originals");
+                });
+
+            modelBuilder.Entity("PersonnelManagement.Domain.Orders.Order", b =>
+                {
+                    b.Navigation("Originals");
                 });
 #pragma warning restore 612, 618
         }

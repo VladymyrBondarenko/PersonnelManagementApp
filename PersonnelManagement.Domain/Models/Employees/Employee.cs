@@ -1,4 +1,5 @@
 ﻿using PersonnelManagement.Domain.Departments;
+using PersonnelManagement.Domain.Models.Originals;
 using PersonnelManagement.Domain.Orders;
 using PersonnelManagement.Domain.Positions;
 using System;
@@ -25,16 +26,6 @@ namespace PersonnelManagement.Domain.Employees
 
         public DateTime FireDate { get; set; }
 
-        //public Guid HireOrderId { get; set; }
-
-        //[ForeignKey(nameof(HireOrderId))]
-        //public Order HireOrder { get; set; }
-
-        //public Guid FireOrderId { get; set; }
-
-        //[ForeignKey(nameof(FireOrderId))]
-        //public Order FireOrder { get; set; }
-
         public ICollection<Order> Orders { get; set; }
 
         public Guid? DepartmentId { get; set; }
@@ -50,5 +41,7 @@ namespace PersonnelManagement.Domain.Employees
         public Position Position { get; set; }
 
         public EmployeeState EmployeeState { get; set; }
+
+        public ICollection<Original> Originals { get; set; }
     }
 }

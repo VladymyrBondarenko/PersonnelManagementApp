@@ -26,6 +26,7 @@ namespace PersonnelManagement.Infrastracture.Orders.OrderBase
                 .Include(x => x.Position)
                 .Include(x => x.Department)
                 .Include(x => x.OrderDescription)
+                .Include(x => x.Originals)
                 .FirstOrDefaultAsync(x => x.Id == id);
         }
 
@@ -36,6 +37,7 @@ namespace PersonnelManagement.Infrastracture.Orders.OrderBase
                 .Include(x => x.Position)
                 .Include(x => x.Department)
                 .Include(x => x.OrderDescription)
+                .Include(x => x.Originals)
                 .ToListAsync();
         }
 

@@ -9,6 +9,7 @@ using PersonnelManagement.Application.Positions;
 using PersonnelManagement.Infrastracture.Positions;
 using PersonnelManagement.Application.Departments;
 using PersonnelManagement.Infrastracture.Departments;
+using PersonnelManagement.Infrastracture.FileOperations;
 
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("PersonnelManagementDataConnection");
@@ -21,6 +22,7 @@ builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IOrderDescriptionService, OrderDescriptionService>();
 builder.Services.AddScoped<IPositionService, PositionService>();
 builder.Services.AddScoped<IDepartmentService, DepartmentService>();
+builder.Services.AddScoped<IFtpService, FtpService>();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
