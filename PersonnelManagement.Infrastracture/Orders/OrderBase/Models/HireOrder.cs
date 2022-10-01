@@ -25,6 +25,7 @@ namespace PersonnelManagement.Infrastracture.Orders.OrderBase.Models
             if(employee != null)
             {
                 Order.OrderState = OrderState.Accepted;
+                Order.EmployeeId = employee.Id;
                 return await _orderRepository.UpdateAsync(Order);
             }
 

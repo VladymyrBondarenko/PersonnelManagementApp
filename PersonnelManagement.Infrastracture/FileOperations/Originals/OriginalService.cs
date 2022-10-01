@@ -7,6 +7,7 @@ using PersonnelManagement.Domain.Models.Originals;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -16,27 +17,73 @@ namespace PersonnelManagement.Infrastracture.FileOperations.Originals
     {
         private readonly IFtpService _ftpService;
         private readonly FtpStructureSettings _entityOriginalSettings;
-        private readonly IApplicationDbContext _dbContext;
+        private readonly IOriginalRepository _originalRepo;
 
         public OriginalService(IFtpService ftpService, FtpStructureSettings entityOriginalSettings,
-            IApplicationDbContext dbContext)
+            IOriginalRepository originalRepo)
         {
             _ftpService = ftpService;
             _entityOriginalSettings = entityOriginalSettings;
-            _dbContext = dbContext;
+            _originalRepo = originalRepo;
         }
 
         public async Task<List<Original>> GetOriginalsAsync()
         {
-            return await _dbContext.Originals.ToListAsync();
+            return await _originalRepo.GetAllAsync();
         }
 
         public async Task<Original> GetOriginalAsync(Guid id)
         {
-            return await _dbContext.Originals.FindAsync(id);
+            return await _originalRepo.GetAsync(id);
         }
 
-        public async Task<Original> AddOriginalAsync(string sourceFilePath, OriginalType originalType,
+        public async Task<Original> AddOriginalAsync(OriginalCreateParams createParams, OriginalType originalType)
+        {
+            var bindedEntutyKey = originalType switch
+            {
+                OriginalType.Orders => createParams.OrderId,
+                OriginalType.Employees => createParams.EmployeeId,
+                _ => throw new NotImplementedException("Specified original type could not be handled")
+            };
+
+            Original original = null;
+
+            if (createParams.Bytes != null && !string.IsNullOrWhiteSpace(createParams.FileName))
+            {
+                original = await addOriginalAsync(
+                    createParams.FileName, createParams.Bytes, originalType, bindedEntutyKey);
+            }
+            else if (!string.IsNullOrWhiteSpace(createParams.SourceFilePath))
+            {
+                original = await addOriginalAsync(
+                    createParams.SourceFilePath, originalType, bindedEntutyKey);
+            }
+
+            return original;
+        }
+
+        private async Task<Original> addOriginalAsync(string fileName, byte[] bytes, OriginalType originalType,
+            Guid bindedEntityKey = default)
+        {
+            string executableLocation = Path.GetDirectoryName(
+                Assembly.GetExecutingAssembly().Location);
+            var filePath = Path.Combine(executableLocation, fileName);
+
+            await File.WriteAllBytesAsync(filePath, bytes);
+
+            if (!File.Exists(filePath))
+            {
+                return null;
+            }
+
+            var original = await addOriginalAsync(filePath, originalType, bindedEntityKey);
+
+            File.Delete(filePath);
+
+            return original;
+        }
+
+        private async Task<Original> addOriginalAsync(string sourceFilePath, OriginalType originalType,
             Guid bindedEntityKey = default)
         {
             var remotePath = originalType switch
@@ -65,18 +112,17 @@ namespace PersonnelManagement.Infrastracture.FileOperations.Originals
                     {
                         case OriginalType.Orders:
                             original.OrderId = bindedEntityKey;
+                            original.EmployeeId = null;
                             break;
                         case OriginalType.Employees:
                             original.EmployeeId = bindedEntityKey;
+                            original.OrderId = null;
                             break;
                     }
                 }
 
-                var created = await _dbContext.Originals.AddAsync(original);
-
-                await _dbContext.SaveChangesAsync();
-
-                return created.Entity;
+                var createdOrig = await _originalRepo.CreateAsync(original);
+                return createdOrig;
             }
             else
             {
@@ -86,14 +132,13 @@ namespace PersonnelManagement.Infrastracture.FileOperations.Originals
 
         public async Task<bool> DeleteOriginalAsync(Original original)
         {
-            var exists = await _dbContext.Originals.FindAsync(original?.Id) != null;
+            var exists = await _originalRepo.GetAsync(original.Id) != null;
 
             if (exists)
             {
                 await _ftpService.DeleteFileFromFtpAsync(original.OriginalPath);
 
-                _dbContext.Originals.Remove(original);
-                return await _dbContext.SaveChangesAsync() > 0;
+                return await _originalRepo.DeleteAsync(original);
             }
 
             return false;

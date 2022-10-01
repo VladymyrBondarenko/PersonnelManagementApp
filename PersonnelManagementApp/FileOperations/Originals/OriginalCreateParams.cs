@@ -10,6 +10,10 @@ namespace PersonnelManagement.Application.FileOperations.Originals
     {
         public string SourceFilePath { get; set; }
 
+        public byte[] Bytes { get; set; }
+
+        public string FileName { get; set; }
+
         public Guid OrderId { get; set; }
 
         public Guid EmployeeId { get; set; }

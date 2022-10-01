@@ -4,7 +4,7 @@ namespace PersonnelManagement.Application.FileOperations.Originals
 {
     public interface IOriginalService
     {
-        Task<Original> AddOriginalAsync(string sourceFilePath, OriginalType originalType, Guid bindedEntityKey = default);
+        Task<Original> AddOriginalAsync(OriginalCreateParams createParams, OriginalType originalType);
         Task<bool> DeleteOriginalAsync(Original original);
         Task<Original> GetOriginalAsync(Guid id);
         Task<List<Original>> GetOriginalsAsync();

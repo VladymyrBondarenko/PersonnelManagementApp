@@ -97,9 +97,7 @@ namespace PersonnelManagement.Infrastracture.Employees
                 return null;
             }
 
-            var original = await _originalService.AddOriginalAsync(
-                createParams.SourceFilePath, OriginalType.Employees, employee.Id);
-
+            var original = await _originalService.AddOriginalAsync(createParams, OriginalType.Employees);
             return original;
         }
 

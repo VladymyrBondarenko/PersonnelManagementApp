@@ -40,7 +40,6 @@ namespace PersonnelManagement.Infrastracture.Orders.OrderBase
 
         public async Task<IOrderBase> CreateAsync(Order order)
         {
-            order.Employee = null;
             order.OrderState = OrderState.Project;
             var addedOrder = await _orderRepository.CreateAsync(order);
             return _orderFactory.GetOrder(addedOrder);
@@ -55,9 +54,7 @@ namespace PersonnelManagement.Infrastracture.Orders.OrderBase
                 return null;
             }
 
-            var original = await _originalService.AddOriginalAsync(
-                createParams.SourceFilePath, OriginalType.Orders, order.Id);
-
+            var original = await _originalService.AddOriginalAsync(createParams, OriginalType.Orders);
             return original;
         }
 

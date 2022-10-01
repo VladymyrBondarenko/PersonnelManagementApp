@@ -12,6 +12,7 @@ using PersonnelManagement.Domain.Orders;
 using PersonnelManagement.Domain.Positions;
 using System.Diagnostics;
 using System.IO;
+using System.Reflection;
 
 namespace PersonnelManagement.Api.Controllers
 {
@@ -44,11 +45,17 @@ namespace PersonnelManagement.Api.Controllers
 
         public async Task<IActionResult> Index()
         {
-            //await testOrders();
+            await testOrders();
 
             //await testFileManager();
 
             //await testOriginalService();
+
+            //var path = @"C:\Users\38095\Desktop\Перевод.txt";
+            //string executableLocation = Path.GetDirectoryName(
+            //    Assembly.GetExecutingAssembly().Location);
+            
+            //await System.IO.File.WriteAllBytesAsync(Path.Combine(executableLocation, Path.GetFileName(path)), System.IO.File.ReadAllBytes(path));
 
             return View();
         }
@@ -107,6 +114,7 @@ namespace PersonnelManagement.Api.Controllers
         {
             //var path1 = @"C:\Users\38095\Desktop\Перевод.txt";
             //var path2 = @"C:\Users\38095\Desktop\Новый текстовый документ.txt";
+            //var path3 = @"C:\Users\38095\Desktop\Volodymyr Bondarenko Unit-3.docx";
 
             //var dep = await departmentService.CreateAsync(new Department { DepartmentTitle = "Department 1" });
             //var pos = await positionService.CreateAsync(new Position { PositionTitle = "Department 1" });
@@ -125,7 +133,8 @@ namespace PersonnelManagement.Api.Controllers
             //var orig = await employeeService.AddOriginalAsync(new OriginalCreateParams
             //{
             //    EmployeeId = employee.Id,
-            //    SourceFilePath = path2
+            //    Bytes = System.IO.File.ReadAllBytes(path3),
+            //    FileName = Path.GetFileName(path3)
             //});
 
             //await employeeService.DeleteOriginalAsync(new OriginalDeleteParams
@@ -144,24 +153,19 @@ namespace PersonnelManagement.Api.Controllers
             //    PositionId = pos.Id
             //});
 
-            //var orig1 = await orderService.AddOriginalAsync(new OriginalCreateParams { OrderId = order.Order.Id, SourceFilePath = path1 });
-            //var orig2 = await orderService.AddOriginalAsync(new OriginalCreateParams { OrderId = order.Order.Id, SourceFilePath = path2 });
-
-            //var originals = await originalService.GetOriginalsAsync();
-            //foreach (var o in originals)
-            //{
-            //    await originalService.DeleteOriginalAsync(o);
-            //}
-
-            //var orderModel = await orderService.GetOrderAsync(new Guid("0976cc07-9161-4cbc-4dff-08daa250e94c"));
-            //var origs = orderModel.Order.Originals.ToList();
-
-            //var deleted = await orderService.DeleteOriginalAsync(
-            //    new OriginalDeleteParams
-            //    {
-            //        OrderId = orderModel.Order.Id,
-            //        OriginalId = origs.First().Id
+            //var orig1 = await orderService.AddOriginalAsync(
+            //    new OriginalCreateParams 
+            //    { 
+            //        OrderId = order.Order.Id,
+            //        Bytes = System.IO.File.ReadAllBytes(path3),
+            //        FileName = Path.GetFileName(path3)
             //    });
+
+            //await orderService.DeleteOriginalAsync(new OriginalDeleteParams
+            //{
+            //    OrderId= order.Order.Id,
+            //    OriginalId = orig1.Id
+            //});
         }
 
         public IActionResult Privacy()

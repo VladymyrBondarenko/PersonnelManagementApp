@@ -54,6 +54,7 @@ builder.Services.AddSingleton(ftpStructSettings);
 
 builder.Services.AddScoped<IFtpService, FtpService>();
 builder.Services.AddScoped<IOriginalService, OriginalService>();
+builder.Services.AddScoped<IOriginalRepository, OriginalRepository>();
 
 var app = builder.Build();
 

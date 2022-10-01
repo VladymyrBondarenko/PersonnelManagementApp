@@ -57,6 +57,7 @@ namespace PersonnelManagement.Infrastracture.FileOperations
                     Password = _ftpClientSettings.Password
                 }, _ftpClientSettings.Port);
 
+            // TODO: log connection error
             await ftp.Connect();
             await ftp.DeleteFile(filePath);
         } 
