@@ -8,13 +8,13 @@ using PersonnelManagement.Application.FileOperations;
 using PersonnelManagement.Application.FileOperations.Originals;
 using PersonnelManagement.Application.Orders.Interfaces;
 using PersonnelManagement.Application.Positions;
+using PersonnelManagement.Infrastracture.DbContexts;
 using PersonnelManagement.Infrastracture.Departments;
 using PersonnelManagement.Infrastracture.Employees;
 using PersonnelManagement.Infrastracture.FileOperations;
 using PersonnelManagement.Infrastracture.FileOperations.Originals;
 using PersonnelManagement.Infrastracture.Orders.OrderBase;
 using PersonnelManagement.Infrastracture.Positions;
-using PersonnelManagement.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 

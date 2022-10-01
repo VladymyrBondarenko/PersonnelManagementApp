@@ -1,31 +1,26 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PersonnelManagement.Application.DbContexts;
-using PersonnelManagement.Domain.Departments;
 using PersonnelManagement.Domain.Employees;
-using PersonnelManagement.Domain.Models.Originals;
 using PersonnelManagement.Domain.Orders;
-using PersonnelManagement.Domain.Positions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace PersonnelManagement.Infrastructure
+namespace PersonnelManagement.Infrastracture.DbContexts
 {
-    public class ApplicationDbContext : DbContext, IApplicationDbContext
+    public partial class ApplicationDbContext : DbContext
     {
-        public ApplicationDbContext(DbContextOptions options) : base(options)
-        {
-        }
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            configureEmployeesRelations(modelBuilder);
+
+            configureOrdersRelations(modelBuilder);
+        }
+
+        private void configureEmployeesRelations(ModelBuilder modelBuilder)
+        {
             modelBuilder.Entity<Employee>()
-                .HasMany(x => x.Orders)
-                .WithOne(x => x.Employee)
-                .HasForeignKey(x => x.EmployeeId)
-                .OnDelete(DeleteBehavior.NoAction);
+               .HasMany(x => x.Orders)
+               .WithOne(x => x.Employee)
+               .HasForeignKey(x => x.EmployeeId)
+               .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<Employee>()
                 .HasOne(x => x.Department)
@@ -44,12 +39,15 @@ namespace PersonnelManagement.Infrastructure
                 .WithOne(x => x.Employee)
                 .HasForeignKey(x => x.EmployeeId)
                 .OnDelete(DeleteBehavior.Restrict);
+        }
 
+        private void configureOrdersRelations(ModelBuilder modelBuilder)
+        {
             modelBuilder.Entity<Order>()
-                .HasOne(x => x.Department)
-                .WithOne()
-                .HasForeignKey<Order>(x => x.DepartmentId)
-                .OnDelete(DeleteBehavior.Restrict);
+               .HasOne(x => x.Department)
+               .WithOne()
+               .HasForeignKey<Order>(x => x.DepartmentId)
+               .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Order>()
                 .HasOne(x => x.Position)
@@ -75,17 +73,5 @@ namespace PersonnelManagement.Infrastructure
                 .HasForeignKey(x => x.OrderId)
                 .OnDelete(DeleteBehavior.Restrict);
         }
-
-        public DbSet<Order> Orders { get; set; }
-
-        public DbSet<OrderDescription> OrdersDescription { get; set; }
-
-        public DbSet<Employee> Employees { get; set; }
-
-        public DbSet<Department> Departments { get; set; }
-
-        public DbSet<Position> Positions { get; set; }
-
-        public DbSet<Original> Originals { get; set; }
     }
 }
