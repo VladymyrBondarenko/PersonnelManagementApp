@@ -32,7 +32,7 @@ namespace PersonnelManagement.Infrastracture.Orders.OrderBase
                         typeof(HireOrder), order, _orderRepository, _employeeService);
                 case OrderType.FireOrder:
                     return (IOrderBase)Activator.CreateInstance(
-                        typeof(FireOrder), order, _employeeService);
+                        typeof(FireOrder), order, _orderRepository, _employeeService);
                 default:
                     return (IOrderBase)Activator.CreateInstance(
                         typeof(OtherOrder), order, _orderRepository, _employeeService);

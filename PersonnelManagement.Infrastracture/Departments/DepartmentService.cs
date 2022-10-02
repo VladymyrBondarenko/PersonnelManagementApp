@@ -1,4 +1,5 @@
-﻿using PersonnelManagement.Application.DbContexts;
+﻿using Microsoft.EntityFrameworkCore;
+using PersonnelManagement.Application.DbContexts;
 using PersonnelManagement.Application.Departments;
 using PersonnelManagement.Domain.Departments;
 using System;
@@ -18,6 +19,11 @@ namespace PersonnelManagement.Infrastracture.Departments
             _dbContext = dbContext;
         }
 
+        public async Task<List<Department>> GetAllAsync()
+        {
+            return await _dbContext.Departments.ToListAsync();
+        }
+
         public async Task<Department> GetAsync(Guid Id)
         {
             return await _dbContext.Departments.FindAsync(Id);
@@ -35,6 +41,34 @@ namespace PersonnelManagement.Infrastracture.Departments
             }
 
             return null;
+        }
+
+        public async Task<bool> UpdateAsync(Department department)
+        {
+            var exists = _dbContext.Departments.Any(x => x.Id == department.Id);
+
+            if (!exists)
+            {
+                return false;
+            }
+
+            _dbContext.Departments.Update(department);
+
+            return await _dbContext.SaveChangesAsync() > 0;
+        }
+
+        public async Task<bool> DeleteAsync(Guid id)
+        {
+            var department = await _dbContext.Departments.FindAsync(id);
+
+            if (department == null)
+            {
+                return false;
+            }
+
+            _dbContext.Departments.Remove(department);
+
+            return await _dbContext.SaveChangesAsync() > 0;
         }
     }
 }

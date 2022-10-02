@@ -1,4 +1,5 @@
-﻿using PersonnelManagement.Application.DbContexts;
+﻿using Microsoft.EntityFrameworkCore;
+using PersonnelManagement.Application.DbContexts;
 using PersonnelManagement.Application.Positions;
 using PersonnelManagement.Domain.Positions;
 using System;
@@ -16,6 +17,11 @@ namespace PersonnelManagement.Infrastracture.Positions
         public PositionService(IApplicationDbContext dbContext)
         {
             _dbContext = dbContext;
+        }
+
+        public async Task<List<Position>> GetAllAsync()
+        {
+            return await _dbContext.Positions.ToListAsync();
         }
 
         public async Task<Position> GetAsync(Guid Id)

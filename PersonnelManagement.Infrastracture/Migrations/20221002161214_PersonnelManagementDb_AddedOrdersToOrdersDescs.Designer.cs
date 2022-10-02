@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PersonnelManagement.Infrastracture.DbContexts;
 
@@ -11,9 +12,11 @@ using PersonnelManagement.Infrastracture.DbContexts;
 namespace PersonnelManagement.Infrastracture.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20221002161214_PersonnelManagementDb_AddedOrdersToOrdersDescs")]
+    partial class PersonnelManagementDbAddedOrdersToOrdersDescs
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -66,9 +69,13 @@ namespace PersonnelManagement.Infrastracture.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DepartmentId");
+                    b.HasIndex("DepartmentId")
+                        .IsUnique()
+                        .HasFilter("[DepartmentId] IS NOT NULL");
 
-                    b.HasIndex("PositionId");
+                    b.HasIndex("PositionId")
+                        .IsUnique()
+                        .HasFilter("[PositionId] IS NOT NULL");
 
                     b.ToTable("Employees");
                 });
@@ -141,13 +148,17 @@ namespace PersonnelManagement.Infrastracture.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DepartmentId");
+                    b.HasIndex("DepartmentId")
+                        .IsUnique()
+                        .HasFilter("[DepartmentId] IS NOT NULL");
 
                     b.HasIndex("EmployeeId");
 
                     b.HasIndex("OrderDescriptionId");
 
-                    b.HasIndex("PositionId");
+                    b.HasIndex("PositionId")
+                        .IsUnique()
+                        .HasFilter("[PositionId] IS NOT NULL");
 
                     b.ToTable("Orders");
                 });
@@ -188,13 +199,13 @@ namespace PersonnelManagement.Infrastracture.Migrations
             modelBuilder.Entity("PersonnelManagement.Domain.Employees.Employee", b =>
                 {
                     b.HasOne("PersonnelManagement.Domain.Departments.Department", "Department")
-                        .WithMany("Employees")
-                        .HasForeignKey("DepartmentId")
+                        .WithOne()
+                        .HasForeignKey("PersonnelManagement.Domain.Employees.Employee", "DepartmentId")
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("PersonnelManagement.Domain.Positions.Position", "Position")
-                        .WithMany("Employees")
-                        .HasForeignKey("PositionId")
+                        .WithOne()
+                        .HasForeignKey("PersonnelManagement.Domain.Employees.Employee", "PositionId")
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Department");
@@ -222,8 +233,8 @@ namespace PersonnelManagement.Infrastracture.Migrations
             modelBuilder.Entity("PersonnelManagement.Domain.Orders.Order", b =>
                 {
                     b.HasOne("PersonnelManagement.Domain.Departments.Department", "Department")
-                        .WithMany("Orders")
-                        .HasForeignKey("DepartmentId")
+                        .WithOne()
+                        .HasForeignKey("PersonnelManagement.Domain.Orders.Order", "DepartmentId")
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("PersonnelManagement.Domain.Employees.Employee", "Employee")
@@ -238,8 +249,8 @@ namespace PersonnelManagement.Infrastracture.Migrations
                         .IsRequired();
 
                     b.HasOne("PersonnelManagement.Domain.Positions.Position", "Position")
-                        .WithMany("Orders")
-                        .HasForeignKey("PositionId")
+                        .WithOne()
+                        .HasForeignKey("PersonnelManagement.Domain.Orders.Order", "PositionId")
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Department");
@@ -249,13 +260,6 @@ namespace PersonnelManagement.Infrastracture.Migrations
                     b.Navigation("OrderDescription");
 
                     b.Navigation("Position");
-                });
-
-            modelBuilder.Entity("PersonnelManagement.Domain.Departments.Department", b =>
-                {
-                    b.Navigation("Employees");
-
-                    b.Navigation("Orders");
                 });
 
             modelBuilder.Entity("PersonnelManagement.Domain.Employees.Employee", b =>
@@ -272,13 +276,6 @@ namespace PersonnelManagement.Infrastracture.Migrations
 
             modelBuilder.Entity("PersonnelManagement.Domain.Orders.OrderDescription", b =>
                 {
-                    b.Navigation("Orders");
-                });
-
-            modelBuilder.Entity("PersonnelManagement.Domain.Positions.Position", b =>
-                {
-                    b.Navigation("Employees");
-
                     b.Navigation("Orders");
                 });
 #pragma warning restore 612, 618

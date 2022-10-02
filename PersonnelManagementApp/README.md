@@ -26,7 +26,11 @@ Features. Iteration 1:
 Features. Iteration 2:
 
 // Employees data
-1. *Stores image of employee (could be moved to next iteration)
+1. *Stores image of employee (could be moved to next iteration) +
 
 // Order data
-1. *Stores attached files in order (could be moved to next iteration)
+1. *Stores attached files in order (could be moved to next iteration) +
+
+Features. Iteration 3:
+
+// Create Api for orders, employees, departments, positions

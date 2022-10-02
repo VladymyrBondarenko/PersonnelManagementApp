@@ -14,7 +14,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 
-namespace PersonnelManagement.Api.Controllers
+namespace PersonnelManagement.Api.Controllers.v1
 {
     public class HomeController : Controller
     {
@@ -45,7 +45,7 @@ namespace PersonnelManagement.Api.Controllers
 
         public async Task<IActionResult> Index()
         {
-            await testOrders();
+            //await testOrders();
 
             //await testFileManager();
 
@@ -54,7 +54,7 @@ namespace PersonnelManagement.Api.Controllers
             //var path = @"C:\Users\38095\Desktop\Перевод.txt";
             //string executableLocation = Path.GetDirectoryName(
             //    Assembly.GetExecutingAssembly().Location);
-            
+
             //await System.IO.File.WriteAllBytesAsync(Path.Combine(executableLocation, Path.GetFileName(path)), System.IO.File.ReadAllBytes(path));
 
             return View();

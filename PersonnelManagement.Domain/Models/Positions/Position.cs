@@ -1,4 +1,6 @@
-﻿using System;
+﻿using PersonnelManagement.Domain.Employees;
+using PersonnelManagement.Domain.Orders;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -13,5 +15,9 @@ namespace PersonnelManagement.Domain.Positions
 
         [MaxLength(100)]
         public string PositionTitle { get; set; }
+
+        public ICollection<Order> Orders { get; set; }
+
+        public ICollection<Employee> Employees { get; set; }
     }
 }

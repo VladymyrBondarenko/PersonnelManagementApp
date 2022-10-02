@@ -11,6 +11,8 @@ namespace PersonnelManagement.Infrastracture.DbContexts
         {
             configureEmployeesRelations(modelBuilder);
 
+            //configureOrderDescriptionsRelations(modelBuilder);
+
             configureOrdersRelations(modelBuilder);
         }
 
@@ -24,14 +26,14 @@ namespace PersonnelManagement.Infrastracture.DbContexts
 
             modelBuilder.Entity<Employee>()
                 .HasOne(x => x.Department)
-                .WithOne()
-                .HasForeignKey<Employee>(x => x.DepartmentId)
+                .WithMany(x => x.Employees)
+                .HasForeignKey(x => x.DepartmentId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Employee>()
                 .HasOne(x => x.Position)
-                .WithOne()
-                .HasForeignKey<Employee>(x => x.PositionId)
+                .WithMany(x => x.Employees)
+                .HasForeignKey(x => x.PositionId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Employee>()
@@ -44,21 +46,21 @@ namespace PersonnelManagement.Infrastracture.DbContexts
         private void configureOrdersRelations(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Order>()
+                .HasOne(x => x.OrderDescription)
+                .WithMany(x => x.Orders)
+                .HasForeignKey(x => x.OrderDescriptionId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Order>()
                .HasOne(x => x.Department)
-               .WithOne()
-               .HasForeignKey<Order>(x => x.DepartmentId)
+               .WithMany(x => x.Orders)
+               .HasForeignKey(x => x.DepartmentId)
                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Order>()
                 .HasOne(x => x.Position)
-                .WithOne()
-                .HasForeignKey<Order>(x => x.PositionId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<Order>()
-                .HasOne(x => x.OrderDescription)
-                .WithOne()
-                .HasForeignKey<Order>(x => x.OrderDescriptionId)
+                .WithMany(x => x.Orders)
+                .HasForeignKey(x => x.PositionId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Order>()
