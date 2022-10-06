@@ -36,6 +36,9 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
+// TODO : change to specific origins
+app.UseCors(opt => opt.AllowAnyOrigin());
+
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
