@@ -6,6 +6,11 @@ using PersonnelManagement.Contracts.v1.Responses;
 using PersonnelManagement.Contracts.v1.Responses.Departments;
 using PersonnelManagement.Contracts.v1.Routes;
 using PersonnelManagement.Domain.Departments;
+using PersonnelManagement.Server.Services;
+using PersonnelManagement.Server.Helpers;
+using PersonnelManagement.Domain.Models;
+using PersonnelManagement.Contracts.v1.Requests.Queries;
+using PersonnelManagement.Domain.Models.Filters;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -16,22 +21,32 @@ namespace PersonnelManagement.Api.Controllers.v1
     {
         private readonly IDepartmentService _departmentService;
         private readonly IMapper _mapper;
+        private readonly IUriService _uriService;
 
         public DepartmentController(IDepartmentService departmentService,
-            IMapper mapper)
+            IMapper mapper, IUriService uriService)
         {
             _departmentService = departmentService;
             _mapper = mapper;
+            _uriService = uriService;
         }
 
         // GET: api/<DepartmentController>
         [HttpGet(ApiRoutes.Departments.GetAll)]
-        public async Task<IActionResult> Get()
+        public async Task<IActionResult> Get([FromQuery] PaginationQueryRequest queryRequest, [FromQuery] GetAllDepartmentsQuery query)
         {
-            var departments = await _departmentService.GetAllAsync();
+            var paginationFilter = _mapper.Map<PaginationQuery>(queryRequest);
+            var filter = _mapper.Map<GetAllDepartmentsFilter>(query);
 
-            var respoonse = _mapper.Map<List<GetDepartmentResponse>>(departments);
-            return Ok(new Response<List<GetDepartmentResponse>>(respoonse));
+            var departments = await _departmentService.GetAllAsync(paginationFilter, filter);
+
+            var totalAmount = await _departmentService.GetDepartmentsAmountAsync();
+            var response = _mapper.Map<List<GetDepartmentResponse>>(departments);
+
+            var pagedResponse = PaginationHelpers
+               .CreatePaginatedResponse(_uriService, paginationFilter, response, totalAmount);
+
+            return Ok(pagedResponse);
         }
 
         // GET api/<DepartmentController>/5
@@ -58,7 +73,8 @@ namespace PersonnelManagement.Api.Controllers.v1
             }
 
             var response = _mapper.Map<GetDepartmentResponse>(createdDepartment);
-            return Ok(new Response<GetDepartmentResponse>(response));
+            return Created(_uriService.GetDepartmentsUri(createdDepartment.Id.ToString()), 
+                new Response<GetDepartmentResponse>(response));
         }
 
         // PUT api/<DepartmentController>/5
@@ -74,7 +90,11 @@ namespace PersonnelManagement.Api.Controllers.v1
             }
 
             department.DepartmentTitle = updateRequest.DepartmentTitle;
-            if(await _departmentService.UpdateAsync(department))
+            department.DepartmentDescription = updateRequest.DepartmentDescription;
+            department.DateFrom = updateRequest.DateFrom;
+            department.DateTo = updateRequest.DateTo;
+
+            if (await _departmentService.UpdateAsync(department))
             {
                 var response = _mapper.Map<GetDepartmentResponse>(department);
                 return Ok(new Response<GetDepartmentResponse>(response));
@@ -91,7 +111,7 @@ namespace PersonnelManagement.Api.Controllers.v1
             {
                 return NoContent();
             }
-
+            
             return NotFound();
         }
     }

@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>da1ec026-3b6d-4a9e-b672-f93a097efb83</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="6.0.9" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="6.0.9" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0-rc.1.22426.10" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="7.0.0-rc.1.22426.10" />
+    <PackageReference Include="MudBlazor" Version="6.0.17-dev.1" />
+    <PackageReference Include="Refit" Version="6.3.2" />
+    <PackageReference Include="Refit.HttpClientFactory" Version="6.3.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\PersonnelManagement.Contracts\PersonnelManagement.Contracts.csproj" />
+    <ProjectReference Include="..\PersonnelManagement.Sdk\PersonnelManagement.Sdk.csproj" />
+    <ProjectReference Include="..\PersonnelManagement.WebClient.Infrastructure\PersonnelManagement.WebClient.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>

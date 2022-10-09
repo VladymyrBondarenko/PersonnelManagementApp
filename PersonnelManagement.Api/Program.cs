@@ -37,7 +37,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 // TODO : change to specific origins
-app.UseCors(opt => opt.AllowAnyOrigin());
+app.UseCors(opt => opt.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 
 app.MapControllerRoute(
     name: "default",

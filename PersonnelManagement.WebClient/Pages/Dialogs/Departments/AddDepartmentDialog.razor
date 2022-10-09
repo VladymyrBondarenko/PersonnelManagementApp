@@ -1,0 +1,103 @@
+﻿@using static PersonnelManagement.WebClient.Pages.OrgStruct.Departments
+@using System.Globalization
+@using PersonnelManagement.Contracts.v1.Requests
+@using PersonnelManagement.Contracts.v1.Responses.Departments
+@using PersonnelManagement.WebClient.Infrastructure.Managers.Departments
+@using System.Net.Http.Json
+@using System.ComponentModel.DataAnnotations
+@using PersonnelManagement.WebClient.Pages.Dialogs
+
+@inject IDialogService dialogService
+@inject ISnackbar snackBar
+@inject IDepartmentManager departmentManager
+
+<MudDialog>
+    <DialogContent>
+        <MudText></MudText>
+    </DialogContent>
+    <DialogActions>
+        <MudCard>
+            <MudForm Model="@model" onsubmit="@(() => SaveData())">
+                <div class="department-form-content">
+                    <MudCardContent>
+                        <MudTextField @bind-Value="model.Title" For="@(() => model.Title)" Label="Title" />
+                        <MudTextField @bind-Value="model.Description" For="@(() => model.Description)" Label="Description" />
+                        <MudDatePicker @bind-Date="model.DateFrom" For="@(() => model.DateFrom)" Label="Date From" />
+                    </MudCardContent>
+                    <div class="department-form-submit">
+                        <MudButton ButtonType="MudBlazor.ButtonType.Submit" 
+                                    Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save" 
+                                    Color="Color.Info"  Size="Size.Small">
+                                    Save
+                        </MudButton>
+                    </div>
+                    <div class="department-form-cancel">
+                        <MudButton OnClick="Cancel">Cancel</MudButton>
+                    </div>
+                </div>
+            </MudForm>
+        </MudCard>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    [Parameter] public DepartmentModel model { get; set; }
+
+    private async Task SaveData()
+    {
+        var isFormValid = !string.IsNullOrWhiteSpace(model.Title) &&
+            !string.IsNullOrWhiteSpace(model.Description) &&
+            model.DateFrom != default;
+
+        if (isFormValid)
+        {
+            if(model.Id != default)
+            {
+                var updateRequest = new UpdateDepartmentRequest
+                {
+                    DepartmentTitle = model.Title,
+                    DepartmentDescription = model.Description,
+                    DateFrom = model.DateFrom ?? default
+                };
+                var response = await departmentManager.UpdateAsync(model.Id, updateRequest);
+
+                if (response.StatusCode == System.Net.HttpStatusCode.OK &&
+                    response.Content.Data != null)
+                {
+                    snackBar.Add("Department edited", Severity.Success);
+                    model = new();
+                }
+                else
+                {
+                    snackBar.Add("Department cannot be edited", Severity.Error);
+                }
+            }
+            else
+            {
+                var createRequest = new CreateDepartmentRequest
+                {
+                    DepartmentTitle = model.Title,
+                    DepartmentDescription = model.Description,
+                    DateFrom = model.DateFrom ?? default
+                };
+                var response = await departmentManager.CreateAsync(createRequest);
+
+                if (response.Content?.Data != null)
+                {
+                    snackBar.Add("Department added", Severity.Success);
+                    model = new();
+                }
+            }
+
+            MudDialog.Close(DialogResult.Ok(true));
+        }
+        else
+        {
+            snackBar.Add("Form was not validated", Severity.Error);
+        }
+    }
+
+    void Cancel() => MudDialog.Cancel();
+}

@@ -1,0 +1,168 @@
+﻿@using System.Net.Http.Json
+@using System.Collections.ObjectModel
+@using PersonnelManagement.Contracts.v1.Responses.Orders
+@using PersonnelManagement.Sdk.Orders
+@using Refit
+@using System.Text.RegularExpressions
+@using System.ComponentModel.DataAnnotations
+
+@page "/orders"
+
+<MudButton OnClick="@AddItem" Color="@Color.Success" Class="add-item-btn">Add Item</MudButton>
+<MudButton OnClick="@RemoveItem" Color="@Color.Error" Class="remove-item-btn">Remove Item</MudButton>
+
+<MudGrid class="@GetInputFormClass()">
+    <MudItem xs="12" sm="7">
+        <MudPaper Class="pa-4">
+            <MudForm @ref="form" @bind-IsValid="@success" @bind-Errors="@errors">
+                    <MudTextField T="string" Label="Username" Required="true" RequiredError="User name is required!"/>
+                    <MudTextField T="string" Label="Email" Required="true" RequiredError="Email is required!"
+                                  Validation="@(new EmailAddressAttribute() {ErrorMessage = "The email address is invalid"})"/>
+                    <MudTextField T="string" Label="Password" HelperText="Choose a strong password" @ref="pwField1"
+                                  InputType="InputType.Password"
+                                  Validation="@(new Func<string, IEnumerable<string>>(PasswordStrength))" Required="true"
+                                  RequiredError="Password is required!"/>
+                    <MudTextField T="string"
+                                  Label="Password" HelperText="Repeat the password" InputType="InputType.Password"
+                                  Validation="@(new Func<string, string>(PasswordMatch))"/>
+                    <div class="d-flex">
+                        <MudRadioGroup T="string" Required="true" RequiredError="Account type is required!">
+                            <MudRadio Option="@("Personal")">Personal</MudRadio>
+                            <MudRadio Option="@("Professional")">Professional</MudRadio>
+                        </MudRadioGroup>
+                    </div>
+                    <div class="d-flex align-center justify-space-between">
+                        <MudCheckBox T="bool" Required="true" RequiredError="You must agree" Label="I agree!"  />
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@(!success)" Class="ml-auto">Register</MudButton>
+                    </div>
+            </MudForm>   
+        </MudPaper>
+        <MudPaper Class="pa-4 mt-4">
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" DisableElevation="true" OnClick="@(()=>form.Validate())">Validate</MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Secondary" DisableElevation="true" OnClick="@(()=>form.Reset())" Class="mx-2">Reset</MudButton>
+            <MudButton Variant="Variant.Filled" DisableElevation="true" OnClick="@(()=>form.ResetValidation())">Reset Validation</MudButton>
+        </MudPaper>
+    </MudItem>
+    <MudItem xs="12" sm="5">
+        <MudPaper Class="pa-4 mud-height-full">
+            <MudText Typo="Typo.subtitle2">@($"Errors ({errors.Length})")</MudText>
+                @foreach (var error in errors)
+                {
+                    <MudText Color="@Color.Error">@error</MudText>
+                }
+        </MudPaper>
+    </MudItem>
+</MudGrid>
+
+@if (OrderItems.Any())
+{
+    <MudDataGrid Items="@OrderItems">
+    <Columns>
+        <Column T="Model" Field="@nameof(Model.OrderType)" />
+        <Column T="Model" Field="@nameof(Model.State)" />
+        <Column T="Model" Field="@nameof(Model.FirstName)" />
+        <Column T="Model" Field="@nameof(Model.LastName)" />
+        <Column T="Model" Field="@nameof(Model.Department)" />
+        <Column T="Model" Field="@nameof(Model.Position)" />
+        <Column T="Model" Field="@nameof(Model.DateFrom)" />
+        <Column T="Model" Field="@nameof(Model.DateTo)" />
+    </Columns>
+    </MudDataGrid>
+}
+else
+{
+    <MudProgressCircular Color="Color.Primary" Indeterminate="true"/>
+}
+
+@code {
+
+    public record Model (string OrderType, string State, 
+        string FirstName, string LastName, 
+        string Department, string Position, 
+        string DateFrom, string DateTo);
+
+    private List<GetOrderResponse> OrdersData = new();
+    private ObservableCollection<Model> OrderItems = new ();
+    private IOrderApi OrderService;
+    private string InputFormDisplay = "none";
+
+    bool success;
+    string[] errors = { };
+    MudTextField<string> pwField1;
+    MudForm form;
+    private bool isInputFormVisible = false;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        OrderService = RestService.For<IOrderApi>("https://localhost:7030/");
+
+        var data = await OrderService.GetAllAsync();
+        OrdersData = data?.Content?.Data;
+
+        if(OrdersData != null && OrdersData.Any())
+        {
+            foreach (var order in OrdersData)
+            {
+                OrderItems.Add(new Model(
+                    order.OrderDescription?.OrderDescriptionTitle ?? string.Empty, 
+                    order.OrderState.ToString(), 
+                    order.FirstName ?? string.Empty, 
+                    order.LastName ?? string.Empty, 
+                    order.Department?.DepartmentTitle ?? string.Empty, 
+                    order.Position?.PositionTitle ?? string.Empty, 
+                    order.DateFrom.ToShortDateString(), 
+                    order.DateTo.ToShortDateString()));
+            }
+        }
+    }
+
+    private IEnumerable<string> PasswordStrength(string pw)
+    {
+        if (string.IsNullOrWhiteSpace(pw))
+        {
+            yield return "Password is required!";
+            yield break;
+        }
+        if (pw.Length < 8)
+            yield return "Password must be at least of length 8";
+        if (!Regex.IsMatch(pw, @"[A-Z]"))
+            yield return "Password must contain at least one capital letter";
+        if (!Regex.IsMatch(pw, @"[a-z]"))
+            yield return "Password must contain at least one lowercase letter";
+        if (!Regex.IsMatch(pw, @"[0-9]"))
+            yield return "Password must contain at least one digit";
+    }
+
+    private string PasswordMatch(string arg)
+    {
+        if (pwField1.Value != arg)
+            return "Passwords don't match";
+        return null;
+    }
+
+    private string GetInputFormClass()
+    {
+        if (isInputFormVisible)
+        {
+            return "input-form-visible";
+        }
+        else
+        {
+            return "input-form-hidden";
+        }
+    }
+
+    private void AddItem()
+    {
+        isInputFormVisible = !isInputFormVisible;
+        StateHasChanged();
+
+        //_items.Add(new Model("New Person", 44, Severity.Warning, 85_000.00M, new DateTime(2022, 1, 1), true));
+    }
+
+    private void RemoveItem()
+    {
+        //_items.RemoveAt(0);
+    }
+}

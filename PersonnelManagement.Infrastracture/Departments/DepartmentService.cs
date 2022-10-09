@@ -2,6 +2,8 @@
 using PersonnelManagement.Application.DbContexts;
 using PersonnelManagement.Application.Departments;
 using PersonnelManagement.Domain.Departments;
+using PersonnelManagement.Domain.Models;
+using PersonnelManagement.Domain.Models.Filters;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,6 +19,30 @@ namespace PersonnelManagement.Infrastracture.Departments
         public DepartmentService(IApplicationDbContext dbContext)
         {
             _dbContext = dbContext;
+        }
+
+        public async Task<int> GetDepartmentsAmountAsync()
+        {
+            return await _dbContext.Departments.CountAsync();
+        }
+
+        public async Task<List<Department>> GetAllAsync(PaginationQuery paginationFilter = null, GetAllDepartmentsFilter filter = null)
+        {
+            var queryable = _dbContext.Departments.AsQueryable();
+
+            if (filter != null)
+            {
+                queryable = addFiltersOnQuery(filter, queryable);
+            }
+
+            if (paginationFilter == null || paginationFilter.PageSize < 1 || paginationFilter.PageNumber < 1)
+            {
+                return await queryable.ToListAsync();
+            }
+
+            var skip = (paginationFilter.PageNumber - 1) * paginationFilter.PageSize;
+            return await queryable
+                .Skip(skip).Take(paginationFilter.PageSize).ToListAsync();
         }
 
         public async Task<List<Department>> GetAllAsync()
@@ -68,7 +94,29 @@ namespace PersonnelManagement.Infrastracture.Departments
 
             _dbContext.Departments.Remove(department);
 
-            return await _dbContext.SaveChangesAsync() > 0;
+            try
+            {
+                return await _dbContext.SaveChangesAsync() > 0;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private static IQueryable<Department> addFiltersOnQuery(GetAllDepartmentsFilter filter, IQueryable<Department> queryable)
+        {
+            if (!string.IsNullOrWhiteSpace(filter.SearchText))
+            {
+                var text = filter.SearchText;
+                queryable = queryable.Where(x =>
+                    x.DepartmentTitle.Contains(text) ||
+                    x.DepartmentDescription.Contains(text) ||
+                    x.DateFrom.ToString().Contains(text) ||
+                    x.DateTo.ToString().Contains(text));
+            }
+
+            return queryable;
         }
     }
 }
