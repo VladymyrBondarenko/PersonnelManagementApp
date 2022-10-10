@@ -17,5 +17,7 @@ namespace PersonnelManagement.Contracts.v1.Responses.Departments
         public DateTime DateFrom { get; set; }
 
         public DateTime DateTo { get; set; }
+
+        public DateTime CreatedDate { get; set; }
     }
 }

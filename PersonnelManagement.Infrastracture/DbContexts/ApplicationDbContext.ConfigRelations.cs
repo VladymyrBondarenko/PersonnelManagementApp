@@ -1,17 +1,19 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using PersonnelManagement.Application.DbContexts;
 using PersonnelManagement.Domain.Employees;
 using PersonnelManagement.Domain.Orders;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace PersonnelManagement.Infrastracture.DbContexts
 {
     public partial class ApplicationDbContext : DbContext
     {
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        protected void ConfigureRelations(ModelBuilder modelBuilder)
         {
             configureEmployeesRelations(modelBuilder);
-
-            //configureOrderDescriptionsRelations(modelBuilder);
 
             configureOrdersRelations(modelBuilder);
         }

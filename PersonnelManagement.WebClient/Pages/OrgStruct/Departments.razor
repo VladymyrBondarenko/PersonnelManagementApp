@@ -83,7 +83,7 @@
     }
 
     public record class Element(Guid Id, string DepartmentTitle, string DepartmentDescription, 
-        DateTime DateFrom, DateTime DateTo);
+        DateTime DateFrom, DateTime DateTo, DateTime CreatedDate);
 
     private async Task FilterFunc()
     {
@@ -161,7 +161,8 @@
         var grid = new TableData<Element>();
         if(data != null)
         {
-            grid.Items = data.Select(x => new Element(x.Id, x.DepartmentTitle, x.DepartmentDescription, x.DateFrom, x.DateTo)).ToList();
+            grid.Items = data.Select(x => new Element(x.Id, x.DepartmentTitle, x.DepartmentDescription, x.DateFrom, x.DateTo, x.CreatedDate))
+                .OrderByDescending(x => x.CreatedDate).ToList();
             grid.TotalItems = response.Content.TotalAmount;
         }
         return grid;
