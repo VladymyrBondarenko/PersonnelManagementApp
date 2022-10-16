@@ -1,6 +1,6 @@
 ﻿using PersonnelManagement.Contracts.v1.Responses;
 using PersonnelManagement.Domain.Models;
-using PersonnelManagement.Server.Services;
+using PersonnelManagement.Server.Services.UriServices;
 
 namespace PersonnelManagement.Server.Helpers
 {

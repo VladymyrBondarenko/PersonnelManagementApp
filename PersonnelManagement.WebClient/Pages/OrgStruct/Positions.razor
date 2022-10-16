@@ -1,0 +1,160 @@
+﻿@page "/positions"
+
+@using System.Globalization
+@using PersonnelManagement.Contracts.v1.Requests
+@using PersonnelManagement.Contracts.v1.Requests.Queries
+@using System.Net.Http.Json
+@using System.ComponentModel.DataAnnotations
+@using PersonnelManagement.WebClient.Infrastructure.Managers.Positions
+@using PersonnelManagement.WebClient.Pages.Dialogs
+@using PersonnelManagement.WebClient.Pages.Dialogs.Positions
+
+@inject IDialogService dialogService
+@inject ISnackbar snackBar
+@inject IPositionManager positionManager;
+
+<div class="position-add-btn">
+    <MudButton OnClick="@AddRow" Color="@Color.Success" Class="add-item-btn">Add Position</MudButton>
+</div>
+
+<MudTable ServerData="@(new Func<TableState, Task<TableData<PositionModel>>>(LoadData))" Dense="true" @ref="table" 
+        Hover="true" Bordered="true" Striped="true" @bind-SelectedItem="selectedItem">
+    <ToolBarContent>
+        <MudText Typo="Typo.h6"></MudText>
+        <MudSpacer />
+        <MudTextField TextChanged="@(() => FilterFunc())" @bind-Value="searchItem" Placeholder="Search" 
+            Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" 
+            IconSize="Size.Medium" Class="mt-0"></MudTextField>
+    </ToolBarContent>
+    <HeaderContent>
+        <MudTh>Position Title</MudTh>
+        <MudTh>Description</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="PositionTitle">@context.PositionTitle</MudTd>
+            <MudTd DataLabel="Description">@context.PositionDescription</MudTd>
+            <MudTd>
+            <div class="position-edit-btn">
+                <MudIconButton OnClick="@(() => EditRow(context))" ButtonType="MudBlazor.ButtonType.Button" 
+                    Icon="@Icons.Material.Filled.Edit" aria-label="edit"></MudIconButton>
+            </div>
+            </MudTd>
+            <MudTd>
+            <div class="position-delete-btn">
+                <MudIconButton OnClick="@(() => DeleteRow(context))" ButtonType="MudBlazor.ButtonType.Button" 
+                    Icon="@Icons.Material.Filled.Delete" aria-label="delete"></MudIconButton>
+            </div>
+        </MudTd>
+    </RowTemplate>
+    <PagerContent>
+        <MudTablePager PageSizeOptions="pageSizeOptions" />
+    </PagerContent>
+</MudTable>
+
+@code {
+
+    private string searchItem = "";
+    private PositionModel selectedItem = null;
+    private int[] pageSizeOptions = new int[] { 5, 10, 15 };
+    private bool isOpen;
+
+    private MudTable<PositionModel> table;
+
+    public class PositionModel
+    {
+        public Guid Id { get; set; }
+
+        [Display(Name = "Title")]
+        [Required]
+        public string PositionTitle { get; set; }
+
+        [Display(Name = "Description")]
+        [Required]
+        public string PositionDescription { get; set; }
+
+        public DateTime CreatedDate{ get; set; }
+    }
+
+    private async Task FilterFunc()
+    {
+        await Reset();
+    }
+
+    private async Task AddRow()
+    {
+        var parameters = new DialogParameters { ["model"] = new PositionModel() };
+        var dialog = dialogService.Show<AddPositionDialog>("Add position", parameters);
+
+        var result = await dialog.Result;
+        if (!result.Cancelled)
+        {
+            await Reset();
+        }
+    }
+
+    private async Task EditRow(PositionModel model)
+    {
+        var parameters = new DialogParameters { ["model"] = model };
+        var dialog = dialogService.Show<AddPositionDialog>("Edit position", parameters);
+
+        var result = await dialog.Result;
+        if (!result.Cancelled)
+        {
+            await Reset();
+        }
+    }
+
+    private async Task DeleteRow(PositionModel model)
+    {
+        var parameters = new DialogParameters { ["model"] = model };
+        var dialog = dialogService.Show<DeletePositionDialog>("Delete department", parameters);
+
+        var result = await dialog.Result;
+        if(!result.Cancelled)
+        {
+            await Reset();
+        }
+    }
+
+    private async Task<TableData<PositionModel>> LoadData(TableState state)
+    {
+        GetAllPositionsQuery query = null;
+
+        if (!string.IsNullOrWhiteSpace(searchItem))
+        {
+            query = new GetAllPositionsQuery { SearchText = searchItem };
+        }
+
+        var response = await positionManager.GetAllAsync(new Contracts.v1.Requests.PaginationQueryRequest 
+            { 
+                PageNumber = state.Page + 1, PageSize = state.PageSize 
+            }, query);
+
+        var data = response.Content?.Data?.ToList();
+
+        var grid = new TableData<PositionModel>();
+        if(data != null)
+        {
+            grid.Items = data.Select(x => new PositionModel
+            {
+                Id = x.Id,
+                PositionTitle = x.PositionTitle,
+                PositionDescription = x.PositionDescription,
+                CreatedDate = x.CreatedDate
+            }).OrderByDescending(x => x.CreatedDate).ToList();
+            grid.TotalItems = response.Content.TotalAmount;
+        }
+        return grid;
+    }
+
+    private async Task Reset()
+    {
+        await table.ReloadServerData();
+    }
+
+    protected override Task OnAfterRenderAsync(bool firstRender)
+    {
+        table.SetRowsPerPage(5);
+        return base.OnAfterRenderAsync(firstRender);
+    }
+}

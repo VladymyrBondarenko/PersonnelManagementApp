@@ -6,11 +6,12 @@ using PersonnelManagement.Contracts.v1.Responses;
 using PersonnelManagement.Contracts.v1.Responses.Departments;
 using PersonnelManagement.Contracts.v1.Routes;
 using PersonnelManagement.Domain.Departments;
-using PersonnelManagement.Server.Services;
 using PersonnelManagement.Server.Helpers;
 using PersonnelManagement.Domain.Models;
 using PersonnelManagement.Contracts.v1.Requests.Queries;
 using PersonnelManagement.Domain.Models.Filters;
+using PersonnelManagement.Server.Services.UriServices;
+using PersonnelManagement.Server.Services.PaginationServices.Departments;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -22,13 +23,15 @@ namespace PersonnelManagement.Api.Controllers.v1
         private readonly IDepartmentService _departmentService;
         private readonly IMapper _mapper;
         private readonly IUriService _uriService;
+        private readonly IDepartmentPaginationService _paginationService;
 
         public DepartmentController(IDepartmentService departmentService,
-            IMapper mapper, IUriService uriService)
+            IMapper mapper, IUriService uriService, IDepartmentPaginationService paginationService)
         {
             _departmentService = departmentService;
             _mapper = mapper;
             _uriService = uriService;
+            _paginationService = paginationService;
         }
 
         // GET: api/<DepartmentController>
@@ -43,8 +46,7 @@ namespace PersonnelManagement.Api.Controllers.v1
             var totalAmount = await _departmentService.GetDepartmentsAmountAsync();
             var response = _mapper.Map<List<GetDepartmentResponse>>(departments);
 
-            var pagedResponse = PaginationHelpers
-               .CreatePaginatedResponse(_uriService, paginationFilter, response, totalAmount);
+            var pagedResponse = _paginationService.CreatePaginatedResponse(paginationFilter, response, totalAmount);
 
             return Ok(pagedResponse);
         }
@@ -83,21 +85,18 @@ namespace PersonnelManagement.Api.Controllers.v1
         {
             var department = await _departmentService.GetAsync(departmentId);
 
-            if(department == null)
+            if(department != null)
             {
-                // TODO : return some error text
-                return BadRequest();
-            }
+                department.DepartmentTitle = updateRequest.DepartmentTitle;
+                department.DepartmentDescription = updateRequest.DepartmentDescription;
+                department.DateFrom = updateRequest.DateFrom;
+                department.DateTo = updateRequest.DateTo;
 
-            department.DepartmentTitle = updateRequest.DepartmentTitle;
-            department.DepartmentDescription = updateRequest.DepartmentDescription;
-            department.DateFrom = updateRequest.DateFrom;
-            department.DateTo = updateRequest.DateTo;
-
-            if (await _departmentService.UpdateAsync(department))
-            {
-                var response = _mapper.Map<GetDepartmentResponse>(department);
-                return Ok(new Response<GetDepartmentResponse>(response));
+                if (await _departmentService.UpdateAsync(department))
+                {
+                    var response = _mapper.Map<GetDepartmentResponse>(department);
+                    return Ok(new Response<GetDepartmentResponse>(response));
+                }
             }
 
             return NotFound();

@@ -16,36 +16,36 @@ namespace PersonnelManagement.WebClient.Infrastructure.Managers.Departments
 {
     public class DepartmentManager : IDepartmentManager
     {
-        private IDepartmentApi _departmentApi;
+        private IDepartmentRestService _departmentService;
 
         public DepartmentManager(IHttpClientFactory httpClientFactory,
             ManagersApiOptions apiOptions)
         {
             var httpClient = httpClientFactory.CreateClient(apiOptions.ClientName);
-            _departmentApi = RestService.For<IDepartmentApi>(httpClient);
+            _departmentService = RestService.For<IDepartmentRestService>(httpClient);
         }
 
         public async Task<ApiResponse<PagedResponse<GetDepartmentResponse>>> GetAllAsync(PaginationQueryRequest queryRequest = null, GetAllDepartmentsQuery query = null)
         {
-            var response = await _departmentApi.GetAllAsync(queryRequest, query);
+            var response = await _departmentService.GetAllAsync(queryRequest, query);
             return response;
         }
 
         public async Task<ApiResponse<Response<GetDepartmentResponse>>> CreateAsync(CreateDepartmentRequest createRequest)
         {
-            var response = await _departmentApi.CreateAsync(createRequest);
+            var response = await _departmentService.CreateAsync(createRequest);
             return response;
         }
 
         public async Task<ApiResponse<Response<GetDepartmentResponse>>> UpdateAsync(Guid departmentId, UpdateDepartmentRequest updateRequest)
         {
-            var response = await _departmentApi.UpdateAsync(departmentId, updateRequest);
+            var response = await _departmentService.UpdateAsync(departmentId, updateRequest);
             return response;
         }
 
         public async Task<IApiResponse> DeleteAsync(Guid id)
         {
-            return await _departmentApi.DeleteAsync(id);
+            return await _departmentService.DeleteAsync(id);
         }
     }
 }

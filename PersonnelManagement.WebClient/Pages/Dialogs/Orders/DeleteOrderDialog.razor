@@ -1,0 +1,46 @@
+﻿@using static PersonnelManagement.WebClient.Pages.OrgStruct.Departments
+@using System.Globalization
+@using PersonnelManagement.Contracts.v1.Requests
+@using System.Net.Http.Json
+@using System.ComponentModel.DataAnnotations
+@using PersonnelManagement.WebClient.Infrastructure.Managers.Orders
+@using PersonnelManagement.WebClient.Pages.Dialogs
+@using static PersonnelManagement.WebClient.Pages.Orders.Orders
+@using static PersonnelManagement.WebClient.Pages.Orders.OrdersDescription
+
+@inject ISnackbar snackBar
+@inject IOrderManager orderManager
+
+<MudDialog>
+    <DialogContent>
+        <MudText>Do you really want to delete these record? This process cannot be undone.</MudText>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Error" Variant="Variant.Filled" OnClick="Submit">Delete</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    [Parameter] public OrderModel OrderModel { get; set; } = new();
+
+    private async Task Submit()
+    {
+        var response = await orderManager.DeleteAsync(OrderModel.Id);
+
+        if (response.StatusCode == System.Net.HttpStatusCode.NoContent)
+        {
+            snackBar.Add("Order deleted successfully", Severity.Success);
+        }
+        else
+        {
+            snackBar.Add("Order cannot be deleted", Severity.Error);
+        }
+
+        MudDialog.Close(DialogResult.Ok(true));
+    }
+
+    void Cancel() => MudDialog.Cancel();
+}

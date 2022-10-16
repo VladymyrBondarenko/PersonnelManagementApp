@@ -31,7 +31,7 @@ namespace PersonnelManagement.Infrastracture.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValue(new DateTime(2022, 10, 10, 10, 8, 9, 739, DateTimeKind.Utc).AddTicks(8538));
+                        .HasDefaultValue(new DateTime(2022, 10, 10, 13, 5, 44, 713, DateTimeKind.Utc).AddTicks(7154));
 
                     b.Property<DateTime>("DateFrom")
                         .HasColumnType("datetime2");
@@ -190,6 +190,15 @@ namespace PersonnelManagement.Infrastracture.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValue(new DateTime(2022, 10, 10, 13, 5, 44, 713, DateTimeKind.Utc).AddTicks(7567));
+
+                    b.Property<string>("PositionDescription")
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
 
                     b.Property<string>("PositionTitle")
                         .HasMaxLength(100)

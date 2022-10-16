@@ -89,3 +89,57 @@ a, .btn-link {
     float: left;
     margin: 10px;
 }
+
+/*Positions page*/
+
+.position-form-add {
+    display: inline-block;
+    width: 100%;
+}
+
+.position-form-content {
+    display: inline-block;
+    width: 100%;
+}
+
+.position-form-submit {
+    margin: 10px;
+    float: right;
+}
+
+.position-form-cancel {
+    margin: 10px;
+    float: left;
+}
+
+.position-add-btn {
+    float: left;
+    margin: 10px;
+}
+
+/* Order Descriptions page*/
+
+.orderdesc-form-add {
+    display: inline-block;
+    width: 100%;
+}
+
+.orderdesc-form-content {
+    display: inline-block;
+    width: 100%;
+}
+
+.orderdesc-form-submit {
+    margin: 10px;
+    float: right;
+}
+
+.orderdesc-form-cancel {
+    margin: 10px;
+    float: left;
+}
+
+.orderdesc-add-btn {
+    float: left;
+    margin: 10px;
+}

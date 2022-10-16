@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using PersonnelManagement.Sdk.Departments;
 using PersonnelManagement.WebClient.Infrastructure.Managers.Departments;
+using PersonnelManagement.WebClient.Infrastructure.Managers.Orders;
+using PersonnelManagement.WebClient.Infrastructure.Managers.Positions;
 using PersonnelManagement.WebClient.Options;
 using Refit;
 
@@ -20,6 +22,9 @@ namespace PersonnelManagement.WebClient.Installers
             });
 
             builder.Services.AddScoped<IDepartmentManager, DepartmentManager>();
+            builder.Services.AddScoped<IPositionManager, PositionManager>();
+            builder.Services.AddScoped<IOrderDescriptionManager, OrderDescriptionManager>();
+            builder.Services.AddScoped<IOrderManager, OrderManager>();
         }
     }
 }

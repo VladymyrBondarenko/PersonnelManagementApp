@@ -16,7 +16,7 @@ namespace PersonnelManagement.Contracts.v1.Routes
 
             public const string Create = $"{BaseUrl}/positions";
 
-            public const string Update = BaseUrl + "/position/{positionId}";
+            public const string Update = BaseUrl + "/positions/{positionId}";
 
             public const string Delete = BaseUrl + "/positions/{positionId}";
         }

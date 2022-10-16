@@ -16,6 +16,11 @@ namespace PersonnelManagement.Domain.Positions
         [MaxLength(100)]
         public string PositionTitle { get; set; }
 
+        [MaxLength(300)]
+        public string PositionDescription { get; set; }
+
+        public DateTime CreatedDate { get; set; }
+
         public ICollection<Order> Orders { get; set; }
 
         public ICollection<Employee> Employees { get; set; }

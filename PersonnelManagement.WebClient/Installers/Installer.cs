@@ -13,6 +13,7 @@ namespace PersonnelManagement.WebClient.Installers
             {
                 opt.SnackbarConfiguration.PositionClass = Defaults.Classes.Position.BottomLeft;
             });
+            builder.Services.AddAutoMapper(typeof(Program));
         }
     }
 }

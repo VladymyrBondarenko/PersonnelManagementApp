@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PersonnelManagement.Domain.Departments;
+using PersonnelManagement.Domain.Positions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,11 +14,20 @@ namespace PersonnelManagement.Infrastracture.DbContexts
         protected void ConfigureDefaultValues(ModelBuilder modelBuilder)
         {
             configurateDepartmentDefaults(modelBuilder);
+
+            configuratePositionDefaults(modelBuilder);
         }
 
         private void configurateDepartmentDefaults(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Department>()
+                .Property(b => b.CreatedDate)
+                .HasDefaultValue(DateTime.UtcNow);
+        }
+
+        private void configuratePositionDefaults(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Position>()
                 .Property(b => b.CreatedDate)
                 .HasDefaultValue(DateTime.UtcNow);
         }

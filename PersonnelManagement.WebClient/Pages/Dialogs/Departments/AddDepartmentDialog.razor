@@ -20,8 +20,8 @@
             <MudForm Model="@model" onsubmit="@(() => SaveData())">
                 <div class="department-form-content">
                     <MudCardContent>
-                        <MudTextField @bind-Value="model.Title" For="@(() => model.Title)" Label="Title" />
-                        <MudTextField @bind-Value="model.Description" For="@(() => model.Description)" Label="Description" />
+                        <MudTextField @bind-Value="model.DepartmentTitle" For="@(() => model.DepartmentTitle)" Label="Title" />
+                        <MudTextField @bind-Value="model.DepartmentDescription" For="@(() => model.DepartmentDescription)" Label="Description" />
                         <MudDatePicker @bind-Date="model.DateFrom" For="@(() => model.DateFrom)" Label="Date From" />
                     </MudCardContent>
                     <div class="department-form-submit">
@@ -47,8 +47,8 @@
 
     private async Task SaveData()
     {
-        var isFormValid = !string.IsNullOrWhiteSpace(model.Title) &&
-            !string.IsNullOrWhiteSpace(model.Description) &&
+        var isFormValid = !string.IsNullOrWhiteSpace(model.DepartmentTitle) &&
+            !string.IsNullOrWhiteSpace(model.DepartmentDescription) &&
             model.DateFrom != default;
 
         if (isFormValid)
@@ -57,8 +57,8 @@
             {
                 var updateRequest = new UpdateDepartmentRequest
                 {
-                    DepartmentTitle = model.Title,
-                    DepartmentDescription = model.Description,
+                    DepartmentTitle = model.DepartmentTitle,
+                    DepartmentDescription = model.DepartmentDescription,
                     DateFrom = model.DateFrom ?? default
                 };
                 var response = await departmentManager.UpdateAsync(model.Id, updateRequest);
@@ -78,8 +78,8 @@
             {
                 var createRequest = new CreateDepartmentRequest
                 {
-                    DepartmentTitle = model.Title,
-                    DepartmentDescription = model.Description,
+                    DepartmentTitle = model.DepartmentTitle,
+                    DepartmentDescription = model.DepartmentDescription,
                     DateFrom = model.DateFrom ?? default
                 };
                 var response = await departmentManager.CreateAsync(createRequest);

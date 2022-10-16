@@ -1,0 +1,100 @@
+﻿@using static PersonnelManagement.WebClient.Pages.OrgStruct.Departments
+@using System.Globalization
+@using PersonnelManagement.Contracts.v1.Requests
+@using System.Net.Http.Json
+@using System.ComponentModel.DataAnnotations
+@using PersonnelManagement.Contracts.v1.Requests.Positions
+@using PersonnelManagement.WebClient.Infrastructure.Managers.Positions
+@using PersonnelManagement.WebClient.Pages.Dialogs
+@using static PersonnelManagement.WebClient.Pages.OrgStruct.Positions
+
+@inject IDialogService dialogService
+@inject ISnackbar snackBar
+@inject IPositionManager positionManager
+
+<MudDialog>
+    <DialogContent>
+        <MudText></MudText>
+    </DialogContent>
+    <DialogActions>
+        <MudCard>
+            <MudForm Model="@model" onsubmit="@(() => SaveData())">
+                <div class="position-form-content">
+                    <MudCardContent>
+                        <MudTextField @bind-Value="model.PositionTitle" For="@(() => model.PositionTitle)" Label="Title" />
+                        <MudTextField @bind-Value="model.PositionDescription" For="@(() => model.PositionDescription)" Label="Description" />
+                    </MudCardContent>
+                    <div class="position-form-submit">
+                        <MudButton ButtonType="MudBlazor.ButtonType.Submit" 
+                                    Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save" 
+                                    Color="Color.Info"  Size="Size.Small">
+                                    Save
+                        </MudButton>
+                    </div>
+                    <div class="position-form-cancel">
+                        <MudButton OnClick="Cancel">Cancel</MudButton>
+                    </div>
+                </div>
+            </MudForm>
+        </MudCard>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    [Parameter] public PositionModel model { get; set; }
+
+    private async Task SaveData()
+    {
+        var isFormValid = !string.IsNullOrWhiteSpace(model.PositionTitle) &&
+            !string.IsNullOrWhiteSpace(model.PositionDescription);
+
+        if (isFormValid)
+        {
+            if(model.Id != default)
+            {
+                var updateRequest = new UpdatePositionRequest
+                {
+                    PositionTitle = model.PositionTitle,
+                    PositionDescription = model.PositionDescription
+                };
+                var response = await positionManager.UpdateAsync(model.Id, updateRequest);
+
+                if (response.StatusCode == System.Net.HttpStatusCode.OK &&
+                    response.Content.Data != null)
+                {
+                    snackBar.Add("Position edited", Severity.Success);
+                    model = new();
+                }
+                else
+                {
+                    snackBar.Add("Position cannot be edited", Severity.Error);
+                }
+            }
+            else
+            {
+                var createRequest = new CreatePositionRequest
+                {
+                    PositionTitle = model.PositionTitle,
+                    PositionDescription = model.PositionDescription
+                };
+                var response = await positionManager.CreateAsync(createRequest);
+
+                if (response.Content?.Data != null)
+                {
+                    snackBar.Add("Position added", Severity.Success);
+                    model = new();
+                }
+            }
+
+            MudDialog.Close(DialogResult.Ok(true));
+        }
+        else
+        {
+            snackBar.Add("Form was not validated", Severity.Error);
+        }
+    }
+
+    void Cancel() => MudDialog.Cancel();
+}

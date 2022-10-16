@@ -1,0 +1,285 @@
+﻿@using static PersonnelManagement.WebClient.Pages.OrgStruct.Departments
+@using System.Globalization
+@using AutoMapper
+@using PersonnelManagement.Contracts.v1.Requests
+@using System.Net.Http.Json
+@using System.ComponentModel.DataAnnotations
+@using PersonnelManagement.Contracts.v1.Requests.Orders
+@using PersonnelManagement.Contracts.v1.Requests.Queries
+@using PersonnelManagement.Domain.Orders
+@using PersonnelManagement.WebClient.Infrastructure.Managers.Departments
+@using PersonnelManagement.WebClient.Infrastructure.Managers.Orders
+@using PersonnelManagement.WebClient.Infrastructure.Managers.Positions
+@using PersonnelManagement.WebClient.Pages.Dialogs
+@using static PersonnelManagement.WebClient.Pages.OrgStruct.Positions
+@using static PersonnelManagement.WebClient.Pages.Orders.Orders
+@using static PersonnelManagement.WebClient.Pages.Orders.OrdersDescription
+
+@inject IDialogService dialogService
+@inject ISnackbar snackBar
+@inject IOrderDescriptionManager orderDescManager
+@inject IOrderManager orderManager
+@inject IMapper mapper
+@inject IPositionManager positionManager
+@inject IDepartmentManager departmentManager
+
+<MudDialog>
+    <DialogContent>
+        <MudText></MudText>
+    </DialogContent>
+    <DialogActions>
+        <MudCard>
+            <MudForm Model="@OrderModel" onsubmit="@(() => SaveData())">
+                <div class="orderdesc-form-content">
+                    <MudCardContent>
+                        <MudTextField @bind-Value="OrderModel.FirstName" For="@(() => OrderModel.FirstName)" Label="First Name" />
+                        <MudTextField @bind-Value="OrderModel.LastName" For="@(() => OrderModel.LastName)" Label="Last Name" />
+                        <MudDatePicker @bind-Date="@OrderModel.DateFrom" For="@(() => OrderModel.DateFrom)" Label="Hire Date" />
+                        <div style="max-width:600px">
+                            <MudTextField @bind-Value="Position" Placeholder="Position" 
+                                Immediate="true" @onclick="@(()=> isPositionPopoverOpen = true)" @onkeydown="OnPositionKeyDown"/>
+                            <MudPopover Open="@isPositionPopoverOpen" MaxHeight="300" AnchorOrigin="@Origin.BottomCenter" 
+                                TransformOrigin="@Origin.TopCenter" RelativeWidth="true">
+                                <MudSimpleTable Style="overflow-x: auto;" Dense="true">
+                                <thead>
+                                    <tr>
+                                        <th>Title</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var position in positions)
+                                    {
+                                        <tr style="cursor:pointer" @onclick="(() => pickPosition(position))">
+                                            <td>@position.PositionTitle</td>
+                                            <td>@position.PositionDescription</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                                </MudSimpleTable>
+                            </MudPopover>    
+                        </div>
+                        <div style="max-width:600px">
+                            <MudTextField @bind-Value="Department" Placeholder="Department" 
+                                Immediate="true" @onclick="@(()=> isDepartmentPopoverOpen = true)" @onkeydown="OnDepartmentKeyDown"/>
+                            <MudPopover Open="@isDepartmentPopoverOpen" MaxHeight="300" AnchorOrigin="@Origin.BottomCenter" 
+                                TransformOrigin="@Origin.TopCenter" RelativeWidth="true">
+                                <MudSimpleTable Style="overflow-x: auto;" Dense="true">
+                                <thead>
+                                    <tr>
+                                        <th>Title</th>
+                                        <th>Description</th>
+                                        <th>Date From</th>
+                                        <th>Date To</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var department in departments)
+                                    {
+                                        <tr style="cursor:pointer" @onclick="(() => pickDepartment(department))">
+                                            <td>@department.DepartmentTitle</td>
+                                            <td>@department.DepartmentDescription</td>
+                                            <td>@department.DateFrom</td>
+                                            <td>@department.DateTo</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                                </MudSimpleTable>
+                            </MudPopover>    
+                        </div>
+                    </MudCardContent>
+                    <div class="orderdesc-form-submit">
+                        <MudButton ButtonType="MudBlazor.ButtonType.Submit" 
+                                    Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save" 
+                                    Color="Color.Info"  Size="Size.Small">
+                                    Save
+                        </MudButton>
+                    </div>
+                    <div class="orderdesc-form-cancel">
+                        <MudButton OnClick="Cancel">Cancel</MudButton>
+                    </div>
+                </div>
+            </MudForm>
+        </MudCard>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    [Parameter] public OrderModel OrderModel { get; set; }
+
+    [Parameter] public Guid OrderDescId { get; set; }
+
+    private bool isPositionPopoverOpen;
+
+    private string position;
+
+    public string Position 
+    {
+        get => position;
+        set 
+        {
+            if (position == value)
+            {
+                return;
+            }
+
+            position = value;
+            isPositionPopoverOpen = true;
+
+            StateHasChanged();
+        }
+    }
+
+    private bool isDepartmentPopoverOpen;
+
+    private string department;
+
+    public string Department 
+    {
+        get => department;
+        set 
+        {
+            if (department == value)
+            {
+                return;
+            }
+
+            department = value;
+            isDepartmentPopoverOpen = true;
+
+            StateHasChanged();
+        }
+    }
+
+    private List<PositionModel> positions;
+    private List<DepartmentModel> departments;
+
+    protected override async Task OnInitializedAsync()
+    {
+        OrderModel.OrderDescriptionId = OrderDescId;
+        department = OrderModel.Department?.DepartmentTitle;
+        position = OrderModel.Position?.PositionTitle;
+
+        await LoadPositions();
+        await LoadDepartments();
+    }
+
+    private async Task LoadPositions(string searchText = null)
+    {
+        var response = await positionManager.GetAllAsync(query: new GetAllPositionsQuery { SearchText = searchText });
+        var data = response.Content?.Data?.ToList();
+
+        if(data != null)
+        {
+            positions = mapper.Map<List<PositionModel>>(data).OrderByDescending(x => x.CreatedDate).ToList();
+        }
+    }
+
+    private async Task LoadDepartments(string searchText = null)
+    {
+        var response = await departmentManager.GetAllAsync(query: new GetAllDepartmentsQuery { SearchText = searchText });
+        var data = response.Content?.Data?.ToList();
+
+        if(data != null)
+        {
+            departments = mapper.Map<List<DepartmentModel>>(data).OrderByDescending(x => x.CreatedDate).ToList();
+        }
+    }
+
+    private async Task OnPositionKeyDown(KeyboardEventArgs args) 
+    {
+        if (args.Key == "Enter")
+        {
+             isPositionPopoverOpen = false;
+        }
+        else
+        {
+            await LoadPositions(OrderModel.PositionId != default ? string.Empty : position);
+            StateHasChanged();
+        }
+    }
+
+    private void pickPosition(PositionModel position)
+    {
+        OrderModel.PositionId = position.Id;
+        Position = position.PositionTitle;
+        isPositionPopoverOpen = false;
+    }
+
+    private async Task OnDepartmentKeyDown(KeyboardEventArgs args) 
+    {
+        if (args.Key == "Enter")
+        {
+             isDepartmentPopoverOpen = false;
+        }
+        else
+        {
+            await LoadDepartments(OrderModel.DepartmentId != default ? string.Empty : department);
+            StateHasChanged();
+        }
+    }
+
+    private void pickDepartment(DepartmentModel department)
+    {
+        OrderModel.DepartmentId = department.Id;
+        Department = department.DepartmentTitle;
+        isDepartmentPopoverOpen = false;
+    }
+
+    private async Task SaveData()
+    {
+        var isFormValid = !string.IsNullOrWhiteSpace(OrderModel.FirstName) &&
+            !string.IsNullOrWhiteSpace(OrderModel.LastName) &&
+            OrderModel.DateFrom != default &&
+            OrderModel.PositionId != default &&
+            OrderModel.DepartmentId != default &&
+            OrderModel.OrderDescriptionId != default;
+
+        if (isFormValid)
+        {
+            if(OrderModel.Id != default)
+            {
+                var updateRequest = mapper.Map<UpdateOrderRequest>(OrderModel);
+
+                var response = await orderManager.UpdateAsync(OrderModel.Id, updateRequest);
+
+                if (response.StatusCode == System.Net.HttpStatusCode.OK &&
+                    response.Content.Data != null)
+                {
+                    snackBar.Add("Order edited", Severity.Success);
+                    OrderModel = new();
+                }
+                else
+                {
+                    snackBar.Add("Order cannot be edited", Severity.Error);
+                }
+            }
+            else
+            {
+                var createRequest = mapper.Map<CreateOrderRequest>(OrderModel);
+
+                var response = await orderManager.CreateAsync(createRequest);
+
+                if (response.Content?.Data != null)
+                {
+                    snackBar.Add("Order added", Severity.Success);
+                    OrderModel = new();
+                }
+                else
+                {
+                    snackBar.Add("Order was not added", Severity.Error);
+                }
+            }
+
+            MudDialog.Close(DialogResult.Ok(true));
+        }
+        else
+        {
+            snackBar.Add("Form was not validated", Severity.Error);
+        }
+    }
+
+    void Cancel() => MudDialog.Cancel();
+}

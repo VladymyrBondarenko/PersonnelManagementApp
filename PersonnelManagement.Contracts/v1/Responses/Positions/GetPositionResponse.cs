@@ -11,5 +11,9 @@ namespace PersonnelManagement.Contracts.v1.Responses.Positions
         public Guid Id { get; set; }
 
         public string PositionTitle { get; set; }
+
+        public string PositionDescription { get; set; }
+
+        public DateTime CreatedDate { get; set; }
     }
 }

@@ -1,12 +1,14 @@
 ﻿using AutoMapper;
 using PersonnelManagement.Contracts.v1.Requests;
 using PersonnelManagement.Contracts.v1.Requests.Orders;
+using PersonnelManagement.Contracts.v1.Requests.Positions;
 using PersonnelManagement.Contracts.v1.Requests.Queries;
 using PersonnelManagement.Contracts.v1.Responses.Departments;
 using PersonnelManagement.Domain.Departments;
 using PersonnelManagement.Domain.Models;
 using PersonnelManagement.Domain.Models.Filters;
 using PersonnelManagement.Domain.Orders;
+using PersonnelManagement.Domain.Positions;
 
 namespace PersonnelManagement.Api.MappingProfiles
 {
@@ -14,13 +16,23 @@ namespace PersonnelManagement.Api.MappingProfiles
     {
         public RequestToDomainProfile()
         {
+            // departments
             CreateMap<CreateDepartmentRequest, Department>();
-
-            CreateMap<CreateOrderRequest, Order>();
-
-            CreateMap<PaginationQueryRequest, PaginationQuery>();
-
             CreateMap<GetAllDepartmentsQuery, GetAllDepartmentsFilter>();
+
+            // positions
+            CreateMap<CreatePositionRequest, Position>();
+            CreateMap<GetAllPositionsQuery, GetAllPositionsFilter>();
+
+            // orders
+            CreateMap<CreateOrderRequest, Order>();
+            CreateMap<GetAllOrdersQuery, GetAllOrdersFilter>();
+            CreateMap<CreateOrderRequest, Order>();
+            CreateMap<GetAllOrderDescriptionsQuery, GetAllOrderDescriptionsFilter>();
+            CreateMap<CreateOrderDescriptionRequest, OrderDescription>();
+
+            // other
+            CreateMap<PaginationQueryRequest, PaginationQuery>();
         }
     }
 }

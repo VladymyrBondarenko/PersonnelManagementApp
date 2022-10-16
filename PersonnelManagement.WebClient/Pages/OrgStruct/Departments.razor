@@ -18,7 +18,7 @@
     <MudButton OnClick="@AddRow" Color="@Color.Success" Class="add-item-btn">Add Department</MudButton>
 </div>
 
-<MudTable ServerData="@(new Func<TableState, Task<TableData<Element>>>(LoadData))" Dense="true" @ref="table" 
+<MudTable ServerData="@(new Func<TableState, Task<TableData<DepartmentModel>>>(LoadData))" Dense="true" @ref="table" 
         Hover="true" Bordered="true" Striped="true" @bind-SelectedItem="selectedItem">
     <ToolBarContent>
         <MudText Typo="Typo.h6"></MudText>
@@ -36,8 +36,8 @@
     <RowTemplate>
         <MudTd DataLabel="DepartmentTitle">@context.DepartmentTitle</MudTd>
             <MudTd DataLabel="Description">@context.DepartmentDescription</MudTd>
-            <MudTd DataLabel="DateFrom">@context.DateFrom</MudTd>
-            <MudTd DataLabel="DateTo">@context.DateTo</MudTd>
+            <MudTd DataLabel="DateFrom">@context.DateFrom.Value.ToShortDateString()</MudTd>
+            <MudTd DataLabel="DateTo">@context.DateTo.Value.ToShortDateString()</MudTd>
             <MudTd>
             <div class="department-edit-btn">
                 <MudIconButton OnClick="@(() => EditRow(context))" ButtonType="MudBlazor.ButtonType.Button" 
@@ -59,11 +59,11 @@
 @code {
 
     private string searchItem = "";
-    private Element selectedItem = null;
+    private DepartmentModel selectedItem = null;
     private int[] pageSizeOptions = new int[] { 5, 10, 15 };
     private bool isOpen;
 
-    private MudTable<Element> table;
+    private MudTable<DepartmentModel> table;
 
     public class DepartmentModel
     {
@@ -71,19 +71,20 @@
 
         [Display(Name = "Title")]
         [Required]
-        public string Title { get; set; }
+        public string DepartmentTitle { get; set; }
 
         [Display(Name = "Description")]
         [Required]
-        public string Description { get; set; }
+        public string DepartmentDescription { get; set; }
 
         [Display(Name = "Date From")]
         [Required]
         public DateTime? DateFrom { get; set; } = DateTime.UtcNow;
-    }
 
-    public record class Element(Guid Id, string DepartmentTitle, string DepartmentDescription, 
-        DateTime DateFrom, DateTime DateTo, DateTime CreatedDate);
+        public DateTime? DateTo { get; set; }
+
+        public DateTime? CreatedDate { get; set; }
+    }
 
     private async Task FilterFunc()
     {
@@ -102,16 +103,8 @@
         }
     }
 
-    private async Task EditRow(Element element)
+    private async Task EditRow(DepartmentModel model)
     {
-        var model = new DepartmentModel
-        {
-            Id = element.Id,
-            Title = element.DepartmentTitle,
-            Description = element.DepartmentDescription,
-            DateFrom = element.DateFrom
-        };
-
         var parameters = new DialogParameters { ["model"] = model };
         var dialog = dialogService.Show<AddDepartmentDialog>("Edit department", parameters);
 
@@ -122,16 +115,8 @@
         }
     }
 
-    private async Task DeleteRow(Element element)
+    private async Task DeleteRow(DepartmentModel model)
     {
-        var model = new DepartmentModel
-        {
-            Id = element.Id,
-            Title = element.DepartmentTitle,
-            Description = element.DepartmentDescription,
-            DateFrom = element.DateFrom
-        };
-
         var parameters = new DialogParameters { ["model"] = model };
         var dialog = dialogService.Show<DeleteDepartmentDialog>("Delete department", parameters);
 
@@ -142,7 +127,7 @@
         }
     }
 
-    private async Task<TableData<Element>> LoadData(TableState state)
+    private async Task<TableData<DepartmentModel>> LoadData(TableState state)
     {
         GetAllDepartmentsQuery query = null;
 
@@ -158,11 +143,18 @@
 
         var data = response.Content?.Data?.ToList();
 
-        var grid = new TableData<Element>();
+        var grid = new TableData<DepartmentModel>();
         if(data != null)
         {
-            grid.Items = data.Select(x => new Element(x.Id, x.DepartmentTitle, x.DepartmentDescription, x.DateFrom, x.DateTo, x.CreatedDate))
-                .OrderByDescending(x => x.CreatedDate).ToList();
+            grid.Items = data.Select(x => new DepartmentModel
+            {
+                Id = x.Id,
+                DepartmentTitle = x.DepartmentTitle,
+                DepartmentDescription = x.DepartmentDescription,
+                DateFrom = x.DateFrom,
+                DateTo = x.DateTo,
+                CreatedDate = x.CreatedDate
+            }).OrderByDescending(x => x.CreatedDate).ToList();
             grid.TotalItems = response.Content.TotalAmount;
         }
         return grid;

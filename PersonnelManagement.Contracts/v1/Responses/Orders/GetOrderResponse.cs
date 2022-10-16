@@ -40,7 +40,7 @@ namespace PersonnelManagement.Contracts.v1.Responses.Orders
 
         public Guid OrderDescriptionId { get; set; }
 
-        public GetOrderDescriptionResponse OrderDescription { get; set; }
+        //public GetOrderDescriptionResponse OrderDescription { get; set; }
 
         public OrderState OrderState { get; set; }
     }

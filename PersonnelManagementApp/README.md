@@ -39,16 +39,28 @@ Features. Iteration 4:
 
 // Create some web UI for with use of Api (Crud operations)
 
-1. Add ui to departments with pagination + crud
+1. Add ui to departments with pagination + crud +
+2. Add ui to positions with pagination + crud +
+3. Add ui to orders/order descriptions +
+4. Add ui to employees
+5. Add logic for accept/rollback hire/fire orders
 
-Features. Iteration 5: 
+Features. Iteration 4:
+
+// Add validations to api
+
+Features. Iteration 6: 
 
 // Add registration/authorization/authetication
 
-Features. Iteration 6:
+Features. Iteration 7:
+
+// Add logging (Serilog?)
+
+Features. Iteration 8:
 
 // Add caching to api (redis or monobd)
 
-Features. Iteration 7:
+Features. Iteration 9:
 
-// Add integration tests to api + health checks
+// Add integration tests to api + unit tests (if needed) + health checks

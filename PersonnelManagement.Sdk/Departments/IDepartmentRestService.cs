@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace PersonnelManagement.Sdk.Departments
 {
-    public interface IDepartmentApi
+    public interface IDepartmentRestService
     {
         [Get($"/{ApiRoutes.Departments.GetAll}")]
         Task<ApiResponse<PagedResponse<GetDepartmentResponse>>> GetAllAsync(PaginationQueryRequest queryRequest = null, GetAllDepartmentsQuery query = null);

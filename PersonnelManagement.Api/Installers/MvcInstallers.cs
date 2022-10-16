@@ -1,4 +1,8 @@
-﻿using PersonnelManagement.Server.Services;
+﻿using PersonnelManagement.Server.Services.PaginationServices.Departments;
+using PersonnelManagement.Server.Services.PaginationServices.OrderDescriptions;
+using PersonnelManagement.Server.Services.PaginationServices.Orders;
+using PersonnelManagement.Server.Services.PaginationServices.Positions;
+using PersonnelManagement.Server.Services.UriServices;
 
 namespace PersonnelManagement.Api.Installers
 {
@@ -15,6 +19,11 @@ namespace PersonnelManagement.Api.Installers
                 var request = accessor.HttpContext.Request;
                 return new UriService($"{request.Scheme}://{request.Host.ToUriComponent()}");
             });
+
+            services.AddScoped<IOrderPaginationService, OrderPaginationService>();
+            services.AddScoped<IPositionPaginationService, PositionPaginationService>();
+            services.AddScoped<IDepartmentPaginationService, DepartmentPaginationService>();
+            services.AddScoped<IOrderDescriptionPaginationService, OrderDescriptionPaginationService>();
         }
     }
 }

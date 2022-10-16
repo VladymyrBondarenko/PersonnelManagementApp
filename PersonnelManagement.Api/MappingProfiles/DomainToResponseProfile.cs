@@ -46,12 +46,12 @@ namespace PersonnelManagement.Api.MappingProfiles
                         EmployeeId = x.EmployeeId,
                         OrderState = x.OrderState,
                         OrderDescriptionId = x.OrderDescriptionId,
-                        OrderDescription = new GetOrderDescriptionResponse 
-                        { 
-                            Id = x.OrderDescriptionId, 
-                            OrderDescriptionTitle = x.OrderDescription.OrderDescriptionTitle,
-                            OrderType = x.OrderDescription.OrderType
-                        },
+                        //OrderDescription = new GetOrderDescriptionResponse 
+                        //{ 
+                        //    Id = x.OrderDescriptionId, 
+                        //    OrderDescriptionTitle = x.OrderDescription.OrderDescriptionTitle,
+                        //    OrderType = x.OrderDescription.OrderType
+                        //},
                         Employee = new GetEmployeeResponse
                         {
                             Id = src.Id,
@@ -103,12 +103,12 @@ namespace PersonnelManagement.Api.MappingProfiles
                             FirstName = x.FirstName,
                             LastName = x.LastName,
                             OrderState = x.OrderState,
-                            OrderDescription = new GetOrderDescriptionResponse
-                            {
-                                Id = x.OrderDescriptionId,
-                                OrderDescriptionTitle = x.OrderDescription.OrderDescriptionTitle,
-                                OrderType = x.OrderDescription.OrderType
-                            },
+                            //OrderDescription = new GetOrderDescriptionResponse
+                            //{
+                            //    Id = x.OrderDescriptionId,
+                            //    OrderDescriptionTitle = x.OrderDescription.OrderDescriptionTitle,
+                            //    OrderType = x.OrderDescription.OrderType
+                            //},
                             OrderDescriptionId = x.OrderDescriptionId
                         }).ToList()
                     });

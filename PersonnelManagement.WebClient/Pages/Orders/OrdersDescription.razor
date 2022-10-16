@@ -1,0 +1,155 @@
+﻿@page "/ordersDescription"
+@using System.ComponentModel.DataAnnotations
+@using PersonnelManagement.Contracts.v1.Requests.Queries
+@using PersonnelManagement.Domain.Orders
+@using PersonnelManagement.WebClient.Infrastructure.Managers.Orders
+@using PersonnelManagement.WebClient.Pages.Dialogs.Orders
+@using static PersonnelManagement.WebClient.Pages.Orders.Orders
+
+@inject IOrderDescriptionManager orderDescManager
+@inject IDialogService dialogService
+
+<div class="orderdesc-add-btn">
+    <MudButton OnClick="@AddRow" Color="@Color.Success" Class="add-item-btn">Add order description</MudButton>
+</div>
+
+<MudTable ServerData="@(new Func<TableState, Task<TableData<OrderDescriptionModel>>>(LoadData))" Dense="true" @ref="table" 
+        Hover="true" Bordered="true" Striped="true" @bind-SelectedItem="selectedItem">
+    <ToolBarContent>
+        <MudText Typo="Typo.h6"></MudText>
+        <MudSpacer />
+        <MudTextField TextChanged="@(() => FilterFunc())" @bind-Value="searchItem" Placeholder="Search" 
+            Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" 
+            IconSize="Size.Medium" Class="mt-0"></MudTextField>
+    </ToolBarContent>
+    <HeaderContent>
+        <MudTh>Order type</MudTh>
+        <MudTh>Title</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="OrderType">@context.OrderType</MudTd>
+            <MudTd DataLabel="OrderDescTitle">@context.OrderDescriptionTitle</MudTd>
+            <MudTd>
+            <div class="orderdesc-edit-btn">
+                <MudIconButton OnClick="@(() => EditRow(context))" ButtonType="MudBlazor.ButtonType.Button" 
+                    Icon="@Icons.Material.Filled.Edit" aria-label="edit"></MudIconButton>
+            </div>
+            </MudTd>
+            <MudTd>
+            <div class="orderdesc-delete-btn">
+                <MudIconButton OnClick="@(() => DeleteRow(context))" ButtonType="MudBlazor.ButtonType.Button" 
+                    Icon="@Icons.Material.Filled.Delete" aria-label="delete"></MudIconButton>
+            </div>
+        </MudTd>
+    </RowTemplate>
+    <PagerContent>
+        <MudTablePager PageSizeOptions="pageSizeOptions" />
+    </PagerContent>
+</MudTable>
+
+@code {
+
+    private string searchItem = "";
+    private OrderDescriptionModel selectedItem = null;
+    private int[] pageSizeOptions = new int[] { 5, 10, 15 };
+    private bool isOpen;
+
+    private MudTable<OrderDescriptionModel> table;
+
+    public class OrderDescriptionModel
+    {
+        public Guid Id { get; set; }
+
+        [Display(Name = "Type")]
+        [Required]
+        public OrderType OrderType { get; set; }
+
+        [Display(Name = "Title")]
+        [Required]
+        public string OrderDescriptionTitle { get; set; }
+
+        public List<OrderModel> Orders { get; set; }
+    }
+
+    private async Task FilterFunc()
+    {
+        await Reset();
+    }
+
+    private async Task AddRow()
+    {
+        var parameters = new DialogParameters { ["model"] = new OrderDescriptionModel() };
+        var dialog = dialogService.Show<AddOrderDescriptionDialog>("Add order description", parameters);
+
+        var result = await dialog.Result;
+        if (!result.Cancelled)
+        {
+            await Reset();
+        }
+    }
+
+    private async Task EditRow(OrderDescriptionModel model)
+    {
+        var parameters = new DialogParameters { ["model"] = model };
+        var dialog = dialogService.Show<AddOrderDescriptionDialog>("Edit order description", parameters);
+
+        var result = await dialog.Result;
+        if (!result.Cancelled)
+        {
+            await Reset();
+        }
+    }
+
+    private async Task DeleteRow(OrderDescriptionModel model)
+    {
+        var parameters = new DialogParameters { ["model"] = model };
+        var dialog = dialogService.Show<DeleteOrderDescriptionDialog>("Delete order description", parameters);
+
+        var result = await dialog.Result;
+        if(!result.Cancelled)
+        {
+            await Reset();
+        }
+    }
+
+    private async Task<TableData<OrderDescriptionModel>> LoadData(TableState state)
+    {
+        GetAllOrderDescriptionsQuery query = null;
+
+        if (!string.IsNullOrWhiteSpace(searchItem))
+        {
+            query = new GetAllOrderDescriptionsQuery { SearchText = searchItem };
+        }
+
+        var response = await orderDescManager.GetAllAsync(new Contracts.v1.Requests.PaginationQueryRequest 
+            { 
+                PageNumber = state.Page + 1, PageSize = state.PageSize 
+            }, query);
+
+        var data = response.Content?.Data?.ToList();
+
+        var grid = new TableData<OrderDescriptionModel>();
+        if(data != null)
+        {
+            grid.Items = data.Select(x => new OrderDescriptionModel 
+                { 
+                    Id = x.Id, 
+                    OrderDescriptionTitle = x.OrderDescriptionTitle, 
+                    OrderType = x.OrderType 
+                }).ToList();
+            grid.TotalItems = response.Content.TotalAmount;
+        }
+        return grid;
+    }
+
+    private async Task Reset()
+    {
+        await table.ReloadServerData();
+    }
+
+    protected override Task OnAfterRenderAsync(bool firstRender)
+    {
+        table.SetRowsPerPage(5);
+        return base.OnAfterRenderAsync(firstRender);
+    }
+}

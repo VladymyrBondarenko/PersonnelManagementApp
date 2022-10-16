@@ -1,168 +1,267 @@
 ﻿@using System.Net.Http.Json
 @using System.Collections.ObjectModel
+@using AutoMapper
+@using PersonnelManagement.Contracts.v1.Requests.Queries
+@using PersonnelManagement.Contracts.v1.Responses.Departments
 @using PersonnelManagement.Contracts.v1.Responses.Orders
+@using PersonnelManagement.Domain.Orders
 @using PersonnelManagement.Sdk.Orders
+@using PersonnelManagement.WebClient.Infrastructure.Managers.Orders
+@using PersonnelManagement.WebClient.Pages.Dialogs.Orders
 @using Refit
 @using System.Text.RegularExpressions
 @using System.ComponentModel.DataAnnotations
+@using static PersonnelManagement.WebClient.Pages.Orders.OrdersDescription
+@using static PersonnelManagement.WebClient.Pages.OrgStruct.Departments
+@using static PersonnelManagement.WebClient.Pages.OrgStruct.Positions
+
+@inject IOrderDescriptionManager orderDescManager
+@inject IOrderManager orderManager
+@inject IDialogService dialogService
+@inject IMapper mapper
 
 @page "/orders"
 
-<MudButton OnClick="@AddItem" Color="@Color.Success" Class="add-item-btn">Add Item</MudButton>
-<MudButton OnClick="@RemoveItem" Color="@Color.Error" Class="remove-item-btn">Remove Item</MudButton>
-
-<MudGrid class="@GetInputFormClass()">
-    <MudItem xs="12" sm="7">
-        <MudPaper Class="pa-4">
-            <MudForm @ref="form" @bind-IsValid="@success" @bind-Errors="@errors">
-                    <MudTextField T="string" Label="Username" Required="true" RequiredError="User name is required!"/>
-                    <MudTextField T="string" Label="Email" Required="true" RequiredError="Email is required!"
-                                  Validation="@(new EmailAddressAttribute() {ErrorMessage = "The email address is invalid"})"/>
-                    <MudTextField T="string" Label="Password" HelperText="Choose a strong password" @ref="pwField1"
-                                  InputType="InputType.Password"
-                                  Validation="@(new Func<string, IEnumerable<string>>(PasswordStrength))" Required="true"
-                                  RequiredError="Password is required!"/>
-                    <MudTextField T="string"
-                                  Label="Password" HelperText="Repeat the password" InputType="InputType.Password"
-                                  Validation="@(new Func<string, string>(PasswordMatch))"/>
-                    <div class="d-flex">
-                        <MudRadioGroup T="string" Required="true" RequiredError="Account type is required!">
-                            <MudRadio Option="@("Personal")">Personal</MudRadio>
-                            <MudRadio Option="@("Professional")">Professional</MudRadio>
-                        </MudRadioGroup>
-                    </div>
-                    <div class="d-flex align-center justify-space-between">
-                        <MudCheckBox T="bool" Required="true" RequiredError="You must agree" Label="I agree!"  />
-                        <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@(!success)" Class="ml-auto">Register</MudButton>
-                    </div>
-            </MudForm>   
-        </MudPaper>
-        <MudPaper Class="pa-4 mt-4">
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" DisableElevation="true" OnClick="@(()=>form.Validate())">Validate</MudButton>
-            <MudButton Variant="Variant.Filled" Color="Color.Secondary" DisableElevation="true" OnClick="@(()=>form.Reset())" Class="mx-2">Reset</MudButton>
-            <MudButton Variant="Variant.Filled" DisableElevation="true" OnClick="@(()=>form.ResetValidation())">Reset Validation</MudButton>
-        </MudPaper>
-    </MudItem>
-    <MudItem xs="12" sm="5">
-        <MudPaper Class="pa-4 mud-height-full">
-            <MudText Typo="Typo.subtitle2">@($"Errors ({errors.Length})")</MudText>
-                @foreach (var error in errors)
-                {
-                    <MudText Color="@Color.Error">@error</MudText>
-                }
-        </MudPaper>
+<MudGrid>
+    <MudItem xs="12">
+        <MudGrid Justify="Justify.FlexStart">
+            <MudItem xs="2" Style="padding: 5px">
+                <MudPaper Class="d-flex mud-width-full py-12" Outlined="true" Width="100%" Height="1000px" Elevation="0">
+                    <MudNavMenu Rounded="true" Margin="Margin.Dense" Color="Color.Primary" Class="pa-2" Style="width: 100%">
+                        @foreach(var record in OrderDescModels)
+                        {
+                            <MudNavLink OnClick="@(() => SelectOrderDesc(record.Id))" Icon="@getIcon(record)">@record.OrderDescriptionTitle</MudNavLink>
+                        }
+                    </MudNavMenu>
+                </MudPaper>
+            </MudItem>
+            <MudItem xs="10" Style="padding: 5px; height: 100%">
+                <div class="orderdesc-add-btn">
+                    <MudButton OnClick="@AddRow" Color="@Color.Success" Class="add-item-btn">Add order</MudButton>
+                </div>
+                <MudPaper Width="100%" Height="100%" Class="d-flex mud-width-full">
+                    <MudTable ServerData="@(new Func<TableState, Task<TableData<OrderModel>>>(LoadOrdersData))"
+                            Dense="true" @ref="table" Style="width: 100%; height:100%"
+                            Hover="true" Bordered="true" Striped="true" @bind-SelectedItem="selectedOrder">
+                        <ToolBarContent>
+                            <MudText Typo="Typo.h6"></MudText>
+                            <MudSpacer />
+                            <MudTextField TextChanged="@(() => FilterFunc())" @bind-Value="searchItem" Placeholder="Search" 
+                                Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" 
+                                IconSize="Size.Medium" Class="mt-0"></MudTextField>
+                        </ToolBarContent>
+                        <HeaderContent>
+                            <MudTh>Order State</MudTh>
+                            <MudTh>First Name</MudTh>
+                            <MudTh>Last Name</MudTh>
+                            <MudTh>Department</MudTh>
+                            <MudTh>Position</MudTh>
+                            <MudTh>Date From</MudTh>
+                            <MudTh>Date To</MudTh>
+                        </HeaderContent>
+                        <RowTemplate>
+                            <MudTd DataLabel="OrderState">@context.OrderState</MudTd>
+                            <MudTd DataLabel="FirstName">@context.FirstName</MudTd>
+                            <MudTd DataLabel="LastName">@context.LastName</MudTd>
+                            <MudTd DataLabel="Department">@context.Department?.DepartmentTitle</MudTd>
+                            <MudTd DataLabel="Position">@context.Position?.PositionTitle</MudTd>
+                            <MudTd DataLabel="DateFrom">@context.DateFrom?.ToShortDateString()</MudTd>
+                            <MudTd DataLabel="DateTo">@context.DateTo?.ToShortDateString()</MudTd>
+                            <MudTd>
+                                <div class="orderdesc-edit-btn">
+                                    <MudIconButton OnClick="@(() => EditRow(context))" ButtonType="MudBlazor.ButtonType.Button" 
+                                        Icon="@Icons.Material.Filled.Edit" aria-label="edit"></MudIconButton>
+                                </div>
+                            </MudTd>
+                            <MudTd>
+                                <div class="orderdesc-delete-btn">
+                                    <MudIconButton OnClick="@(() => DeleteRow(context))" ButtonType="MudBlazor.ButtonType.Button" 
+                                        Icon="@Icons.Material.Filled.Delete" aria-label="delete"></MudIconButton>
+                                </div>
+                            </MudTd>
+                        </RowTemplate>
+                        <PagerContent>
+                            <MudTablePager PageSizeOptions="pageSizeOptions" />
+                        </PagerContent>
+                    </MudTable>
+                </MudPaper>
+            </MudItem>
+        </MudGrid>
     </MudItem>
 </MudGrid>
 
-@if (OrderItems.Any())
-{
-    <MudDataGrid Items="@OrderItems">
-    <Columns>
-        <Column T="Model" Field="@nameof(Model.OrderType)" />
-        <Column T="Model" Field="@nameof(Model.State)" />
-        <Column T="Model" Field="@nameof(Model.FirstName)" />
-        <Column T="Model" Field="@nameof(Model.LastName)" />
-        <Column T="Model" Field="@nameof(Model.Department)" />
-        <Column T="Model" Field="@nameof(Model.Position)" />
-        <Column T="Model" Field="@nameof(Model.DateFrom)" />
-        <Column T="Model" Field="@nameof(Model.DateTo)" />
-    </Columns>
-    </MudDataGrid>
-}
-else
-{
-    <MudProgressCircular Color="Color.Primary" Indeterminate="true"/>
-}
-
 @code {
+    private string searchItem = "";
+    private int[] pageSizeOptions = new int[] { 5, 10, 15 };
+    private bool isOpen;
+    private OrderModel selectedOrder = null;
+    private Guid selectedOrderDescId;
 
-    public record Model (string OrderType, string State, 
-        string FirstName, string LastName, 
-        string Department, string Position, 
-        string DateFrom, string DateTo);
+    public class OrderModel
+    {
+        public Guid Id { get; set; }
 
-    private List<GetOrderResponse> OrdersData = new();
-    private ObservableCollection<Model> OrderItems = new ();
-    private IOrderApi OrderService;
-    private string InputFormDisplay = "none";
+        [Display(Name = "First Name")]
+        [Required]
+        public string FirstName { get; set; }
 
-    bool success;
-    string[] errors = { };
-    MudTextField<string> pwField1;
-    MudForm form;
-    private bool isInputFormVisible = false;
+        [Display(Name = "Last Name")]
+        [Required]
+        public string LastName { get; set; }
 
+        [Display(Name = "Date From")]
+        [Required]
+        public DateTime? DateFrom { get; set; }
+
+        public DateTime? DateTo { get; set; }
+
+        [Display(Name = "Department")]
+        [Required]
+        public DepartmentModel Department { get; set; }
+
+        public Guid? DepartmentId { get; set; }
+
+        [Display(Name = "Position")]
+        [Required]
+        public PositionModel Position { get; set; }
+
+        public Guid? PositionId { get; set; }
+
+        public OrderDescriptionModel OrderDescription { get; set; }
+
+        public Guid? OrderDescriptionId { get; set; }
+
+        public OrderState OrderState { get; set; }
+    }
+
+    private MudTable<OrderModel> table;
+
+    private List<OrderDescriptionModel> OrderDescModels = new ();
 
     protected override async Task OnInitializedAsync()
     {
-        OrderService = RestService.For<IOrderApi>("https://localhost:7030/");
+        await LoadDescriptionsData();
 
-        var data = await OrderService.GetAllAsync();
-        OrdersData = data?.Content?.Data;
+        await SelectOrderDesc(OrderDescModels.FirstOrDefault()?.Id ?? default);
+    }
 
-        if(OrdersData != null && OrdersData.Any())
+    private async Task LoadDescriptionsData()
+    {
+        var response = await orderDescManager.GetAllAsync();
+
+        var data = response.Content?.Data?.ToList();
+
+        if(data != null)
         {
-            foreach (var order in OrdersData)
+            OrderDescModels = mapper.Map<List<OrderDescriptionModel>>(data);
+        }
+    }
+
+    private async Task FilterFunc()
+    {
+        await Reset();
+    }
+
+    private async Task AddRow()
+    {
+        var parameters = new DialogParameters 
+        { 
+            ["OrderModel"] = new OrderModel(),
+            ["OrderDescId"] = selectedOrderDescId
+        };
+
+        var dialog = dialogService.Show<AddOrderDialog>("Add order", parameters);
+
+        var result = await dialog.Result;
+        if (!result.Cancelled)
+        {
+            await Reset();
+        }
+    }
+
+    private async Task EditRow(OrderModel element)
+    {
+        var parameters = new DialogParameters 
+        { 
+            ["OrderModel"] = element,
+            ["OrderDescId"] = selectedOrderDescId
+        };
+
+        var dialog = dialogService.Show<AddOrderDialog>("Edit order", parameters);
+
+        var result = await dialog.Result;
+        if (!result.Cancelled)
+        {
+            await Reset();
+        }
+    }
+
+    private async Task DeleteRow(OrderModel element)
+    {
+        var parameters = new DialogParameters 
+        { 
+            ["OrderModel"] = element
+        };
+
+        var dialog = dialogService.Show<DeleteOrderDialog>("Delete order", parameters);
+
+        var result = await dialog.Result;
+        if (!result.Cancelled)
+        {
+            await Reset();
+        }
+    }
+
+    private async Task SelectOrderDesc(Guid orderDescId)
+    {
+        selectedOrderDescId = orderDescId;
+        await FilterFunc();
+    }
+
+    private async Task<TableData<OrderModel>> LoadOrdersData(TableState state)
+    {
+        var grid = new TableData<OrderModel>();
+
+        if(selectedOrderDescId != default)
+        {
+            var query = new GetAllOrdersQuery { SearchText = searchItem, OrderDescriptionId = selectedOrderDescId };
+
+            var response = await orderManager.GetAllAsync(new Contracts.v1.Requests.PaginationQueryRequest 
+            { 
+                PageNumber = state.Page + 1, PageSize = state.PageSize 
+            }, query);
+
+            var data = response?.Content?.Data;
+            if(data != null)
             {
-                OrderItems.Add(new Model(
-                    order.OrderDescription?.OrderDescriptionTitle ?? string.Empty, 
-                    order.OrderState.ToString(), 
-                    order.FirstName ?? string.Empty, 
-                    order.LastName ?? string.Empty, 
-                    order.Department?.DepartmentTitle ?? string.Empty, 
-                    order.Position?.PositionTitle ?? string.Empty, 
-                    order.DateFrom.ToShortDateString(), 
-                    order.DateTo.ToShortDateString()));
+                grid.Items = mapper.Map<List<OrderModel>>(data);
+                grid.TotalItems = response.Content.TotalAmount;
             }
         }
+
+        return grid;
     }
 
-    private IEnumerable<string> PasswordStrength(string pw)
+    private async Task Reset()
     {
-        if (string.IsNullOrWhiteSpace(pw))
+        await table.ReloadServerData();
+    }
+
+    protected override Task OnAfterRenderAsync(bool firstRender)
+    {
+        table.SetRowsPerPage(5);
+        return base.OnAfterRenderAsync(firstRender);
+    }
+
+    private string getIcon(OrderDescriptionModel orderDesc)
+    {
+        // maybe later add logic to add icon to order description, for now constant
+        var icon = orderDesc.OrderType switch
         {
-            yield return "Password is required!";
-            yield break;
-        }
-        if (pw.Length < 8)
-            yield return "Password must be at least of length 8";
-        if (!Regex.IsMatch(pw, @"[A-Z]"))
-            yield return "Password must contain at least one capital letter";
-        if (!Regex.IsMatch(pw, @"[a-z]"))
-            yield return "Password must contain at least one lowercase letter";
-        if (!Regex.IsMatch(pw, @"[0-9]"))
-            yield return "Password must contain at least one digit";
-    }
-
-    private string PasswordMatch(string arg)
-    {
-        if (pwField1.Value != arg)
-            return "Passwords don't match";
-        return null;
-    }
-
-    private string GetInputFormClass()
-    {
-        if (isInputFormVisible)
-        {
-            return "input-form-visible";
-        }
-        else
-        {
-            return "input-form-hidden";
-        }
-    }
-
-    private void AddItem()
-    {
-        isInputFormVisible = !isInputFormVisible;
-        StateHasChanged();
-
-        //_items.Add(new Model("New Person", 44, Severity.Warning, 85_000.00M, new DateTime(2022, 1, 1), true));
-    }
-
-    private void RemoveItem()
-    {
-        //_items.RemoveAt(0);
+            OrderType.HireOrder => Icons.Filled.WorkOutline,
+            OrderType.FireOrder => Icons.Filled.WorkOff,
+            _ => ""
+        };
+        return icon;
     }
 }
