@@ -22,6 +22,8 @@ namespace PersonnelManagement.Contracts.v1.Requests.Orders
 
         public Guid? PositionId { get; set; }
 
+        public Guid? EmployeeId { get; set; }
+
         public Guid OrderDescriptionId { get; set; }
     }
 }

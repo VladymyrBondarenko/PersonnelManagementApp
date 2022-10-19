@@ -11,8 +11,6 @@ namespace PersonnelManagement.WebClient.MappingProfiles
             CreateMap<OrderModel, CreateOrderRequest>();
 
             CreateMap<OrderModel, UpdateOrderRequest>();
-
-            CreateMap<OrderModel, CreateOrderRequest>();
         }
     }
 }

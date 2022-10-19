@@ -38,15 +38,14 @@ namespace PersonnelManagement.Infrastracture.Orders.OrderBase.Models
         {
             if(Order?.Employee != null)
             {
-                var deleted = await _employeeService.DeleteAsync(Order.Employee);
+                var employeeId = Order.EmployeeId ?? default;
 
-                if(deleted)
+                Order.OrderState = toProject ? OrderState.Project : OrderState.Canceled;
+                Order.EmployeeId = null;
+
+                if(await _orderRepository.UpdateAsync(Order) && employeeId != default)
                 {
-                    Order.OrderState = toProject ? OrderState.Project : OrderState.Canceled;
-
-                    // TODO: deleting appointment
-
-                    return await _orderRepository.UpdateAsync(Order);
+                    return await _employeeService.DeleteAsync(employeeId);
                 }
             }
 

@@ -98,7 +98,7 @@ namespace PersonnelManagement.UnitTests.OrdersTests
                 .Setup(x => x.CreateAsync(hireOrder))
                 .ReturnsAsync(employee);
             employeeServiceMock
-                .Setup(x => x.DeleteAsync(employee))
+                .Setup(x => x.DeleteAsync(employee.Id))
                 .ReturnsAsync(true);
 
             orderFactoryMock

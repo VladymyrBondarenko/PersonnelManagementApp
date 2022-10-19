@@ -26,5 +26,11 @@ namespace PersonnelManagement.Sdk.Orders
 
         [Delete($"/{ApiRoutes.Orders.Delete}")]
         Task<IApiResponse> DeleteAsync(Guid orderId);
+
+        [Post($"/{ApiRoutes.Orders.AcceptOrder}")]
+        Task<ApiResponse<Response<AcceptOrderSuccessResponse>>> AcceptOrder(Guid orderId);
+
+        [Post($"/{ApiRoutes.Orders.RollbackOrder}")]
+        Task<ApiResponse<Response<AcceptOrderSuccessResponse>>> RollbackOrder(Guid orderId);
     }
 }

@@ -1,0 +1,219 @@
+﻿@using static PersonnelManagement.WebClient.Pages.OrgStruct.Departments
+@using System.Globalization
+@using AutoMapper
+@using PersonnelManagement.Contracts.v1.Requests
+@using System.Net.Http.Json
+@using System.ComponentModel.DataAnnotations
+@using PersonnelManagement.Contracts.v1.Requests.Orders
+@using PersonnelManagement.Contracts.v1.Requests.Queries
+@using PersonnelManagement.Domain.Employees
+@using PersonnelManagement.Domain.Orders
+@using PersonnelManagement.WebClient.Infrastructure.Managers.Departments
+@using PersonnelManagement.WebClient.Infrastructure.Managers.Employees
+@using PersonnelManagement.WebClient.Infrastructure.Managers.Orders
+@using PersonnelManagement.WebClient.Infrastructure.Managers.Positions
+@using PersonnelManagement.WebClient.Pages.Dialogs
+@using static PersonnelManagement.WebClient.Pages.Employees.Employees
+@using static PersonnelManagement.WebClient.Pages.OrgStruct.Positions
+@using static PersonnelManagement.WebClient.Pages.Orders.Orders
+@using static PersonnelManagement.WebClient.Pages.Orders.OrdersDescription
+
+@inject IDialogService dialogService
+@inject ISnackbar snackBar
+@inject IOrderDescriptionManager orderDescManager
+@inject IOrderManager orderManager
+@inject IMapper mapper
+@inject IEmployeeManager employeeManager
+
+<MudDialog Style="max-width: 700px">
+    <DialogContent>
+        <MudText></MudText>
+    </DialogContent>
+    <DialogActions>
+        <MudCard>
+            <MudForm Model="@OrderModel" onsubmit="@(() => SaveData())">
+                <div style="width:550px" class="orderdesc-form-content">
+                    <MudCardContent>
+                        <div>
+                            <MudTextField @bind-Value="Employee" Placeholder="Employee" 
+                                Immediate="true" @onclick="@(()=> isEmployeePopoverOpen = true)" @onkeydown="OnEmployeeKeyDown"/>
+                            <MudPopover Open="@isEmployeePopoverOpen" MaxHeight="300" AnchorOrigin="@Origin.BottomCenter" 
+                                TransformOrigin="@Origin.TopCenter" RelativeWidth="true">
+                                <MudSimpleTable Style="overflow-x: auto;" Dense="true">
+                                <thead>
+                                    <tr>
+                                        <th>First Name</th>
+                                        <th>Last Name</th>
+                                        <th>Department</th>
+                                        <th>Position</th>
+                                        <th>Hire Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var employee in employees)
+                                    {
+                                        <tr style="cursor:pointer" @onclick="(() => pickEmployee(employee))">
+                                            <td>@employee.FirstName</td>
+                                            <td>@employee.LastName</td>
+                                            <td>@employee.Department?.DepartmentTitle</td>
+                                            <td>@employee.Position?.PositionTitle</td>
+                                            <td>@employee.HireDate.Value.ToShortDateString()</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                                </MudSimpleTable>
+                            </MudPopover>    
+                        </div>
+                        <MudDatePicker Style="width:150px" @bind-Date="@OrderModel.DateFrom" For="@(() => OrderModel.DateFrom)" Label="Fire Date" />
+                    </MudCardContent>
+                    <div class="orderdesc-form-submit">
+                        <MudButton ButtonType="MudBlazor.ButtonType.Submit" 
+                                    Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save" 
+                                    Color="Color.Info"  Size="Size.Small">
+                                    Save
+                        </MudButton>
+                    </div>
+                    <div class="orderdesc-form-cancel">
+                        <MudButton OnClick="Cancel">Cancel</MudButton>
+                    </div>
+                </div>
+            </MudForm>
+        </MudCard>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    [Parameter] public OrderModel OrderModel { get; set; }
+
+    [Parameter] public Guid OrderDescId { get; set; }
+
+    private bool isEmployeePopoverOpen;
+
+    private string employee;
+
+    public string Employee 
+    {
+        get => employee;
+        set 
+        {
+            if (employee == value)
+            {
+                return;
+            }
+
+            employee = value;
+            isEmployeePopoverOpen = true;
+
+            StateHasChanged();
+        }
+    }
+
+    private List<EmployeeModel> employees;
+
+    protected override async Task OnInitializedAsync()
+    {
+        OrderModel.OrderDescriptionId = OrderDescId;
+
+        if(OrderModel.Employee != null)
+        {
+            employee = $"{OrderModel.Employee.FirstName} {OrderModel.Employee.LastName}";
+        }
+
+        await LoadEmployees();
+    }
+
+    private async Task LoadEmployees(string searchText = null)
+    {
+        var response = await employeeManager.GetAllAsync(query: new GetAllEmployeesQuery { SearchText = searchText });
+        var data = response.Content?.Data?.ToList();
+
+        if(data != null)
+        {
+            employees = mapper.Map<List<EmployeeModel>>(data).ToList();
+        }
+    }
+
+    private async Task OnEmployeeKeyDown(KeyboardEventArgs args) 
+    {
+        if (args.Key == "Enter")
+        {
+            isEmployeePopoverOpen = false;
+        }
+        else
+        {
+            await LoadEmployees(OrderModel.EmployeeId != default ? string.Empty : employee);
+            StateHasChanged();
+        }
+    }
+
+    private void pickEmployee(EmployeeModel employee)
+    {
+        OrderModel.EmployeeId = employee.Id;
+        OrderModel.Employee = employee;
+        OrderModel.DepartmentId = employee.DepartmentId;
+        OrderModel.Department = employee.Department;
+        OrderModel.Position = employee.Position;
+        OrderModel.PositionId = employee.PositionId;
+        OrderModel.FirstName = employee.FirstName;
+        OrderModel.LastName = employee.LastName;
+
+        Employee = $"{employee.FirstName} {employee.LastName}";
+        isEmployeePopoverOpen = false;
+    }
+
+    private async Task SaveData()
+    {
+        var isFormValid = OrderModel.EmployeeId != default &&
+            OrderModel.DateFrom != default &&
+            OrderModel.OrderDescriptionId != default &&
+            OrderModel.Employee.EmployeeState != EmployeeState.Fired &&
+            OrderModel.DateFrom > OrderModel.Employee.HireDate;
+
+        if (isFormValid)
+        {
+            if(OrderModel.Id != default)
+            {
+                var updateRequest = mapper.Map<UpdateOrderRequest>(OrderModel);
+
+                var response = await orderManager.UpdateAsync(OrderModel.Id, updateRequest);
+
+                if (response.StatusCode == System.Net.HttpStatusCode.OK &&
+                    response.Content.Data != null)
+                {
+                    snackBar.Add("Order edited", Severity.Success);
+                    OrderModel = new();
+                }
+                else
+                {
+                    snackBar.Add("Order cannot be edited", Severity.Error);
+                }
+            }
+            else
+            {
+                var createRequest = mapper.Map<CreateOrderRequest>(OrderModel);
+
+                var response = await orderManager.CreateAsync(createRequest);
+
+                if (response.Content?.Data != null)
+                {
+                    snackBar.Add("Order added", Severity.Success);
+                    OrderModel = new();
+                }
+                else
+                {
+                    snackBar.Add("Order was not added", Severity.Error);
+                }
+            }
+
+            MudDialog.Close(DialogResult.Ok(true));
+        }
+        else
+        {
+            snackBar.Add("Form was not validated", Severity.Error);
+        }
+    }
+
+    void Cancel() => MudDialog.Cancel();
+}

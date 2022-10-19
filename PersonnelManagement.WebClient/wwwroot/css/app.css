@@ -143,3 +143,45 @@ a, .btn-link {
     float: left;
     margin: 10px;
 }
+
+/* Orders page*/
+
+.orderdesc-link-selected {
+    background-color: gainsboro !important;
+}
+
+.orderdesc-link-not-selected {
+    background-color: white !important;
+}
+
+.accept-order-btn-hidden {
+    display: none !important;
+}
+
+.accept-order-btn-visible {
+    display: flex !important;
+}
+
+.rollback-order-btn-hidden {
+    display: none !important;
+}
+
+.rollback-order-btn-visible {
+    display: flex !important;
+}
+
+.edit-btn-hidden {
+    display: none !important;
+}
+
+.edit-btn-visible {
+    display: flex !important;
+}
+
+.delete-btn-hidden {
+    display: none !important;
+}
+
+.delete-btn-visible {
+    display: flex !important;
+}

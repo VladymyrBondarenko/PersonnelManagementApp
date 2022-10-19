@@ -11,6 +11,7 @@
 @using Refit
 @using System.Text.RegularExpressions
 @using System.ComponentModel.DataAnnotations
+@using static PersonnelManagement.WebClient.Pages.Employees.Employees
 @using static PersonnelManagement.WebClient.Pages.Orders.OrdersDescription
 @using static PersonnelManagement.WebClient.Pages.OrgStruct.Departments
 @using static PersonnelManagement.WebClient.Pages.OrgStruct.Positions
@@ -19,6 +20,7 @@
 @inject IOrderManager orderManager
 @inject IDialogService dialogService
 @inject IMapper mapper
+@inject ISnackbar snackBar
 
 @page "/orders"
 
@@ -30,7 +32,7 @@
                     <MudNavMenu Rounded="true" Margin="Margin.Dense" Color="Color.Primary" Class="pa-2" Style="width: 100%">
                         @foreach(var record in OrderDescModels)
                         {
-                            <MudNavLink OnClick="@(() => SelectOrderDesc(record.Id))" Icon="@getIcon(record)">@record.OrderDescriptionTitle</MudNavLink>
+                            <MudNavLink Class="@GetOrderDescClass(record)" OnClick="@(() => SelectOrderDesc(record))" Icon="@GetIcon(record)">@record.OrderDescriptionTitle</MudNavLink>
                         }
                     </MudNavMenu>
                 </MudPaper>
@@ -67,18 +69,12 @@
                             <MudTd DataLabel="Position">@context.Position?.PositionTitle</MudTd>
                             <MudTd DataLabel="DateFrom">@context.DateFrom?.ToShortDateString()</MudTd>
                             <MudTd DataLabel="DateTo">@context.DateTo?.ToShortDateString()</MudTd>
-                            <MudTd>
-                                <div class="orderdesc-edit-btn">
-                                    <MudIconButton OnClick="@(() => EditRow(context))" ButtonType="MudBlazor.ButtonType.Button" 
-                                        Icon="@Icons.Material.Filled.Edit" aria-label="edit"></MudIconButton>
-                                </div>
-                            </MudTd>
-                            <MudTd>
-                                <div class="orderdesc-delete-btn">
-                                    <MudIconButton OnClick="@(() => DeleteRow(context))" ButtonType="MudBlazor.ButtonType.Button" 
-                                        Icon="@Icons.Material.Filled.Delete" aria-label="delete"></MudIconButton>
-                                </div>
-                            </MudTd>
+                            <MudMenu Icon="@Icons.Material.Filled.MoreVert">
+                                <MudMenuItem Class="@GetAcceptOrderClass(context)" OnClick="@(() => AcceptOrder(context))" Icon="@Icons.Filled.Check">Accept</MudMenuItem>
+                                <MudMenuItem Class="@GetRollbackOrderClass(context)" OnClick="@(() => RollbackOrder(context))" Icon="@Icons.Filled.Cancel">Rollback</MudMenuItem>
+                                <MudMenuItem Class="@GetEditRowClass(context)" OnClick="@(() => EditRow(context))" Icon="@Icons.Material.Filled.Edit">Edit</MudMenuItem>
+                                <MudMenuItem Class="@GetDeleteRowClass(context)" OnClick="@(() => DeleteRow(context))" Icon="@Icons.Material.Filled.Delete">Delete</MudMenuItem>
+                            </MudMenu>
                         </RowTemplate>
                         <PagerContent>
                             <MudTablePager PageSizeOptions="pageSizeOptions" />
@@ -94,8 +90,8 @@
     private string searchItem = "";
     private int[] pageSizeOptions = new int[] { 5, 10, 15 };
     private bool isOpen;
-    private OrderModel selectedOrder = null;
-    private Guid selectedOrderDescId;
+    private OrderModel selectedOrder;
+    private OrderDescriptionModel selectedOrderDesc;
 
     public class OrderModel
     {
@@ -131,6 +127,12 @@
 
         public Guid? OrderDescriptionId { get; set; }
 
+        public Guid? EmployeeId { get; set; }
+
+        [Display(Name = "Emplpoyee")]
+        [Required]
+        public EmployeeModel Employee { get; set; }
+
         public OrderState OrderState { get; set; }
     }
 
@@ -142,7 +144,7 @@
     {
         await LoadDescriptionsData();
 
-        await SelectOrderDesc(OrderDescModels.FirstOrDefault()?.Id ?? default);
+        await SelectOrderDesc(OrderDescModels.FirstOrDefault());
     }
 
     private async Task LoadDescriptionsData()
@@ -164,35 +166,91 @@
 
     private async Task AddRow()
     {
-        var parameters = new DialogParameters 
-        { 
-            ["OrderModel"] = new OrderModel(),
-            ["OrderDescId"] = selectedOrderDescId
-        };
+        DialogResult result = null;
 
-        var dialog = dialogService.Show<AddOrderDialog>("Add order", parameters);
+        if(selectedOrderDesc?.OrderType == OrderType.HireOrder)
+        {
+            var parameters = new DialogParameters 
+            { 
+                ["OrderModel"] = new OrderModel(),
+                ["OrderDescId"] = selectedOrderDesc?.Id
+            };
 
-        var result = await dialog.Result;
+            var dialog = dialogService.Show<AddHireOrderDialog>("Add hire order", parameters);
+            result = await dialog.Result;
+        }
+        else if(selectedOrderDesc?.OrderType == OrderType.FireOrder)
+        {
+            var parameters = new DialogParameters 
+            { 
+                ["OrderModel"] = new OrderModel(),
+                ["OrderDescId"] = selectedOrderDesc?.Id
+            };
+
+            var dialog = dialogService.Show<AddFireOrderDialog>("Add fire order", parameters);
+            result = await dialog.Result;
+        }
+
         if (!result.Cancelled)
         {
             await Reset();
         }
     }
 
+    private string GetEditRowClass(OrderModel order)
+    {
+        if(order.OrderState == OrderState.Accepted)
+        {
+            return "edit-btn-hidden";
+        }
+        else
+        {
+            return "edit-btn-visible";
+        }
+    }
+
     private async Task EditRow(OrderModel element)
     {
-        var parameters = new DialogParameters 
-        { 
-            ["OrderModel"] = element,
-            ["OrderDescId"] = selectedOrderDescId
-        };
+         DialogResult result = null;
 
-        var dialog = dialogService.Show<AddOrderDialog>("Edit order", parameters);
+        if(selectedOrderDesc?.OrderType == OrderType.HireOrder)
+        {
+            var parameters = new DialogParameters 
+            { 
+                ["OrderModel"] = element,
+                ["OrderDescId"] = selectedOrderDesc?.Id
+            };
 
-        var result = await dialog.Result;
+            var dialog = dialogService.Show<AddHireOrderDialog>("Edit hire order", parameters);
+            result = await dialog.Result;
+        }
+        else if(selectedOrderDesc?.OrderType == OrderType.FireOrder)
+        {
+            var parameters = new DialogParameters 
+            { 
+                ["OrderModel"] = element,
+                ["OrderDescId"] = selectedOrderDesc?.Id
+            };
+
+            var dialog = dialogService.Show<AddFireOrderDialog>("Edit fire order", parameters);
+            result = await dialog.Result;
+        }
+
         if (!result.Cancelled)
         {
             await Reset();
+        }
+    }
+
+    private string GetDeleteRowClass(OrderModel order)
+    {
+        if(order.OrderState == OrderState.Accepted)
+        {
+            return "delete-btn-hidden";
+        }
+        else
+        {
+            return "delete-btn-visible";
         }
     }
 
@@ -212,19 +270,89 @@
         }
     }
 
-    private async Task SelectOrderDesc(Guid orderDescId)
+    private string GetAcceptOrderClass(OrderModel order)
     {
-        selectedOrderDescId = orderDescId;
+        if(order.OrderState == OrderState.Accepted)
+        {
+            return "accept-order-btn-hidden";
+        }
+        else
+        {
+            return "accept-order-btn-visible";
+        }
+    }
+
+    private async Task AcceptOrder(OrderModel order)
+    {
+        var response = await orderManager.AcceptOrder(order.Id);
+
+        var data = response?.Content?.Data;
+        if(data != null)
+        {
+            var success = data.Success;
+
+            if (success)
+            {
+                await Reset();
+
+                snackBar.Add("Order is accepted", Severity.Success);
+            }
+            else
+            {
+                snackBar.Add("Order cannot be accepted", Severity.Error);
+            }
+        }
+    }
+
+    private string GetRollbackOrderClass(OrderModel order)
+    {
+        if(order.OrderState == OrderState.Accepted)
+        {
+            return "rollback-order-btn-visible";
+        }
+        else
+        {
+            return "rollback-order-btn-hidden";
+        }
+    }
+
+    private async Task RollbackOrder(OrderModel order)
+    {
+        var response = await orderManager.RollbackOrder(order.Id);
+
+        var data = response?.Content?.Data;
+        if(data != null)
+        {
+            var success = data.Success;
+
+            if (success)
+            {
+                await Reset();
+
+                snackBar.Add("Order is rollback", Severity.Success);
+            }
+            else
+            {
+                snackBar.Add("Order cannot be rollback", Severity.Error);
+            }
+        }
+    }
+
+    private async Task SelectOrderDesc(OrderDescriptionModel orderDesc)
+    {
+        selectedOrderDesc = orderDesc;
         await FilterFunc();
+
+        StateHasChanged();
     }
 
     private async Task<TableData<OrderModel>> LoadOrdersData(TableState state)
     {
         var grid = new TableData<OrderModel>();
 
-        if(selectedOrderDescId != default)
+        if(selectedOrderDesc?.Id != null)
         {
-            var query = new GetAllOrdersQuery { SearchText = searchItem, OrderDescriptionId = selectedOrderDescId };
+            var query = new GetAllOrdersQuery { SearchText = searchItem, OrderDescriptionId = selectedOrderDesc.Id };
 
             var response = await orderManager.GetAllAsync(new Contracts.v1.Requests.PaginationQueryRequest 
             { 
@@ -253,7 +381,19 @@
         return base.OnAfterRenderAsync(firstRender);
     }
 
-    private string getIcon(OrderDescriptionModel orderDesc)
+    private string GetOrderDescClass(OrderDescriptionModel orderDesc)
+    {
+        if(orderDesc.Id == selectedOrderDesc?.Id)
+        {
+            return "orderdesc-link-selected";
+        }
+        else
+        {
+            return "orderdesc-link-not-selected";
+        }
+    }
+
+    private string GetIcon(OrderDescriptionModel orderDesc)
     {
         // maybe later add logic to add icon to order description, for now constant
         var icon = orderDesc.OrderType switch

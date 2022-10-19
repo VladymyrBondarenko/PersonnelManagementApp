@@ -47,5 +47,17 @@ namespace PersonnelManagement.WebClient.Infrastructure.Managers.Orders
         {
             return await _orderService.DeleteAsync(id);
         }
+
+        public async Task<ApiResponse<Response<AcceptOrderSuccessResponse>>> AcceptOrder(Guid orderId)
+        {
+            var response = await _orderService.AcceptOrder(orderId);
+            return response;
+        }
+
+        public async Task<ApiResponse<Response<AcceptOrderSuccessResponse>>> RollbackOrder(Guid orderId)
+        {
+            var response = await _orderService.RollbackOrder(orderId);
+            return response;
+        }
     }
 }

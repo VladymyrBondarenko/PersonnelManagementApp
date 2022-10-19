@@ -24,7 +24,8 @@ namespace PersonnelManagement.Infrastracture.Orders.OrderBase.Models
             if (Order?.Employee != null)
             {
                 Order.Employee.EmployeeState = EmployeeState.Fired;
-                if(await _employeeService.UpdateAsync(Order.Employee))
+                Order.Employee.FireDate = Order.DateFrom;
+                if (await _employeeService.UpdateAsync(Order.Employee))
                 {
                     Order.OrderState = OrderState.Accepted;
                     return await _orderRepository.UpdateAsync(Order);
@@ -41,6 +42,7 @@ namespace PersonnelManagement.Infrastracture.Orders.OrderBase.Models
             if (Order?.Employee != null)
             {
                 Order.Employee.EmployeeState = EmployeeState.Hired;
+                Order.Employee.FireDate = default;
                 if (await _employeeService.UpdateAsync(Order.Employee))
                 {
                     Order.OrderState = toProject ? OrderState.Project : OrderState.Canceled;

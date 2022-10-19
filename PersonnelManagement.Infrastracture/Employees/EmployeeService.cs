@@ -4,6 +4,8 @@ using PersonnelManagement.Application.Employees;
 using PersonnelManagement.Application.FileOperations.Originals;
 using PersonnelManagement.Application.Orders.Interfaces;
 using PersonnelManagement.Domain.Employees;
+using PersonnelManagement.Domain.Models;
+using PersonnelManagement.Domain.Models.Filters;
 using PersonnelManagement.Domain.Models.Originals;
 
 namespace PersonnelManagement.Infrastracture.Employees
@@ -17,6 +19,43 @@ namespace PersonnelManagement.Infrastracture.Employees
         {
             _dbContext = dbContext;
             _originalService = originalService;
+        }
+
+        public async Task<int> GetEmployeesAmountAsync()
+        {
+            return await _dbContext.Employees.CountAsync();
+        }
+
+        public async Task<List<Employee>> GetAllAsync(PaginationQuery paginationFilter = null, GetAllEmployeesFilter filter = null)
+        {
+            var queryable = _dbContext.Employees
+                .Include(x => x.Department)
+                .Include(x => x.Position)
+                .Include(x => x.Orders)
+                .Include(x => x.Originals).AsQueryable();
+
+            if (filter != null)
+            {
+                queryable = addFiltersOnQuery(filter, queryable);
+            }
+
+            if (paginationFilter == null || paginationFilter.PageSize < 1 || paginationFilter.PageNumber < 1)
+            {
+                return await queryable.ToListAsync();
+            }
+
+            var skip = (paginationFilter.PageNumber - 1) * paginationFilter.PageSize;
+            return await queryable
+                .Skip(skip).Take(paginationFilter.PageSize).ToListAsync();
+        }
+
+        public async Task<List<Employee>> GetAllAsync()
+        {
+            return await _dbContext.Employees
+                .Include(x => x.Department)
+                .Include(x => x.Position)
+                .Include(x => x.Orders)
+                .Include(x => x.Originals).ToListAsync();
         }
 
         public async Task<Employee> CreateAsync(Employee employee)
@@ -64,18 +103,25 @@ namespace PersonnelManagement.Infrastracture.Employees
             return await _dbContext.SaveChangesAsync() > 0;
         }
 
-        public async Task<bool> DeleteAsync(Employee employee)
+        public async Task<bool> DeleteAsync(Guid employeeId)
         {
-            var exists = _dbContext.Employees.Any(x => x.Id == employee.Id);
+            var employee = await _dbContext.Employees.FindAsync(employeeId);
 
-            if (!exists)
+            if (employee == null)
             {
                 return false;
             }
 
             _dbContext.Employees.Remove(employee);
 
-            return await _dbContext.SaveChangesAsync() > 0;
+            try
+            {
+                return await _dbContext.SaveChangesAsync() > 0;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         public async Task<Employee> GetAsync(Guid id)
@@ -112,6 +158,21 @@ namespace PersonnelManagement.Infrastracture.Employees
 
             var origDeleted = await _originalService.DeleteOriginalAsync(original);
             return origDeleted;
+        }
+
+        private static IQueryable<Employee> addFiltersOnQuery(GetAllEmployeesFilter filter, IQueryable<Employee> queryable)
+        {
+            if (!string.IsNullOrWhiteSpace(filter.SearchText))
+            {
+                var text = filter.SearchText;
+                queryable = queryable.Where(x =>
+                    x.FirstName.Contains(text) ||
+                    x.LastName.Contains(text) ||
+                    (x.Department != null ? x.Department.DepartmentTitle.Contains(text) : false) ||
+                    (x.Position != null ? x.Position.PositionTitle.Contains(text) : false));
+            }
+
+            return queryable;
         }
     }
 }

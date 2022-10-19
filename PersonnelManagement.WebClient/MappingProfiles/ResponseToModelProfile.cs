@@ -1,10 +1,12 @@
 ﻿using AutoMapper;
 using PersonnelManagement.Contracts.v1.Requests.Queries;
 using PersonnelManagement.Contracts.v1.Responses.Departments;
+using PersonnelManagement.Contracts.v1.Responses.Employees;
 using PersonnelManagement.Contracts.v1.Responses.Orders;
 using PersonnelManagement.Contracts.v1.Responses.OrdersDescription;
 using PersonnelManagement.Contracts.v1.Responses.Positions;
 using PersonnelManagement.Domain.Orders;
+using static PersonnelManagement.WebClient.Pages.Employees.Employees;
 using static PersonnelManagement.WebClient.Pages.Orders.Orders;
 using static PersonnelManagement.WebClient.Pages.Orders.OrdersDescription;
 using static PersonnelManagement.WebClient.Pages.OrgStruct.Departments;
@@ -31,38 +33,41 @@ namespace PersonnelManagement.WebClient.MappingProfiles
                         FirstName = x.FirstName,
                         LastName = x.LastName,
                         OrderState = x.OrderState,
-                        OrderDescriptionId = x.OrderDescriptionId,
-                        //OrderDescription = new OrderDescriptionModel
-                        //{
-                        //    Id = x.OrderDescriptionId,
-                        //    OrderDescriptionTitle = x.OrderDescription.OrderDescriptionTitle,
-                        //    OrderType = x.OrderDescription.OrderType
-                        //}
+                        OrderDescriptionId = x.OrderDescriptionId
                     }));
                 });
 
             CreateMap<GetOrderResponse, OrderModel>()
                 .ForMember(x => x.Position, opt =>
                 {
-                    opt.MapFrom(src => new GetPositionResponse { Id = src.Id, PositionTitle = src.Position.PositionTitle });
+                    opt.MapFrom(src => new PositionModel { Id = src.Id, PositionTitle = src.Position.PositionTitle });
                 })
                 .ForMember(x => x.Department, opt =>
                 {
-                    opt.MapFrom(src => new GetDepartmentResponse { Id = src.Department.Id, DepartmentTitle = src.Department.DepartmentTitle });
+                    opt.MapFrom(src => new DepartmentModel { Id = src.Department.Id, DepartmentTitle = src.Department.DepartmentTitle });
+                })
+                .ForMember(x => x.Employee, opt =>
+                {
+                    opt.MapFrom(src => new EmployeeModel 
+                    { 
+                        Id = src.Employee != null ? src.Employee.Id : default,
+                        DepartmentId = src.DepartmentId,
+                        Department = src.Department != null ? new DepartmentModel { Id = src.Department.Id, DepartmentTitle = src.Department.DepartmentTitle } : default,
+                        PositionId = src.PositionId,
+                        Position = src.Position != null ? new PositionModel { Id = src.Position.Id, PositionTitle = src.Position.PositionTitle } : default,
+                        EmployeeState = src.Employee != null ? src.Employee.EmployeeState : default,
+                        FirstName = src.Employee != null ? src.Employee.FirstName : default,
+                        LastName = src.Employee != null ? src.Employee.LastName : default,
+                        FireDate = src.Employee != null ? src.Employee.FireDate : default,
+                        HireDate = src.Employee != null ? src.Employee.HireDate : default
+                    });
                 });
-                //.ForMember(x => x.OrderDescription, opt =>
-                //{
-                //    opt.MapFrom(src => new OrderDescriptionModel
-                //    {
-                //        Id = src.OrderDescriptionId,
-                //        OrderDescriptionTitle = src.OrderDescription.OrderDescriptionTitle,
-                //        OrderType = src.OrderDescription.OrderType
-                //    });
-                //});
 
             CreateMap<GetDepartmentResponse, DepartmentModel>();
 
             CreateMap<GetPositionResponse, PositionModel>();
+
+            CreateMap<GetEmployeeResponse, EmployeeModel>();
         }
     }
 }

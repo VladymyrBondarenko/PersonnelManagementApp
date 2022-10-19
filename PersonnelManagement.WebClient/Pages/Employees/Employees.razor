@@ -1,0 +1,174 @@
+﻿@page "/employees"
+
+@using System.ComponentModel.DataAnnotations
+@using AutoMapper
+@using PersonnelManagement.Contracts.v1.Requests.Queries
+@using PersonnelManagement.Domain.Employees
+@using PersonnelManagement.Domain.Orders
+@using PersonnelManagement.WebClient.Infrastructure.Managers.Employees
+@using PersonnelManagement.WebClient.Infrastructure.Managers.Orders
+@using PersonnelManagement.WebClient.Pages.Dialogs.Orders
+@using static PersonnelManagement.WebClient.Pages.OrgStruct.Positions
+@using static PersonnelManagement.WebClient.Pages.OrgStruct.Departments
+@using static PersonnelManagement.WebClient.Pages.Orders.Orders
+
+@inject IEmployeeManager employeeManager
+@inject IMapper mapper
+@inject IDialogService dialogService
+
+<div class="orderdesc-add-btn">
+    <MudButton OnClick="@AddRow" Color="@Color.Success" Class="add-item-btn">Add Employee</MudButton>
+</div>
+
+<MudTable ServerData="@(new Func<TableState, Task<TableData<EmployeeModel>>>(LoadData))" Dense="true" @ref="table" 
+        Hover="true" Bordered="true" Striped="true" @bind-SelectedItem="selectedItem">
+    <ToolBarContent>
+        <MudText Typo="Typo.h6"></MudText>
+        <MudSpacer />
+        <MudTextField TextChanged="@(() => FilterFunc())" @bind-Value="searchItem" Placeholder="Search" 
+            Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" 
+            IconSize="Size.Medium" Class="mt-0"></MudTextField>
+    </ToolBarContent>
+    <HeaderContent>
+        <MudTh>Employee State</MudTh>
+        <MudTh>First Name</MudTh>
+        <MudTh>Last Name</MudTh>
+        <MudTh>Department</MudTh>
+        <MudTh>Position</MudTh>
+        <MudTh>Hire Date</MudTh>
+        <MudTh>Fire Date</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="OrderState">@context.EmployeeState</MudTd>
+        <MudTd DataLabel="FirstName">@context.FirstName</MudTd>
+        <MudTd DataLabel="LastName">@context.LastName</MudTd>
+        <MudTd DataLabel="Department">@context.Department?.DepartmentTitle</MudTd>
+        <MudTd DataLabel="Position">@context.Position?.PositionTitle</MudTd>
+        <MudTd DataLabel="DateFrom">@context.HireDate?.ToShortDateString()</MudTd>
+        <MudTd DataLabel="DateTo">@context.FireDate?.ToShortDateString()</MudTd>
+    </RowTemplate>
+    <PagerContent>
+        <MudTablePager PageSizeOptions="pageSizeOptions" />
+    </PagerContent>
+</MudTable>
+
+@code {
+
+    private string searchItem = "";
+    private EmployeeModel selectedItem = null;
+    private int[] pageSizeOptions = new int[] { 5, 10, 15 };
+    private bool isOpen;
+
+    private MudTable<EmployeeModel> table;
+
+    public class EmployeeModel
+    {
+        public Guid Id { get; set; }
+
+        [Display(Name = "First Name")]
+        [Required]
+        public string FirstName { get; set; }
+
+        [Display(Name = "Last Name")]
+        [Required]
+        public string LastName { get; set; }
+
+        [Display(Name = "Hire Date")]
+        [Required]
+        public DateTime? HireDate { get; set; }
+
+        [Display(Name = "Fire Date")]
+        public DateTime? FireDate { get; set; }
+
+        [Display(Name = "Department")]
+        [Required]
+        public DepartmentModel Department { get; set; }
+
+        public Guid? DepartmentId { get; set; }
+
+        [Display(Name = "Position")]
+        [Required]
+        public PositionModel Position { get; set; }
+
+        public Guid? PositionId { get; set; }
+
+        public EmployeeState EmployeeState { get; set; }
+    }
+
+    private async Task FilterFunc()
+    {
+        await Reset();
+    }
+
+    private async Task AddRow()
+    {
+        //var parameters = new DialogParameters { ["model"] = new OrderDescriptionModel() };
+        //var dialog = dialogService.Show<AddOrderDescriptionDialog>("Add order description", parameters);
+
+        //var result = await dialog.Result;
+        //if (!result.Cancelled)
+        //{
+        //    await Reset();
+        //}
+    }
+
+    private async Task EditRow(EmployeeModel model)
+    {
+        //var parameters = new DialogParameters { ["model"] = model };
+        //var dialog = dialogService.Show<AddOrderDescriptionDialog>("Edit order description", parameters);
+
+        //var result = await dialog.Result;
+        //if (!result.Cancelled)
+        //{
+        //    await Reset();
+        //}
+    }
+
+    private async Task DeleteRow(EmployeeModel model)
+    {
+        //var parameters = new DialogParameters { ["model"] = model };
+        //var dialog = dialogService.Show<DeleteOrderDescriptionDialog>("Delete order description", parameters);
+
+        //var result = await dialog.Result;
+        //if(!result.Cancelled)
+        //{
+        //    await Reset();
+        //}
+    }
+
+    private async Task<TableData<EmployeeModel>> LoadData(TableState state)
+    {
+        GetAllEmployeesQuery query = null;
+
+        if (!string.IsNullOrWhiteSpace(searchItem))
+        {
+            query = new GetAllEmployeesQuery { SearchText = searchItem };
+        }
+
+        var response = await employeeManager.GetAllAsync(new Contracts.v1.Requests.PaginationQueryRequest 
+            { 
+                PageNumber = state.Page + 1, PageSize = state.PageSize 
+            }, query);
+
+        var data = response.Content?.Data?.ToList();
+
+        var grid = new TableData<EmployeeModel>();
+        if(data != null)
+        {
+            grid.Items = mapper.Map<List<EmployeeModel>>(data);
+            grid.TotalItems = response.Content.TotalAmount;
+        }
+        return grid;
+    }
+
+    private async Task Reset()
+    {
+        await table.ReloadServerData();
+    }
+
+    protected override Task OnAfterRenderAsync(bool firstRender)
+    {
+        table.SetRowsPerPage(5);
+        return base.OnAfterRenderAsync(firstRender);
+    }
+}

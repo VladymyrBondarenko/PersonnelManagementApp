@@ -42,12 +42,14 @@ Features. Iteration 4:
 1. Add ui to departments with pagination + crud +
 2. Add ui to positions with pagination + crud +
 3. Add ui to orders/order descriptions +
-4. Add ui to employees
-5. Add logic for accept/rollback hire/fire orders
+4. Add ui to employees +
+5. Add logic for accept/rollback hire/fire orders +
+6. Add ui to add files to orders
+7. Add logic to move files from orders to employees when accepting order
 
 Features. Iteration 4:
 
-// Add validations to api
+// Add validations/middleware to handle exceptions to api
 
 Features. Iteration 6: 
 
