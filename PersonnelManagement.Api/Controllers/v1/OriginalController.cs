@@ -90,6 +90,20 @@ namespace PersonnelManagement.Server.Controllers.v1
                 Bytes = System.IO.File.ReadAllBytes(filePath)
             });
 
+            if(original == null)
+            {
+                return BadRequest(new ErrorResponse
+                {
+                    Errors = new List<ErrorModel>
+                    {
+                        new ErrorModel
+                        {
+                            Message = "The attachment was not added."
+                        }
+                    }
+                });
+            }
+
             System.IO.File.Delete(filePath);
 
             var response = _mapper.Map<GetOriginalResponse>(original);
@@ -113,7 +127,7 @@ namespace PersonnelManagement.Server.Controllers.v1
                 }
             }
 
-            return BadRequest();
+            return NotFound();
         }
 
         // DELETE api/originals/5

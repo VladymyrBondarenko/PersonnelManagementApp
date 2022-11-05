@@ -71,7 +71,16 @@ namespace PersonnelManagement.Api.Controllers.v1
 
             if(createdOrder == null)
             {
-                return BadRequest();
+                return BadRequest(new ErrorResponse
+                {
+                    Errors = new List<ErrorModel>
+                    {
+                        new ErrorModel
+                        {
+                            Message = "The order was not created."
+                        }
+                    }
+                });
             }
 
             var response = _mapper.Map<GetOrderResponse>(createdOrder.Order);
@@ -91,7 +100,7 @@ namespace PersonnelManagement.Api.Controllers.v1
 
             if (order == null)
             {
-                return BadRequest();
+                return NotFound();
             }
 
             var success = await order.AcceptOrderAsync();
@@ -151,7 +160,7 @@ namespace PersonnelManagement.Api.Controllers.v1
 
             if (order == null)
             {
-                return BadRequest();
+                return NotFound();
             }
 
             var success = await order.RollbackOrderAsync();
@@ -159,40 +168,5 @@ namespace PersonnelManagement.Api.Controllers.v1
             var response = new AcceptOrderSuccessResponse { Success = success };
             return Ok(new Response<AcceptOrderSuccessResponse>(response));
         }
-
-        ///// <summary>
-        ///// POST api/orders/originals/add/5
-        ///// Attach file to order
-        ///// </summary>
-        ///// <param name="orderId"></param>
-        ///// <returns></returns>
-        //[HttpPost(ApiRoutes.Orders.AttachFileToOrder)]
-        //public async Task<IActionResult> AttachFileToOrder(Guid orderId, [FromForm] IFormFile file)
-        //{
-        //    if (file == null || orderId == Guid.Empty) // move to request validator
-        //    {
-        //        return BadRequest();
-        //    }
-
-        //    string executableLocation = Path.GetDirectoryName(
-        //       Assembly.GetExecutingAssembly().Location);
-        //    var filePath = Path.Combine(executableLocation, file.FileName);
-
-        //    using var stream = System.IO.File.Create(filePath);
-        //    file.CopyTo(stream);
-        //    stream.Close();
-
-        //    var original = await _orderService.AddOriginalAsync(new OriginalCreateParams 
-        //    { 
-        //        FileName = file.FileName, 
-        //        OrderId = orderId,
-        //        Bytes = System.IO.File.ReadAllBytes(filePath)
-        //    });
-
-        //    System.IO.File.Delete(filePath);
-
-        //    var response = new AttachFileSuccessResponse { Success = original != null };
-        //    return Ok(new Response<AttachFileSuccessResponse>(response));
-        //}
     }
 }

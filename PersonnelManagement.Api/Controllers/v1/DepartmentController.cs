@@ -70,8 +70,16 @@ namespace PersonnelManagement.Api.Controllers.v1
 
             if(createdDepartment == null)
             {
-                // TODO : return some error text
-                return BadRequest();
+                return BadRequest(new ErrorResponse
+                {
+                    Errors = new List<ErrorModel>
+                    {
+                        new ErrorModel
+                        {
+                            Message = "The department was not created."
+                        }
+                    }
+                });
             }
 
             var response = _mapper.Map<GetDepartmentResponse>(createdDepartment);

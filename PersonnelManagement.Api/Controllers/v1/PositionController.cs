@@ -69,6 +69,20 @@ namespace PersonnelManagement.Api.Controllers.v1
             var position = _mapper.Map<Position>(createRequest);
             var createdPosition = await _positionService.CreateAsync(position);
 
+            if(createdPosition == null)
+            {
+                return BadRequest(new ErrorResponse
+                {
+                    Errors = new List<ErrorModel>
+                    {
+                        new ErrorModel
+                        {
+                            Message = "The position was not created."
+                        }
+                    }
+                });
+            }
+
             var response = _mapper.Map<GetPositionResponse>(createdPosition);
             return Created(_uriService.GetPositionUri(createdPosition.Id.ToString()), 
                 new Response<GetPositionResponse>(response));

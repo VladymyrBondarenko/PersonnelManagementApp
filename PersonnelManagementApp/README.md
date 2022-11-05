@@ -73,3 +73,5 @@ Some ideas:
 
 // Add feature to add image of employee as original
 // Add progress bar to ui when waiting for response
+// Add buttons to go to previous page
+// Add ability to bind user account to employee

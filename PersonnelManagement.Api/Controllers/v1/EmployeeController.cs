@@ -65,7 +65,16 @@ namespace PersonnelManagement.Server.Controllers.v1
 
             if (createdEmployee == null)
             {
-                return BadRequest();
+                return BadRequest(new ErrorResponse
+                {
+                    Errors = new List<ErrorModel>
+                    {
+                        new ErrorModel
+                        {
+                            Message = "The employee was not created."
+                        }
+                    }
+                });
             }
 
             var response = _mapper.Map<GetEmployeeResponse>(createdEmployee);

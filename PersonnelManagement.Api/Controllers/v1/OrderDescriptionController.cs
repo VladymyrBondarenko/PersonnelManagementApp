@@ -67,6 +67,20 @@ namespace PersonnelManagement.Api.Controllers.v1
             var orderDesc = _mapper.Map<OrderDescription>(createRequest);
             var createdOrderDesc = await _orderDescriptionService.CreateAsync(orderDesc);
 
+            if(createdOrderDesc == null)
+            {
+                return BadRequest(new ErrorResponse
+                {
+                    Errors = new List<ErrorModel>
+                    {
+                        new ErrorModel
+                        {
+                            Message = "The order description was not created."
+                        }
+                    }
+                });
+            }
+
             var response = _mapper.Map<GetOrderDescriptionResponse>(createdOrderDesc);
             return Created(_uriService.GetOrderDescriptionUri(createdOrderDesc.Id.ToString()), 
                 new Response<GetOrderDescriptionResponse>(response));
