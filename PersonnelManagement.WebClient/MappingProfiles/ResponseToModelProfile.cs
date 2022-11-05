@@ -79,7 +79,17 @@ namespace PersonnelManagement.WebClient.MappingProfiles
 
             CreateMap<GetPositionResponse, PositionModel>();
 
-            CreateMap<GetEmployeeResponse, EmployeeModel>();
+            CreateMap<GetEmployeeResponse, EmployeeModel>()
+                .ForMember(x => x.Originals, opt =>
+                {
+                    opt.MapFrom(src => src.Originals.Select(x => new OriginalModel
+                    {
+                        Id = x.Id,
+                        OriginalFileExtension = x.OriginalFileExtension,
+                        OriginalTitle = x.OriginalTitle,
+                        OriginalPath = x.OriginalPath
+                    }));
+                });
 
             CreateMap<GetOriginalResponse, OriginalModel>();
         }

@@ -4,17 +4,20 @@
 @using AutoMapper
 @using PersonnelManagement.Contracts.v1.Requests.Queries
 @using PersonnelManagement.Domain.Employees
-@using PersonnelManagement.Domain.Orders
+@using PersonnelManagement.Domain.Models.Originals
 @using PersonnelManagement.WebClient.Infrastructure.Managers.Employees
-@using PersonnelManagement.WebClient.Infrastructure.Managers.Orders
-@using PersonnelManagement.WebClient.Pages.Dialogs.Orders
+@using PersonnelManagement.WebClient.Infrastructure.Managers.Originals
+@using Refit
+@using static PersonnelManagement.WebClient.Pages.Originals.Originals
 @using static PersonnelManagement.WebClient.Pages.OrgStruct.Positions
 @using static PersonnelManagement.WebClient.Pages.OrgStruct.Departments
-@using static PersonnelManagement.WebClient.Pages.Orders.Orders
 
 @inject IEmployeeManager employeeManager
 @inject IMapper mapper
-@inject IDialogService dialogService
+@inject IOriginalManager originalService
+@inject ISnackbar snackBar
+@inject IJSRuntime jsRuntime
+@inject NavigationManager navManager
 
 <div class="orderdesc-add-btn">
     <MudButton OnClick="@AddRow" Color="@Color.Success" Class="add-item-btn">Add Employee</MudButton>
@@ -46,6 +49,20 @@
         <MudTd DataLabel="Position">@context.Position?.PositionTitle</MudTd>
         <MudTd DataLabel="DateFrom">@context.HireDate?.ToShortDateString()</MudTd>
         <MudTd DataLabel="DateTo">@context.FireDate?.ToShortDateString()</MudTd>
+        <MudTd>
+            <InputFile id="@($"fileInput-{context.Id}")" OnChange="@((e) => AddOriginal(e, context))" hidden />
+            <MudFab id="@($"add-orig-btn-{context.Id}")" HtmlTag="label" for="@($"fileInput-{context.Id}")" hidden/>
+            <MudMenu Icon="@Icons.Material.Filled.MoreVert">
+                <div onclick="@($"document.getElementById('add-orig-btn-{context.Id}').click()")">
+                    <MudMenuItem Class="@GetAddOriginalItemClass(context)" Icon="@Icons.Material.Filled.AttachFile">
+                        Add Original
+                    </MudMenuItem>
+                </div>
+                <MudMenuItem Class="@GetViewOriginalItemClass(context)" OnClick="@(() => ViewOriginals(context))" Icon="@Icons.Material.Filled.AttachFile">
+                    View Originals
+                </MudMenuItem>
+            </MudMenu>
+        </MudTd>
     </RowTemplate>
     <PagerContent>
         <MudTablePager PageSizeOptions="pageSizeOptions" />
@@ -93,6 +110,8 @@
         public Guid? PositionId { get; set; }
 
         public EmployeeState EmployeeState { get; set; }
+
+        public List<OriginalModel> Originals { get; set; }
     }
 
     private async Task FilterFunc()
@@ -102,38 +121,84 @@
 
     private async Task AddRow()
     {
-        //var parameters = new DialogParameters { ["model"] = new OrderDescriptionModel() };
-        //var dialog = dialogService.Show<AddOrderDescriptionDialog>("Add order description", parameters);
-
-        //var result = await dialog.Result;
-        //if (!result.Cancelled)
-        //{
-        //    await Reset();
-        //}
+        //todo
     }
 
     private async Task EditRow(EmployeeModel model)
     {
-        //var parameters = new DialogParameters { ["model"] = model };
-        //var dialog = dialogService.Show<AddOrderDescriptionDialog>("Edit order description", parameters);
-
-        //var result = await dialog.Result;
-        //if (!result.Cancelled)
-        //{
-        //    await Reset();
-        //}
+        //todo
     }
 
     private async Task DeleteRow(EmployeeModel model)
     {
-        //var parameters = new DialogParameters { ["model"] = model };
-        //var dialog = dialogService.Show<DeleteOrderDescriptionDialog>("Delete order description", parameters);
+        //todo
+    }
 
-        //var result = await dialog.Result;
-        //if(!result.Cancelled)
-        //{
-        //    await Reset();
-        //}
+    private async Task AddOriginal(InputFileChangeEventArgs e, EmployeeModel employee)
+    {
+        if(employee?.Id == default)
+        {
+            return;
+        }
+
+        if (!employee.Originals.Any())
+        {
+            var file = e.File;
+
+            if(file != null)
+            {
+                using var stream = file.OpenReadStream(file.Size);
+
+                var streamPart = new StreamPart(stream, file.Name, "multipart/form-data");
+                var resp = await originalService.CreateAsync((int)OriginalEntity.Employees, employee.Id, streamPart);
+                var data = resp.Content.Data;
+
+                if (data != null)
+                {
+                    await Reset();
+
+                    snackBar.Add("Attachment successfully added!", Severity.Success);
+
+                    navManager.NavigateTo($"/originals/{employee.Id}/{(int)OriginalEntity.Employees}");
+                }
+                else
+                {
+                    snackBar.Add("Attachment cannot be added!", Severity.Error);
+                }
+            }
+        }
+    }
+
+    private void ViewOriginals(EmployeeModel employee)
+    {
+        if (employee.Originals.Any())
+        {
+            navManager.NavigateTo($"/originals/{employee.Id}/{(int)OriginalEntity.Employees}");
+        }
+    }
+
+    private string GetAddOriginalItemClass(EmployeeModel employee)
+    {
+        if (employee.Originals.Any())
+        {
+            return "add-original-item-hidden";
+        }
+        else
+        {
+            return "add-original-item-visible";
+        }
+    }
+
+    private string GetViewOriginalItemClass(EmployeeModel employee)
+    {
+        if (!employee.Originals.Any())
+        {
+            return "view-original-item-hidden";
+        }
+        else
+        {
+            return "view-original-item-visible";
+        }
     }
 
     private async Task<TableData<EmployeeModel>> LoadData(TableState state)

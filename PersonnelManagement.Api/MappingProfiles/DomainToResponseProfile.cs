@@ -64,6 +64,16 @@ namespace PersonnelManagement.Api.MappingProfiles
                             LastName = src.LastName
                         }
                     }));
+                })
+                .ForMember(x => x.Originals, opt =>
+                {
+                    opt.MapFrom(src => src.Originals.Select(x => new GetOriginalResponse
+                    {
+                        Id = x.Id,
+                        OriginalTitle = x.OriginalTitle,
+                        OriginalPath = x.OriginalPath,
+                        OriginalFileExtension = x.OriginalFileExtension
+                    }));
                 });
 
             CreateMap<Order, GetOrderResponse>()
