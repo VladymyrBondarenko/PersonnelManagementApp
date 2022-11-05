@@ -24,9 +24,7 @@ namespace PersonnelManagement.Contracts.v1.Routes
 
             public const string RollbackOrder = BaseUrl + "/orders/rollback/{orderId}";
 
-            public const string AttachFileToOrder = BaseUrl + "/orders/originals/add";
-
-            public const string DeleteOrderAttachment = BaseUrl + "/orders/originals/delete/{orderId}";
+            public const string AttachFileToOrder = BaseUrl + "/orders/{orderId}/originals/add";
         }
     }
 }

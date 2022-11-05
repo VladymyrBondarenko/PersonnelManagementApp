@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PersonnelManagement.Infrastracture.DbContexts;
 
@@ -11,9 +12,11 @@ using PersonnelManagement.Infrastracture.DbContexts;
 namespace PersonnelManagement.Infrastracture.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20221030171510_PersonnelManagementDb_Originals_AddedFileNameField")]
+    partial class PersonnelManagementDbOriginalsAddedFileNameField
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -31,7 +34,7 @@ namespace PersonnelManagement.Infrastracture.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValue(new DateTime(2022, 10, 30, 17, 25, 35, 330, DateTimeKind.Utc).AddTicks(1995));
+                        .HasDefaultValue(new DateTime(2022, 10, 30, 17, 15, 10, 569, DateTimeKind.Utc).AddTicks(8963));
 
                     b.Property<DateTime>("DateFrom")
                         .HasColumnType("datetime2");
@@ -59,9 +62,7 @@ namespace PersonnelManagement.Infrastracture.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("CreatedDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValue(new DateTime(2022, 10, 30, 17, 25, 35, 330, DateTimeKind.Utc).AddTicks(3043));
+                        .HasColumnType("datetime2");
 
                     b.Property<Guid?>("DepartmentId")
                         .HasColumnType("uniqueidentifier");
@@ -100,9 +101,7 @@ namespace PersonnelManagement.Infrastracture.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("CreatedDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValue(new DateTime(2022, 10, 30, 17, 25, 35, 330, DateTimeKind.Utc).AddTicks(3366));
+                        .HasColumnType("datetime2");
 
                     b.Property<Guid?>("EmployeeId")
                         .HasColumnType("uniqueidentifier");
@@ -140,9 +139,7 @@ namespace PersonnelManagement.Infrastracture.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("CreatedDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValue(new DateTime(2022, 10, 30, 17, 25, 35, 330, DateTimeKind.Utc).AddTicks(2610));
+                        .HasColumnType("datetime2");
 
                     b.Property<DateTime>("DateFrom")
                         .HasColumnType("datetime2");
@@ -213,7 +210,7 @@ namespace PersonnelManagement.Infrastracture.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValue(new DateTime(2022, 10, 30, 17, 25, 35, 330, DateTimeKind.Utc).AddTicks(2351));
+                        .HasDefaultValue(new DateTime(2022, 10, 30, 17, 15, 10, 569, DateTimeKind.Utc).AddTicks(9302));
 
                     b.Property<string>("PositionDescription")
                         .HasMaxLength(300)

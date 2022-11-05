@@ -7,6 +7,10 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.InstallServicesInAssembly(builder.Configuration);
 builder.Services.AddAutoMapper(typeof(Program));
+builder.WebHost.ConfigureKestrel(opt => 
+{ 
+    opt.Limits.MaxRequestBodySize = 1048576000; // server handles requests up to 1000MB (maybe move to appsettings)
+});
 
 var app = builder.Build();
 

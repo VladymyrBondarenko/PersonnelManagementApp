@@ -4,6 +4,7 @@ using PersonnelManagement.Contracts.v1.Responses.Departments;
 using PersonnelManagement.Contracts.v1.Responses.Employees;
 using PersonnelManagement.Contracts.v1.Responses.Orders;
 using PersonnelManagement.Contracts.v1.Responses.OrdersDescription;
+using PersonnelManagement.Contracts.v1.Responses.Originals;
 using PersonnelManagement.Contracts.v1.Responses.Positions;
 using PersonnelManagement.Domain.Orders;
 using static PersonnelManagement.WebClient.Pages.Employees.Employees;
@@ -11,6 +12,7 @@ using static PersonnelManagement.WebClient.Pages.Orders.Orders;
 using static PersonnelManagement.WebClient.Pages.Orders.OrdersDescription;
 using static PersonnelManagement.WebClient.Pages.OrgStruct.Departments;
 using static PersonnelManagement.WebClient.Pages.OrgStruct.Positions;
+using static PersonnelManagement.WebClient.Pages.Originals.Originals;
 
 namespace PersonnelManagement.WebClient.MappingProfiles
 {
@@ -61,6 +63,16 @@ namespace PersonnelManagement.WebClient.MappingProfiles
                         FireDate = src.Employee != null ? src.Employee.FireDate : default,
                         HireDate = src.Employee != null ? src.Employee.HireDate : default
                     });
+                })
+                .ForMember(x => x.Originals, opt =>
+                {
+                    opt.MapFrom(src => src.Originals.Select(x => new OriginalModel 
+                    { 
+                        Id = x.Id,
+                        OriginalFileExtension = x.OriginalFileExtension,
+                        OriginalTitle = x.OriginalTitle,
+                        OriginalPath = x.OriginalPath
+                    }));
                 });
 
             CreateMap<GetDepartmentResponse, DepartmentModel>();
@@ -68,6 +80,8 @@ namespace PersonnelManagement.WebClient.MappingProfiles
             CreateMap<GetPositionResponse, PositionModel>();
 
             CreateMap<GetEmployeeResponse, EmployeeModel>();
+
+            CreateMap<GetOriginalResponse, OriginalModel>();
         }
     }
 }

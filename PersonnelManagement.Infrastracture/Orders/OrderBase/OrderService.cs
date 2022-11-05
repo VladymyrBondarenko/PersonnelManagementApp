@@ -11,14 +11,12 @@ namespace PersonnelManagement.Infrastracture.Orders.OrderBase
     {
         private readonly IOrderRepository _orderRepository;
         private readonly IOrderFactory _orderFactory;
-        private readonly IOriginalService _originalService;
+        //private readonly IOriginalService _originalService;
 
-        public OrderService(IOrderRepository orderRepository, IOrderFactory orderFactory,
-            IOriginalService originalService)
+        public OrderService(IOrderRepository orderRepository, IOrderFactory orderFactory)
         {
             _orderRepository = orderRepository;
             _orderFactory = orderFactory;
-            _originalService = originalService;
         }
 
         public async Task<IOrderBase> GetOrderAsync(Guid id)
@@ -73,32 +71,6 @@ namespace PersonnelManagement.Infrastracture.Orders.OrderBase
         public async Task<bool> DeleteAsync(Guid id)
         {
             return await _orderRepository.DeleteAsync(id);
-        }
-
-        public async Task<Original> AddOriginalAsync(OriginalCreateParams createParams)
-        {
-            var order = await _orderRepository.GetOrderAsync(createParams.OrderId);
-
-            if(order == null)
-            {
-                return null;
-            }
-
-            var original = await _originalService.AddOriginalAsync(createParams, OriginalType.Orders);
-            return original;
-        }
-
-        public async Task<bool> DeleteOriginalAsync(OriginalDeleteParams deleteParams)
-        {
-            var original = await _originalService.GetOriginalAsync(deleteParams.OriginalId);
-
-            if(original == null || original.OrderId != deleteParams.OrderId)
-            {
-                return false;
-            }
-
-            var origDeleted = await _originalService.DeleteOriginalAsync(original);
-            return origDeleted;
         }
     }
 }

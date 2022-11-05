@@ -37,6 +37,9 @@ namespace PersonnelManagement.Api.MappingProfiles
             CreateMap<GetAllEmployeesQuery, GetAllEmployeesFilter>();
             CreateMap<CreateEmployeeRequest, Employee>();
 
+            //originals
+            CreateMap<GetAllOriginalsQuery, GetAllOriginalsFilter>();
+
             // other
             CreateMap<PaginationQueryRequest, PaginationQuery>();
         }

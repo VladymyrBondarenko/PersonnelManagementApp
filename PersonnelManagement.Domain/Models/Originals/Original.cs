@@ -18,6 +18,9 @@ namespace PersonnelManagement.Domain.Models.Originals
         [MaxLength(100)]
         public string OriginalTitle { get; set; }
 
+        [MaxLength(120)]
+        public string FileName { get; set; }
+
         public string OriginalPath { get; set; }
 
         public string OriginalFileExtension { get; set; }
@@ -33,5 +36,7 @@ namespace PersonnelManagement.Domain.Models.Originals
         [ForeignKey(nameof(EmployeeId))]
         [AllowNull]
         public Employee Employee { get; set; }
+
+        public DateTime CreatedDate { get; set; }
     }
 }

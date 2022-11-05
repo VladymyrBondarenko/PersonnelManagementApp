@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace PersonnelManagement.Contracts.v1.Requests.Originals
 {
-    public class DeleteAttachmentRequest
+    public class UpdateOriginalRequest
     {
-        public Guid OriginalId { get; set; }
+        public string OriginalTitle { get; set; }
     }
 }

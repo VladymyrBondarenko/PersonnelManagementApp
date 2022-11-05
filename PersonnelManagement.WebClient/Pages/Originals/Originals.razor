@@ -1,0 +1,158 @@
+﻿@page "/originals/{EntityKey}/{OriginalEntity:int}"
+
+@using System.ComponentModel.DataAnnotations
+@using AutoMapper
+@using PersonnelManagement.Contracts.v1.Requests
+@using PersonnelManagement.Contracts.v1.Requests.Queries
+@using PersonnelManagement.Contracts.v1.Routes
+@using PersonnelManagement.Domain.Models.Originals
+@using PersonnelManagement.WebClient.Infrastructure.Managers.Originals
+@using PersonnelManagement.WebClient.Pages.Dialogs.Originals
+@using Refit
+
+@inject IOriginalManager originalService
+@inject IMapper mapper
+@inject ISnackbar snackBar
+@inject IDialogService dialogService
+@inject IJSRuntime jsRuntime
+
+<div>
+    <InputFile id="fileInput" OnChange="@((e) => AddOriginal(e))" hidden />
+    <div class="original-add-btn" onclick="@($"document.getElementById('fileInput').click()")">
+        <MudButton Color="@Color.Success" Class="add-item-btn" for="fileInput">Add attachment</MudButton>
+    </div>
+</div>
+
+<MudTable ServerData="@(new Func<TableState, Task<TableData<OriginalModel>>>(LoadOriginals))" Dense="true" @ref="table" 
+        Hover="true" Bordered="true" Striped="true" @bind-SelectedItem="selectedItem">
+    <ToolBarContent>
+        <MudText Typo="Typo.h6"></MudText>
+        <MudSpacer />
+        <MudTextField TextChanged="@(() => Reset())" @bind-Value="searchItem" Placeholder="Search" 
+            Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" 
+            IconSize="Size.Medium" Class="mt-0"></MudTextField>
+    </ToolBarContent>
+    <HeaderContent>
+        <MudTh>Title</MudTh>
+        <MudTh>Extension</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="OriginalTitle">@context.OriginalTitle</MudTd>
+        <MudTd DataLabel="OriginalExtension">@context.OriginalFileExtension</MudTd>
+        <MudTd>
+            <MudMenu Icon="@Icons.Material.Filled.MoreVert">
+                <MudMenuItem OnClick="@(() => DeleteRow(context))" Icon="@Icons.Material.Filled.Delete">Delete</MudMenuItem>
+                <div onclick="document.getElementById('download-link').click()">
+                    <MudMenuItem Icon="@Icons.Material.Filled.Download">
+                        <MudLink id="download-link" Href="@GetFileDownloadEndpoint(context.Id ?? default)" download hidden></MudLink>
+                        Download
+                    </MudMenuItem>
+                </div>
+            </MudMenu>
+        </MudTd>
+    </RowTemplate>
+    <PagerContent>
+        <MudTablePager PageSizeOptions="pageSizeOptions" />
+    </PagerContent>
+</MudTable>
+
+@code {
+    [Parameter()]
+    public string EntityKey { get; set; }
+
+    [Parameter()]
+    public int OriginalEntity { get; set; }
+
+    private string searchItem = "";
+    private OriginalModel selectedItem = null;
+    private int[] pageSizeOptions = new int[] { 5, 10, 15 };
+
+    public class OriginalModel
+    {
+        public Guid? Id { get; set; }
+
+        [Display(Name = "Title")]
+        public string OriginalTitle { get; set; }
+
+        public string OriginalPath { get; set; }
+
+        [Display(Name =  "Ext")]
+        public string OriginalFileExtension { get; set; }
+    }
+
+    private MudTable<OriginalModel> table;
+
+    private async Task Reset()
+    {
+        await table.ReloadServerData();
+    }
+
+    private async Task AddOriginal(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+
+        if(file != null)
+        {
+            using var stream = file.OpenReadStream(file.Size);
+
+            var streamPart = new StreamPart(stream, file.Name, "multipart/form-data");
+            var resp = await originalService.CreateAsync(OriginalEntity, new Guid(EntityKey), streamPart);
+            var data = resp.Content.Data;
+
+            if (data != null)
+            {
+                await Reset();
+
+                snackBar.Add("Attachment successfully added!", Severity.Success);
+            }
+            else
+            {
+                snackBar.Add("Attachment cannot be added!", Severity.Error);
+            }
+        }
+    }
+
+    private string GetFileDownloadEndpoint(Guid originalId)
+    {
+        return originalService.GetFileDownloadEndpoint(originalId);
+    }
+
+    private async Task DeleteRow(OriginalModel element)
+    {
+        var parameters = new DialogParameters 
+        { 
+            ["OriginalModel"] = element
+        };
+
+        var dialog = dialogService.Show<DeleteOriginalDialog>("Delete attachment", parameters);
+
+        var result = await dialog.Result;
+        if (!result.Cancelled)
+        {
+            await Reset();
+        }
+    }
+
+    private async Task<TableData<OriginalModel>> LoadOriginals(TableState state)
+    {
+        var query = new GetAllOriginalsQuery
+        {
+            EntityKey = new Guid(EntityKey),
+            SearchText = searchItem
+        };
+
+        var response = await originalService.GetAllAsync(new PaginationQueryRequest 
+            { 
+                PageNumber = state.Page + 1, PageSize = state.PageSize 
+            }, query);
+        var data = response.Content?.Data?.ToList();
+
+        var grid = new TableData<OriginalModel>();
+        if(data != null)
+        {
+            grid.Items = mapper.Map<List<OriginalModel>>(data);
+            grid.TotalItems = response.Content.TotalAmount;
+        }
+        return grid;
+    }
+}

@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PersonnelManagement.Application.FileOperations.Originals
+namespace PersonnelManagement.Domain.Models.Originals
 {
-    public enum OriginalType
+    public enum OriginalEntity
     {
         Orders,
         Employees

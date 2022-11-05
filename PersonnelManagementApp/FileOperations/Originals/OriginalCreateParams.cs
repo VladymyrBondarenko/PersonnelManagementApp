@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PersonnelManagement.Domain.Models.Originals;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,8 +15,8 @@ namespace PersonnelManagement.Application.FileOperations.Originals
 
         public string FileName { get; set; }
 
-        public Guid OrderId { get; set; }
+        public OriginalEntity OriginalEntity { get; set; }
 
-        public Guid EmployeeId { get; set; }
+        public Guid EntityId { get; set; }
     }
 }

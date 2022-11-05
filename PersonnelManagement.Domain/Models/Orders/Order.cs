@@ -54,5 +54,7 @@ namespace PersonnelManagement.Domain.Orders
         public OrderState OrderState { get; set; }
 
         public ICollection<Original> Originals { get; set; }
+
+        public DateTime CreatedDate { get; set; }
     }
 }

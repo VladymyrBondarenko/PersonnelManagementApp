@@ -25,7 +25,12 @@ namespace PersonnelManagement.Infrastracture.Orders.OrderBase
         {
             var queryable = _dbContext.Orders.AsQueryable();
 
-            if (filter?.OrderDescriptionId != null)
+            if (filter == null)
+            {
+                return await queryable.CountAsync();
+            }
+
+            if (filter.OrderDescriptionId != default)
             {
                 queryable = queryable.Where(x => x.OrderDescriptionId == filter.OrderDescriptionId);
             }
@@ -130,6 +135,11 @@ namespace PersonnelManagement.Infrastracture.Orders.OrderBase
 
         private static IQueryable<Order> addFiltersOnQuery(GetAllOrdersFilter filter, IQueryable<Order> queryable)
         {
+            if(filter == null)
+            {
+                return queryable;
+            }
+
             if (!string.IsNullOrWhiteSpace(filter.SearchText))
             {
                 var text = filter.SearchText;
@@ -140,7 +150,7 @@ namespace PersonnelManagement.Infrastracture.Orders.OrderBase
                     x.Department.DepartmentTitle.Contains(text));
             }
 
-            if (filter?.OrderDescriptionId != null)
+            if (filter.OrderDescriptionId != default)
             {
                 queryable = queryable.Where(x => x.OrderDescriptionId == filter.OrderDescriptionId);
             }

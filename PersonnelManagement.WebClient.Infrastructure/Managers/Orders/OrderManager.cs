@@ -1,8 +1,10 @@
 ﻿using PersonnelManagement.Contracts.v1.Requests;
 using PersonnelManagement.Contracts.v1.Requests.Orders;
+using PersonnelManagement.Contracts.v1.Requests.Originals;
 using PersonnelManagement.Contracts.v1.Requests.Queries;
 using PersonnelManagement.Contracts.v1.Responses;
 using PersonnelManagement.Contracts.v1.Responses.Orders;
+using PersonnelManagement.Contracts.v1.Responses.Originals;
 using PersonnelManagement.Sdk.Orders;
 using PersonnelManagement.WebClient.Options;
 using Refit;
@@ -37,9 +39,9 @@ namespace PersonnelManagement.WebClient.Infrastructure.Managers.Orders
             return response;
         }
 
-        public async Task<ApiResponse<Response<GetOrderResponse>>> UpdateAsync(Guid orderDescriptionId, UpdateOrderRequest updateRequest)
+        public async Task<ApiResponse<Response<GetOrderResponse>>> UpdateAsync(Guid orderId, UpdateOrderRequest updateRequest)
         {
-            var response = await _orderService.UpdateAsync(orderDescriptionId, updateRequest);
+            var response = await _orderService.UpdateAsync(orderId, updateRequest);
             return response;
         }
 

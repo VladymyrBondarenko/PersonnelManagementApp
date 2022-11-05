@@ -160,63 +160,39 @@ namespace PersonnelManagement.Api.Controllers.v1
             return Ok(new Response<AcceptOrderSuccessResponse>(response));
         }
 
-        /// <summary>
-        /// POST api/orders/originals/add
-        /// Attach file to order
-        /// </summary>
-        /// <param name="orderId"></param>
-        /// <returns></returns>
-        [HttpPost(ApiRoutes.Orders.AttachFileToOrder)]
-        public async Task<IActionResult> AttachFileToOrder([FromForm] AttachFileToOrderRequest attachRequest)
-        {
-            if (attachRequest == null || attachRequest.File == null || attachRequest.OrderId == Guid.Empty) // move to request validator
-            {
-                return BadRequest();
-            }
+        ///// <summary>
+        ///// POST api/orders/originals/add/5
+        ///// Attach file to order
+        ///// </summary>
+        ///// <param name="orderId"></param>
+        ///// <returns></returns>
+        //[HttpPost(ApiRoutes.Orders.AttachFileToOrder)]
+        //public async Task<IActionResult> AttachFileToOrder(Guid orderId, [FromForm] IFormFile file)
+        //{
+        //    if (file == null || orderId == Guid.Empty) // move to request validator
+        //    {
+        //        return BadRequest();
+        //    }
 
-            string executableLocation = Path.GetDirectoryName(
-               Assembly.GetExecutingAssembly().Location);
-            var filePath = Path.Combine(executableLocation, attachRequest.File.FileName);
+        //    string executableLocation = Path.GetDirectoryName(
+        //       Assembly.GetExecutingAssembly().Location);
+        //    var filePath = Path.Combine(executableLocation, file.FileName);
 
-            using var stream = System.IO.File.Create(filePath);
-            attachRequest.File.CopyTo(stream);
-            stream.Close();
+        //    using var stream = System.IO.File.Create(filePath);
+        //    file.CopyTo(stream);
+        //    stream.Close();
 
-            var original = await _orderService.AddOriginalAsync(new OriginalCreateParams 
-            { 
-                FileName = attachRequest.File.FileName, 
-                OrderId = attachRequest.OrderId,
-                Bytes = System.IO.File.ReadAllBytes(filePath)
-            });
+        //    var original = await _orderService.AddOriginalAsync(new OriginalCreateParams 
+        //    { 
+        //        FileName = file.FileName, 
+        //        OrderId = orderId,
+        //        Bytes = System.IO.File.ReadAllBytes(filePath)
+        //    });
 
-            System.IO.File.Delete(filePath);
+        //    System.IO.File.Delete(filePath);
 
-            var response = new AttachFileSuccessResponse { Success = original != null };
-            return Ok(new Response<AttachFileSuccessResponse>(response));
-        }
-
-        /// <summary>
-        /// POST api/orders/originals/delete/5
-        /// Delete order attachment
-        /// </summary>
-        /// <param name="orderId"></param>
-        /// <returns></returns>
-        [HttpDelete(ApiRoutes.Orders.DeleteOrderAttachment)]
-        public async Task<IActionResult> DeleteOrderAttachment(Guid orderId, [FromBody] DeleteAttachmentRequest attachRequest)
-        {
-            if(attachRequest.OriginalId == Guid.Empty) // move to request validator
-            {
-                return BadRequest();
-            }
-
-            var success = await _orderService.DeleteOriginalAsync(new OriginalDeleteParams
-            {
-                OriginalId = attachRequest.OriginalId,
-                OrderId = orderId
-            });
-
-            var response = new DeleteAttachmentSuccessResponse { Success = success };
-            return Ok(new Response<DeleteAttachmentSuccessResponse>(response));
-        }
+        //    var response = new AttachFileSuccessResponse { Success = original != null };
+        //    return Ok(new Response<AttachFileSuccessResponse>(response));
+        //}
     }
 }

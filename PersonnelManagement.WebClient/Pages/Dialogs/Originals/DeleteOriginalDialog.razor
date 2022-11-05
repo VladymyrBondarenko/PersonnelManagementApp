@@ -1,0 +1,49 @@
+﻿@using System.Globalization
+@using PersonnelManagement.Contracts.v1.Requests
+@using System.Net.Http.Json
+@using System.ComponentModel.DataAnnotations
+@using PersonnelManagement.WebClient.Infrastructure.Managers.Originals
+@using PersonnelManagement.WebClient.Pages.Dialogs
+@using static PersonnelManagement.WebClient.Pages.Originals.Originals
+
+@inject ISnackbar snackBar
+@inject IOriginalManager originalManager
+
+<MudDialog>
+    <DialogContent>
+        <MudText>Do you really want to delete these record? This process cannot be undone.</MudText>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Error" Variant="Variant.Filled" OnClick="Submit">Delete</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    [Parameter] public OriginalModel OriginalModel { get; set; } = new();
+
+    private async Task Submit()
+    {
+        var id = OriginalModel.Id ?? default;
+
+        if(id != default)
+        {
+            var response = await originalManager.DeleteAsync(id);
+
+            if (response.StatusCode == System.Net.HttpStatusCode.NoContent)
+            {
+                snackBar.Add("Attachment deleted successfully", Severity.Success);
+            }
+            else
+            {
+                snackBar.Add("Attachment cannot be deleted", Severity.Error);
+            }
+
+            MudDialog.Close(DialogResult.Ok(true));
+        }
+    }
+
+    void Cancel() => MudDialog.Cancel();
+}

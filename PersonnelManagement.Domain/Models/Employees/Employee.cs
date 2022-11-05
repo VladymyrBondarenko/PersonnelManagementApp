@@ -43,5 +43,7 @@ namespace PersonnelManagement.Domain.Employees
         public EmployeeState EmployeeState { get; set; }
 
         public ICollection<Original> Originals { get; set; }
+
+        public DateTime CreatedDate { get; set; }
     }
 }

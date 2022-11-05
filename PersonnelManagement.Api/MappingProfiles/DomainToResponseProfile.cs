@@ -3,9 +3,11 @@ using PersonnelManagement.Contracts.v1.Responses.Departments;
 using PersonnelManagement.Contracts.v1.Responses.Employees;
 using PersonnelManagement.Contracts.v1.Responses.Orders;
 using PersonnelManagement.Contracts.v1.Responses.OrdersDescription;
+using PersonnelManagement.Contracts.v1.Responses.Originals;
 using PersonnelManagement.Contracts.v1.Responses.Positions;
 using PersonnelManagement.Domain.Departments;
 using PersonnelManagement.Domain.Employees;
+using PersonnelManagement.Domain.Models.Originals;
 using PersonnelManagement.Domain.Orders;
 using PersonnelManagement.Domain.Positions;
 
@@ -18,6 +20,8 @@ namespace PersonnelManagement.Api.MappingProfiles
             CreateMap<Department, GetDepartmentResponse>();
 
             CreateMap<Position, GetPositionResponse>();
+
+            CreateMap<Original, GetOriginalResponse>();
 
             CreateMap<OrderDescription, GetOrderDescriptionResponse>();
 
@@ -100,6 +104,16 @@ namespace PersonnelManagement.Api.MappingProfiles
                             OrderDescriptionId = x.OrderDescriptionId
                         }).ToList()
                     });
+                })
+                .ForMember(x => x.Originals, opt =>
+                {
+                    opt.MapFrom(src => src.Originals.Select(x => new GetOriginalResponse 
+                    {
+                        Id = x.Id,
+                        OriginalTitle = x.OriginalTitle,
+                        OriginalPath = x.OriginalPath,
+                        OriginalFileExtension = x.OriginalFileExtension
+                    }));
                 });
         }
     }

@@ -37,6 +37,11 @@ namespace PersonnelManagement.Server.Services.UriServices
             return new Uri($"{_baseUri}/{ApiRoutes.Employees.Get.Replace("{employeeId}", employeeId)}");
         }
 
+        public Uri GetOriginalUri(string originalId)
+        {
+            return new Uri($"{_baseUri}/{ApiRoutes.Originals.Get.Replace("{originalId}", originalId)}");
+        }
+
         public Uri GetAllDepartmentsUri(PaginationQuery paginationQuery = null)
         {
             return getAllUri(ApiRoutes.Departments.GetAll, paginationQuery);
@@ -60,6 +65,11 @@ namespace PersonnelManagement.Server.Services.UriServices
         public Uri GetAllEmployeesUri(PaginationQuery paginationQuery = null)
         {
             return getAllUri(ApiRoutes.Employees.GetAll, paginationQuery);
+        }
+
+        public Uri GetAllOriginalsUri(PaginationQuery paginationQuery = null)
+        {
+            return getAllUri(ApiRoutes.Originals.GetAll, paginationQuery);
         }
 
         private Uri getAllUri(string route, PaginationQuery paginationQuery = null)

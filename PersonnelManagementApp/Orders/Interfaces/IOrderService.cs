@@ -8,10 +8,8 @@ namespace PersonnelManagement.Application.Orders.Interfaces
 {
     public interface IOrderService
     {
-        Task<Original> AddOriginalAsync(OriginalCreateParams createParams);
         Task<IOrderBase> CreateAsync(Order order);
         Task<bool> DeleteAsync(Guid id);
-        Task<bool> DeleteOriginalAsync(OriginalDeleteParams deleteParams);
         Task<List<IOrderBase>> GetAllAsync();
         Task<List<IOrderBase>> GetAllAsync(PaginationQuery paginationFilter = null, GetAllOrdersFilter filter = null);
         Task<IOrderBase> GetOrderAsync(Guid id);

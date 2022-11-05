@@ -1,16 +1,23 @@
 ﻿@using System.Net.Http.Json
 @using System.Collections.ObjectModel
 @using AutoMapper
+@using Microsoft.AspNetCore.Http
+@using PersonnelManagement.Contracts.v1.Requests.Originals
 @using PersonnelManagement.Contracts.v1.Requests.Queries
 @using PersonnelManagement.Contracts.v1.Responses.Departments
 @using PersonnelManagement.Contracts.v1.Responses.Orders
+@using PersonnelManagement.Domain.Models.Originals
 @using PersonnelManagement.Domain.Orders
 @using PersonnelManagement.Sdk.Orders
 @using PersonnelManagement.WebClient.Infrastructure.Managers.Orders
+@using PersonnelManagement.WebClient.Infrastructure.Managers.Originals
 @using PersonnelManagement.WebClient.Pages.Dialogs.Orders
 @using Refit
 @using System.Text.RegularExpressions
 @using System.ComponentModel.DataAnnotations
+@using System.Net.Http.Headers
+@using System.Text
+@using static PersonnelManagement.WebClient.Pages.Originals.Originals
 @using static PersonnelManagement.WebClient.Pages.Employees.Employees
 @using static PersonnelManagement.WebClient.Pages.Orders.OrdersDescription
 @using static PersonnelManagement.WebClient.Pages.OrgStruct.Departments
@@ -18,9 +25,12 @@
 
 @inject IOrderDescriptionManager orderDescManager
 @inject IOrderManager orderManager
+@inject IOriginalManager originalService
 @inject IDialogService dialogService
 @inject IMapper mapper
 @inject ISnackbar snackBar
+@inject IJSRuntime jsRuntime
+@inject NavigationManager navManager
 
 @page "/orders"
 
@@ -69,12 +79,24 @@
                             <MudTd DataLabel="Position">@context.Position?.PositionTitle</MudTd>
                             <MudTd DataLabel="DateFrom">@context.DateFrom?.ToShortDateString()</MudTd>
                             <MudTd DataLabel="DateTo">@context.DateTo?.ToShortDateString()</MudTd>
-                            <MudMenu Icon="@Icons.Material.Filled.MoreVert">
-                                <MudMenuItem Class="@GetAcceptOrderClass(context)" OnClick="@(() => AcceptOrder(context))" Icon="@Icons.Filled.Check">Accept</MudMenuItem>
-                                <MudMenuItem Class="@GetRollbackOrderClass(context)" OnClick="@(() => RollbackOrder(context))" Icon="@Icons.Filled.Cancel">Rollback</MudMenuItem>
-                                <MudMenuItem Class="@GetEditRowClass(context)" OnClick="@(() => EditRow(context))" Icon="@Icons.Material.Filled.Edit">Edit</MudMenuItem>
-                                <MudMenuItem Class="@GetDeleteRowClass(context)" OnClick="@(() => DeleteRow(context))" Icon="@Icons.Material.Filled.Delete">Delete</MudMenuItem>
-                            </MudMenu>
+                            <MudTd>
+                                <InputFile id="@($"fileInput-{context.Id}")" OnChange="@((e) => AddOriginal(e, context))" hidden />
+                                <MudFab id="@($"add-orig-btn-{context.Id}")" HtmlTag="label" for="@($"fileInput-{context.Id}")" hidden/>
+                                <MudMenu Icon="@Icons.Material.Filled.MoreVert">
+                                    <MudMenuItem Class="@GetAcceptOrderClass(context)" OnClick="@(() => AcceptOrder(context))" Icon="@Icons.Filled.Check">Accept</MudMenuItem>
+                                    <MudMenuItem Class="@GetRollbackOrderClass(context)" OnClick="@(() => RollbackOrder(context))" Icon="@Icons.Filled.Cancel">Rollback</MudMenuItem>
+                                    <MudMenuItem Class="@GetEditRowClass(context)" OnClick="@(() => EditRow(context))" Icon="@Icons.Material.Filled.Edit">Edit</MudMenuItem>
+                                    <MudMenuItem Class="@GetDeleteRowClass(context)" OnClick="@(() => DeleteRow(context))" Icon="@Icons.Material.Filled.Delete">Delete</MudMenuItem>
+                                    <div onclick="@($"document.getElementById('add-orig-btn-{context.Id}').click()")">
+                                        <MudMenuItem Class="@GetAddOriginalItemClass(context)" Icon="@Icons.Material.Filled.AttachFile">
+                                            Add Original
+                                        </MudMenuItem>
+                                    </div>
+                                    <MudMenuItem Class="@GetViewOriginalItemClass(context)" OnClick="@(() => ViewOriginals(context))" Icon="@Icons.Material.Filled.AttachFile">
+                                        View Originals
+                                    </MudMenuItem>
+                                </MudMenu>
+                            </MudTd>
                         </RowTemplate>
                         <PagerContent>
                             <MudTablePager PageSizeOptions="pageSizeOptions" />
@@ -134,6 +156,8 @@
         public EmployeeModel Employee { get; set; }
 
         public OrderState OrderState { get; set; }
+
+        public List<OriginalModel> Originals { get; set; }
     }
 
     private MudTable<OrderModel> table;
@@ -197,6 +221,78 @@
         }
     }
 
+    private void ViewOriginals(OrderModel order)
+    {
+        if (order.Originals.Any())
+        {
+            navManager.NavigateTo($"/originals/{order.Id}/{(int)OriginalEntity.Orders}");
+        }
+    }
+
+    private async Task AddOriginal(InputFileChangeEventArgs e, OrderModel order)
+    {
+        if(order?.Id == default)
+        {
+            return;
+        }
+
+        if (!order.Originals.Any())
+        {
+            var file = e.File;
+
+            if(file != null)
+            {
+                using var stream = file.OpenReadStream(file.Size);
+
+                var streamPart = new StreamPart(stream, file.Name, "multipart/form-data");
+                var resp = await originalService.CreateAsync((int)OriginalEntity.Orders, order.Id, streamPart);
+                var data = resp.Content.Data;
+
+                if (data != null)
+                {
+                    await Reset();
+
+                    snackBar.Add("Attachment successfully added!", Severity.Success);
+
+                    navManager.NavigateTo($"/originals/{order.Id}/{(int)OriginalEntity.Orders}");
+                }
+                else
+                {
+                    snackBar.Add("Attachment cannot be added!", Severity.Error);
+                }
+            }
+        }
+    }
+
+    private async Task FireInputForm(Guid orderId)
+    {
+        await jsRuntime.InvokeVoidAsync("click_fileinput", orderId.ToString());
+    }
+
+    private string GetAddOriginalItemClass(OrderModel order)
+    {
+        if (order.Originals.Any())
+        {
+            return "add-original-item-hidden";
+        }
+        else
+        {
+            return "add-original-item-visible";
+        }
+    }
+
+    private string GetViewOriginalItemClass(OrderModel order)
+    {
+        if (!order.Originals.Any())
+        {
+            return "view-original-item-hidden";
+        }
+        else
+        {
+            return "view-original-item-visible";
+        }
+    }
+
     private string GetEditRowClass(OrderModel order)
     {
         if(order.OrderState == OrderState.Accepted)
@@ -211,7 +307,7 @@
 
     private async Task EditRow(OrderModel element)
     {
-         DialogResult result = null;
+        DialogResult result = null;
 
         if(selectedOrderDesc?.OrderType == OrderType.HireOrder)
         {

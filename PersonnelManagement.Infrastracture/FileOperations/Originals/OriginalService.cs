@@ -3,6 +3,8 @@ using PersonnelManagement.Application.DbContexts;
 using PersonnelManagement.Application.FileOperations;
 using PersonnelManagement.Application.FileOperations.Originals;
 using PersonnelManagement.Domain.Exceptions;
+using PersonnelManagement.Domain.Models;
+using PersonnelManagement.Domain.Models.Filters;
 using PersonnelManagement.Domain.Models.Originals;
 using System;
 using System.Collections.Generic;
@@ -27,9 +29,9 @@ namespace PersonnelManagement.Infrastracture.FileOperations.Originals
             _originalRepo = originalRepo;
         }
 
-        public async Task<List<Original>> GetOriginalsAsync()
+        public async Task<List<Original>> GetOriginalsAsync(PaginationQuery paginationFilter = null, GetAllOriginalsFilter filter = null)
         {
-            return await _originalRepo.GetAllAsync();
+            return await _originalRepo.GetAllAsync(paginationFilter, filter);
         }
 
         public async Task<Original> GetOriginalAsync(Guid id)
@@ -37,32 +39,62 @@ namespace PersonnelManagement.Infrastracture.FileOperations.Originals
             return await _originalRepo.GetAsync(id);
         }
 
-        public async Task<Original> AddOriginalAsync(OriginalCreateParams createParams, OriginalType originalType)
+        public async Task<byte[]> GetOriginalBytesAsync(Guid id)
         {
-            var bindedEntutyKey = originalType switch
-            {
-                OriginalType.Orders => createParams.OrderId,
-                OriginalType.Employees => createParams.EmployeeId,
-                _ => throw new NotImplementedException("Specified original type could not be handled")
-            };
+            var original = await GetOriginalAsync(id);
 
+            if(original != null)
+            {
+                var bytes = await _ftpService.ReadAllBytesAsync(original.OriginalPath);
+                return bytes;
+            }
+
+            return new byte[0];
+        }
+
+        public async Task<int> GetOriginalsAmountAsync(GetAllOriginalsFilter filter = null)
+        {
+            return await _originalRepo.GetOriginalsAmountAsync(filter);
+        }
+
+        public async Task<Original> AddOriginalAsync(OriginalCreateParams createParams)
+        {
             Original original = null;
 
             if (createParams.Bytes != null && !string.IsNullOrWhiteSpace(createParams.FileName))
             {
                 original = await addOriginalAsync(
-                    createParams.FileName, createParams.Bytes, originalType, bindedEntutyKey);
+                    createParams.FileName, createParams.Bytes, createParams.OriginalEntity, createParams.EntityId);
             }
             else if (!string.IsNullOrWhiteSpace(createParams.SourceFilePath))
             {
                 original = await addOriginalAsync(
-                    createParams.SourceFilePath, originalType, bindedEntutyKey);
+                    createParams.SourceFilePath, createParams.OriginalEntity, createParams.EntityId);
             }
 
             return original;
         }
 
-        private async Task<Original> addOriginalAsync(string fileName, byte[] bytes, OriginalType originalType,
+        public async Task<bool> UpdateOriginal(Original original)
+        {
+            return await _originalRepo.UpdateOriginal(original);
+        }
+
+        public async Task<bool> DeleteOriginalAsync(Guid originalId)
+        {
+            var original = await _originalRepo.GetAsync(originalId);
+
+            if (original != null)
+            {
+                await _ftpService.DeleteFileFromFtpAsync(original.OriginalPath);
+
+                return await _originalRepo.DeleteAsync(original);
+            }
+
+            return false;
+        }
+
+        private async Task<Original> addOriginalAsync(string fileName, byte[] bytes, OriginalEntity originalEntity,
             Guid bindedEntityKey = default)
         {
             string executableLocation = Path.GetDirectoryName(
@@ -76,24 +108,19 @@ namespace PersonnelManagement.Infrastracture.FileOperations.Originals
                 return null;
             }
 
-            var original = await addOriginalAsync(filePath, originalType, bindedEntityKey);
+            var original = await addOriginalAsync(filePath, originalEntity, bindedEntityKey);
 
             File.Delete(filePath);
 
             return original;
         }
 
-        private async Task<Original> addOriginalAsync(string sourceFilePath, OriginalType originalType,
+        private async Task<Original> addOriginalAsync(string sourceFilePath, OriginalEntity originalEntity,
             Guid bindedEntityKey = default)
         {
-            var remotePath = originalType switch
-            {
-                OriginalType.Orders => _entityOriginalSettings.OrdersDirectoryPath,
-                OriginalType.Employees => _entityOriginalSettings.EmpoloyeesDirectoryPath,
-                _ => throw new NotImplementedException("Specified original type could not be handled")
-            };
-
-            var fileName = Path.GetFileName(sourceFilePath);
+            var remotePath = getDirectoryPath(originalEntity);
+            var ext = Path.GetExtension(sourceFilePath);
+            var fileName = Path.GetRandomFileName() + ext;
             var resultFilePath = Path.Combine(remotePath, fileName);
             var saved = await _ftpService.SaveFileToFtpAsync(sourceFilePath, resultFilePath);
 
@@ -104,17 +131,18 @@ namespace PersonnelManagement.Infrastracture.FileOperations.Originals
                     Id = Guid.NewGuid(),
                     OriginalPath = resultFilePath,
                     OriginalTitle = Path.GetFileNameWithoutExtension(sourceFilePath),
-                    OriginalFileExtension = Path.GetExtension(resultFilePath)
+                    FileName = Path.GetFileName(sourceFilePath),
+                    OriginalFileExtension = ext
                 };
                 if(bindedEntityKey != default)
                 {
-                    switch (originalType)
+                    switch (originalEntity)
                     {
-                        case OriginalType.Orders:
+                        case OriginalEntity.Orders:
                             original.OrderId = bindedEntityKey;
                             original.EmployeeId = null;
                             break;
-                        case OriginalType.Employees:
+                        case OriginalEntity.Employees:
                             original.EmployeeId = bindedEntityKey;
                             original.OrderId = null;
                             break;
@@ -130,18 +158,14 @@ namespace PersonnelManagement.Infrastracture.FileOperations.Originals
             }
         }
 
-        public async Task<bool> DeleteOriginalAsync(Original original)
+        private string getDirectoryPath(OriginalEntity originalEntity)
         {
-            var exists = await _originalRepo.GetAsync(original.Id) != null;
-
-            if (exists)
+            return originalEntity switch
             {
-                await _ftpService.DeleteFileFromFtpAsync(original.OriginalPath);
-
-                return await _originalRepo.DeleteAsync(original);
-            }
-
-            return false;
+                OriginalEntity.Orders => _entityOriginalSettings.OrdersDirectoryPath,
+                OriginalEntity.Employees => _entityOriginalSettings.EmpoloyeesDirectoryPath,
+                _ => throw new NotImplementedException("Specified original type could not be handled")
+            };
         }
     }
 }

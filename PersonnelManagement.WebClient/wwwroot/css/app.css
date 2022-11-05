@@ -185,3 +185,27 @@ a, .btn-link {
 .delete-btn-visible {
     display: flex !important;
 }
+
+.view-original-item-hidden {
+    display: none !important;
+}
+
+.view-original-item-visible {
+    display: inline-block;
+}
+
+.add-original-item-hidden {
+    display: none !important;
+}
+
+.add-original-item-visible {
+    display: inline-block;
+}
+
+
+/*Originals*/
+
+.original-add-btn {
+    float: left;
+    margin: 10px;
+}

@@ -39,7 +39,7 @@ namespace PersonnelManagement.UnitTests.OriginalsTests
         public async Task AddOriginalAsync_ShouldReturnAddedOriginal_WhenAddingOriginalToOrder()
         {
             // Arrange
-            var origType = OriginalType.Orders;
+            var origType = OriginalEntity.Orders;
             var fileText = "Some text";
             var fileName = "tst.txt";
 
@@ -49,9 +49,10 @@ namespace PersonnelManagement.UnitTests.OriginalsTests
 
             await File.WriteAllTextAsync(filePath, fileText);
 
-            var origCreateParams = new OriginalCreateParams 
-            { 
-                OrderId = Guid.NewGuid(),
+            var origCreateParams = new OriginalCreateParams
+            {
+                EntityId = Guid.NewGuid(),
+                OriginalEntity = OriginalEntity.Orders,
                 Bytes = File.ReadAllBytes(filePath),
                 FileName = fileName
             };
@@ -60,15 +61,15 @@ namespace PersonnelManagement.UnitTests.OriginalsTests
 
             var remotePath = origType switch
             {
-                OriginalType.Orders => _ftpStructSettings.OrdersDirectoryPath,
-                OriginalType.Employees => _ftpStructSettings.EmpoloyeesDirectoryPath,
+                OriginalEntity.Orders => _ftpStructSettings.OrdersDirectoryPath,
+                OriginalEntity.Employees => _ftpStructSettings.EmpoloyeesDirectoryPath,
                 _ => throw new NotImplementedException("Specified original type could not be handled")
             };
 
-            var resultFilePath = Path.Combine(remotePath, fileName);
+            var resultFilePath = Path.Combine(remotePath, Path.GetRandomFileName() + Path.GetExtension(fileName));
 
             _ftpServiceMock
-                .Setup(x => x.SaveFileToFtpAsync(filePath, resultFilePath))
+                .Setup(x => x.SaveFileToFtpAsync(filePath, It.IsAny<string>()))
                 .ReturnsAsync(true);
 
             var returnedOriginal = new Original
@@ -80,8 +81,7 @@ namespace PersonnelManagement.UnitTests.OriginalsTests
                 .ReturnsAsync(returnedOriginal);
 
             // Act
-            var original = await _originalService.AddOriginalAsync(
-                origCreateParams, origType);
+            var original = await _originalService.AddOriginalAsync(origCreateParams);
 
             // Assert
             Assert.NotNull(original?.OriginalPath);

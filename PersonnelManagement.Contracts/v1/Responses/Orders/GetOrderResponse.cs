@@ -1,6 +1,7 @@
 ﻿using PersonnelManagement.Contracts.v1.Responses.Departments;
 using PersonnelManagement.Contracts.v1.Responses.Employees;
 using PersonnelManagement.Contracts.v1.Responses.OrdersDescription;
+using PersonnelManagement.Contracts.v1.Responses.Originals;
 using PersonnelManagement.Contracts.v1.Responses.Positions;
 using PersonnelManagement.Domain.Departments;
 using PersonnelManagement.Domain.Employees;
@@ -43,5 +44,7 @@ namespace PersonnelManagement.Contracts.v1.Responses.Orders
         //public GetOrderDescriptionResponse OrderDescription { get; set; }
 
         public OrderState OrderState { get; set; }
+
+        public List<GetOriginalResponse> Originals { get; set; }
     }
 }

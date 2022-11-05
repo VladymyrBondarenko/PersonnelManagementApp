@@ -2,6 +2,7 @@
 using PersonnelManagement.Server.Services.PaginationServices.Employees;
 using PersonnelManagement.Server.Services.PaginationServices.OrderDescriptions;
 using PersonnelManagement.Server.Services.PaginationServices.Orders;
+using PersonnelManagement.Server.Services.PaginationServices.Originals;
 using PersonnelManagement.Server.Services.PaginationServices.Positions;
 using PersonnelManagement.Server.Services.UriServices;
 
@@ -26,6 +27,7 @@ namespace PersonnelManagement.Api.Installers
             services.AddScoped<IDepartmentPaginationService, DepartmentPaginationService>();
             services.AddScoped<IOrderDescriptionPaginationService, OrderDescriptionPaginationService>();
             services.AddScoped<IEmployeePaginationService, EmployeePaginationService>();
+            services.AddScoped<IOriginalPaginationService, OriginalPaginationService>();
         }
     }
 }

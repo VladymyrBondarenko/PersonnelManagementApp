@@ -44,8 +44,10 @@ Features. Iteration 4:
 3. Add ui to orders/order descriptions +
 4. Add ui to employees +
 5. Add logic for accept/rollback hire/fire orders +
-6. Add ui to add files to orders
-7. Add logic to move files from orders to employees when accepting order
+6. Add ui to add files to orders +
+7. Add ui to add files to orders ..
+8. Add logic to move files from orders to employees when accepting order
+9. *** Add file viewer (images, pdf, docx)
 
 Features. Iteration 4:
 

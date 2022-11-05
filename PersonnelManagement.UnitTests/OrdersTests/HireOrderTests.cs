@@ -23,7 +23,7 @@ namespace PersonnelManagement.UnitTests.OrdersTests
 
         public HireOrderTests()
         {
-            orderService = new OrderService(orderRepMock.Object, orderFactoryMock.Object, null);
+            orderService = new OrderService(orderRepMock.Object, orderFactoryMock.Object);
         }
 
         [Fact]

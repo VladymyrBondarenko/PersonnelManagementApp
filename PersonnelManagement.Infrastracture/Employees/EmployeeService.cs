@@ -134,32 +134,6 @@ namespace PersonnelManagement.Infrastracture.Employees
                 .FirstOrDefaultAsync(x => x.Id == id);
         }
 
-        public async Task<Original> AddOriginalAsync(OriginalCreateParams createParams)
-        {
-            var employee = await GetAsync(createParams.EmployeeId);
-
-            if (employee == null)
-            {
-                return null;
-            }
-
-            var original = await _originalService.AddOriginalAsync(createParams, OriginalType.Employees);
-            return original;
-        }
-
-        public async Task<bool> DeleteOriginalAsync(OriginalDeleteParams deleteParams)
-        {
-            var original = await _originalService.GetOriginalAsync(deleteParams.OriginalId);
-
-            if (original == null || original.EmployeeId != deleteParams.EmployeeId)
-            {
-                return false;
-            }
-
-            var origDeleted = await _originalService.DeleteOriginalAsync(original);
-            return origDeleted;
-        }
-
         private static IQueryable<Employee> addFiltersOnQuery(GetAllEmployeesFilter filter, IQueryable<Employee> queryable)
         {
             if (!string.IsNullOrWhiteSpace(filter.SearchText))
