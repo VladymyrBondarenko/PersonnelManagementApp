@@ -1,4 +1,5 @@
 ﻿using PersonnelManagement.Application.Employees;
+using PersonnelManagement.Application.FileOperations.Originals;
 using PersonnelManagement.Application.Orders.Interfaces;
 using PersonnelManagement.Domain.Orders;
 using PersonnelManagement.Infrastracture.Orders.OrderBase.Models;
@@ -14,11 +15,14 @@ namespace PersonnelManagement.Infrastracture.Orders.OrderBase
     {
         private readonly IOrderRepository _orderRepository;
         private readonly IEmployeeService _employeeService;
+        private readonly IOriginalService _originalService;
 
-        public OrderFactory(IOrderRepository orderRepository, IEmployeeService employeeService)
+        public OrderFactory(IOrderRepository orderRepository, IEmployeeService employeeService,
+            IOriginalService originalService)
         {
             _orderRepository = orderRepository;
             _employeeService = employeeService;
+            _originalService = originalService;
         }
 
         public IOrderBase GetOrder(Order order)
@@ -29,7 +33,7 @@ namespace PersonnelManagement.Infrastracture.Orders.OrderBase
             {
                 case OrderType.HireOrder:
                     return (IOrderBase)Activator.CreateInstance(
-                        typeof(HireOrder), order, _orderRepository, _employeeService);
+                        typeof(HireOrder), order, _orderRepository, _employeeService, _originalService);
                 case OrderType.FireOrder:
                     return (IOrderBase)Activator.CreateInstance(
                         typeof(FireOrder), order, _orderRepository, _employeeService);

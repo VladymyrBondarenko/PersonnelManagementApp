@@ -46,7 +46,7 @@ Features. Iteration 4:
 5. Add logic for accept/rollback hire/fire orders +
 6. Add ui to add files to orders +
 7. Add ui to add files to employees +
-8. Add logic to move files from orders to employees when accepting order
+8. Add logic to move files from orders to employees when accepting order +
 9. *** Add file viewer (images, pdf, docx)
 
 Features. Iteration 4:
@@ -68,3 +68,8 @@ Features. Iteration 8:
 Features. Iteration 9:
 
 // Add integration tests to api + unit tests (if needed) + health checks
+
+Some ideas:
+
+// Add feature to add image of employee as original
+// Add progress bar to ui when waiting for response

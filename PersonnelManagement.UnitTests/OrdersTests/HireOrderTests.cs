@@ -1,7 +1,11 @@
 ﻿using Moq;
 using PersonnelManagement.Application.Employees;
+using PersonnelManagement.Application.FileOperations.Originals;
 using PersonnelManagement.Application.Orders.Interfaces;
 using PersonnelManagement.Domain.Employees;
+using PersonnelManagement.Domain.Models;
+using PersonnelManagement.Domain.Models.Filters;
+using PersonnelManagement.Domain.Models.Originals;
 using PersonnelManagement.Domain.Orders;
 using PersonnelManagement.Infrastracture.Orders.OrderBase;
 using PersonnelManagement.Infrastracture.Orders.OrderBase.Models;
@@ -20,6 +24,7 @@ namespace PersonnelManagement.UnitTests.OrdersTests
         private readonly Mock<IOrderRepository> orderRepMock = new();
         private readonly Mock<IOrderFactory> orderFactoryMock = new();
         private readonly Mock<IEmployeeService> employeeServiceMock = new();
+        private readonly Mock<IOriginalService> originalServiceMock = new();
 
         public HireOrderTests()
         {
@@ -48,11 +53,21 @@ namespace PersonnelManagement.UnitTests.OrdersTests
                 .Setup(x => x.UpdateAsync(order))
                 .ReturnsAsync(true);
 
-            var hireOrder = new HireOrder(order, orderRepMock.Object, employeeServiceMock.Object);
+            var hireOrder = new HireOrder(order, orderRepMock.Object, employeeServiceMock.Object, originalServiceMock.Object);
+
+            var employee = new Employee
+            {
+                Id = Guid.NewGuid()
+            };
+
             employeeServiceMock
                 .Setup(x => x.CreateAsync(hireOrder))
-                .ReturnsAsync(new Employee());
+                .ReturnsAsync(employee);
 
+            originalServiceMock
+                .Setup(x => x.GetOriginalsAsync(It.IsAny<PaginationQuery>(), It.IsAny<GetAllOriginalsFilter>()))
+                .ReturnsAsync(new List<Original>());
+            
             orderFactoryMock
                 .Setup(x => x.GetOrder(order))
                 .Returns(hireOrder);
@@ -93,10 +108,16 @@ namespace PersonnelManagement.UnitTests.OrdersTests
                 .Setup(x => x.UpdateAsync(order))
                 .ReturnsAsync(true);
 
-            var hireOrder = new HireOrder(order, orderRepMock.Object, employeeServiceMock.Object);
+            var hireOrder = new HireOrder(order, orderRepMock.Object, employeeServiceMock.Object, originalServiceMock.Object);
+
             employeeServiceMock
                 .Setup(x => x.CreateAsync(hireOrder))
                 .ReturnsAsync(employee);
+
+            originalServiceMock
+                .Setup(x => x.GetOriginalsAsync(It.IsAny<PaginationQuery>(), It.IsAny<GetAllOriginalsFilter>()))
+                .ReturnsAsync(new List<Original>());
+
             employeeServiceMock
                 .Setup(x => x.DeleteAsync(employee.Id))
                 .ReturnsAsync(true);

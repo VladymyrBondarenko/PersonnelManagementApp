@@ -1,5 +1,8 @@
 ﻿using PersonnelManagement.Application.Employees;
+using PersonnelManagement.Application.FileOperations.Originals;
 using PersonnelManagement.Application.Orders.Interfaces;
+using PersonnelManagement.Domain.Models.Filters;
+using PersonnelManagement.Domain.Models.Originals;
 using PersonnelManagement.Domain.Orders;
 
 namespace PersonnelManagement.Infrastracture.Orders.OrderBase.Models
@@ -8,13 +11,16 @@ namespace PersonnelManagement.Infrastracture.Orders.OrderBase.Models
     {
         private readonly IOrderRepository _orderRepository;
         private readonly IEmployeeService _employeeService;
+        private readonly IOriginalService _originalService;
 
         public Order Order { get; }
 
-        public HireOrder(Order order, IOrderRepository orderRepository, IEmployeeService employeeService)
+        public HireOrder(Order order, IOrderRepository orderRepository, IEmployeeService employeeService,
+            IOriginalService originalService)
         {
             _orderRepository = orderRepository;
             _employeeService = employeeService;
+            _originalService = originalService;
             Order = order;
         }
 
@@ -26,7 +32,28 @@ namespace PersonnelManagement.Infrastracture.Orders.OrderBase.Models
             {
                 Order.OrderState = OrderState.Accepted;
                 Order.EmployeeId = employee.Id;
-                return await _orderRepository.UpdateAsync(Order);
+
+                await _orderRepository.UpdateAsync(Order);
+
+                var originals = await _originalService.GetOriginalsAsync(
+                    filter: new GetAllOriginalsFilter { EntityKey = Order.Id });
+
+                // move files from order to employee when accepting hire order
+                foreach (var original in originals)
+                {
+                    var bytes = await _originalService.GetOriginalBytesAsync(original.Id);
+
+                    await _originalService.AddOriginalAsync(
+                        new OriginalCreateParams
+                        {
+                            FileName = original.FileName,
+                            Bytes = bytes,
+                            EntityId = employee.Id,
+                            OriginalEntity = OriginalEntity.Employees
+                        });
+                }
+
+                return true;
             }
 
             // TODO: creating appointment
