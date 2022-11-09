@@ -51,11 +51,11 @@ Features. Iteration 4:
 
 Features. Iteration 4:
 
-// Add validations/middleware to handle exceptions to api
+// Add validations/middleware to handle exceptions to api +
 
 Features. Iteration 6: 
 
-// Add registration/authorization/authetication
+// Add registration/authorization/authetication +
 
 Features. Iteration 7:
 

@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PersonnelManagement.Application.FileOperations.Originals;
 using PersonnelManagement.Contracts.v1.Requests;
@@ -12,7 +14,6 @@ using PersonnelManagement.Domain.Models.Filters;
 using PersonnelManagement.Domain.Models.Originals;
 using PersonnelManagement.Server.Services.PaginationServices.Originals;
 using PersonnelManagement.Server.Services.UriServices;
-using Refit;
 using System.Reflection;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -20,6 +21,7 @@ using System.Reflection;
 namespace PersonnelManagement.Server.Controllers.v1
 {
     [ApiController]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class OriginalController : ControllerBase
     {
         private readonly IOriginalService _originalService;

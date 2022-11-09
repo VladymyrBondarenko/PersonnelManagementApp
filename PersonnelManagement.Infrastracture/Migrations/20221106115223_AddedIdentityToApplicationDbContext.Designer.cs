@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PersonnelManagement.Infrastracture.DbContexts;
 
@@ -11,9 +12,11 @@ using PersonnelManagement.Infrastracture.DbContexts;
 namespace PersonnelManagement.Infrastracture.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20221106115223_AddedIdentityToApplicationDbContext")]
+    partial class AddedIdentityToApplicationDbContext
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -86,10 +89,6 @@ namespace PersonnelManagement.Infrastracture.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Discriminator")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Email")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
@@ -141,10 +140,6 @@ namespace PersonnelManagement.Infrastracture.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
-
-                    b.HasDiscriminator<string>("Discriminator").HasValue("IdentityUser");
-
-                    b.UseTphMappingStrategy();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
@@ -175,10 +170,12 @@ namespace PersonnelManagement.Infrastracture.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
                     b.Property<string>("LoginProvider")
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("ProviderKey")
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("ProviderDisplayName")
                         .HasColumnType("nvarchar(max)");
@@ -215,10 +212,12 @@ namespace PersonnelManagement.Infrastracture.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("LoginProvider")
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("Value")
                         .HasColumnType("nvarchar(max)");
@@ -237,7 +236,7 @@ namespace PersonnelManagement.Infrastracture.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValueSql("getdate()");
+                        .HasDefaultValue(new DateTime(2022, 11, 6, 11, 52, 23, 582, DateTimeKind.Utc).AddTicks(9081));
 
                     b.Property<DateTime>("DateFrom")
                         .HasColumnType("datetime2");
@@ -267,7 +266,7 @@ namespace PersonnelManagement.Infrastracture.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValueSql("getdate()");
+                        .HasDefaultValue(new DateTime(2022, 11, 6, 11, 52, 23, 583, DateTimeKind.Utc).AddTicks(202));
 
                     b.Property<Guid?>("DepartmentId")
                         .HasColumnType("uniqueidentifier");
@@ -299,37 +298,6 @@ namespace PersonnelManagement.Infrastracture.Migrations
                     b.ToTable("Employees");
                 });
 
-            modelBuilder.Entity("PersonnelManagement.Domain.Models.Identities.RefreshToken", b =>
-                {
-                    b.Property<Guid>("Token")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreationDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("ExpiryDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("Invalidated")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsUsed")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("JwtId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Token");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("RefreshTokens");
-                });
-
             modelBuilder.Entity("PersonnelManagement.Domain.Models.Originals.Original", b =>
                 {
                     b.Property<Guid>("Id")
@@ -339,7 +307,7 @@ namespace PersonnelManagement.Infrastracture.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValueSql("getdate()");
+                        .HasDefaultValue(new DateTime(2022, 11, 6, 11, 52, 23, 583, DateTimeKind.Utc).AddTicks(511));
 
                     b.Property<Guid?>("EmployeeId")
                         .HasColumnType("uniqueidentifier");
@@ -379,7 +347,7 @@ namespace PersonnelManagement.Infrastracture.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValueSql("getdate()");
+                        .HasDefaultValue(new DateTime(2022, 11, 6, 11, 52, 23, 582, DateTimeKind.Utc).AddTicks(9854));
 
                     b.Property<DateTime>("DateFrom")
                         .HasColumnType("datetime2");
@@ -450,7 +418,7 @@ namespace PersonnelManagement.Infrastracture.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValueSql("getdate()");
+                        .HasDefaultValue(new DateTime(2022, 11, 6, 11, 52, 23, 582, DateTimeKind.Utc).AddTicks(9559));
 
                     b.Property<string>("PositionDescription")
                         .HasMaxLength(300)
@@ -463,20 +431,6 @@ namespace PersonnelManagement.Infrastracture.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Positions");
-                });
-
-            modelBuilder.Entity("PersonnelManagement.Domain.Models.Identities.IdentityUserModel", b =>
-                {
-                    b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityUser");
-
-                    b.Property<Guid?>("EmployeeId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasIndex("EmployeeId")
-                        .IsUnique()
-                        .HasFilter("[EmployeeId] IS NOT NULL");
-
-                    b.HasDiscriminator().HasValue("IdentityUserModel");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -547,16 +501,6 @@ namespace PersonnelManagement.Infrastracture.Migrations
                     b.Navigation("Position");
                 });
 
-            modelBuilder.Entity("PersonnelManagement.Domain.Models.Identities.RefreshToken", b =>
-                {
-                    b.HasOne("PersonnelManagement.Domain.Models.Identities.IdentityUserModel", "User")
-                        .WithMany("RefreshTokens")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("PersonnelManagement.Domain.Models.Originals.Original", b =>
                 {
                     b.HasOne("PersonnelManagement.Domain.Employees.Employee", "Employee")
@@ -606,16 +550,6 @@ namespace PersonnelManagement.Infrastracture.Migrations
                     b.Navigation("Position");
                 });
 
-            modelBuilder.Entity("PersonnelManagement.Domain.Models.Identities.IdentityUserModel", b =>
-                {
-                    b.HasOne("PersonnelManagement.Domain.Employees.Employee", "Employee")
-                        .WithOne("User")
-                        .HasForeignKey("PersonnelManagement.Domain.Models.Identities.IdentityUserModel", "EmployeeId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.Navigation("Employee");
-                });
-
             modelBuilder.Entity("PersonnelManagement.Domain.Departments.Department", b =>
                 {
                     b.Navigation("Employees");
@@ -628,8 +562,6 @@ namespace PersonnelManagement.Infrastracture.Migrations
                     b.Navigation("Orders");
 
                     b.Navigation("Originals");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("PersonnelManagement.Domain.Orders.Order", b =>
@@ -647,11 +579,6 @@ namespace PersonnelManagement.Infrastracture.Migrations
                     b.Navigation("Employees");
 
                     b.Navigation("Orders");
-                });
-
-            modelBuilder.Entity("PersonnelManagement.Domain.Models.Identities.IdentityUserModel", b =>
-                {
-                    b.Navigation("RefreshTokens");
                 });
 #pragma warning restore 612, 618
         }

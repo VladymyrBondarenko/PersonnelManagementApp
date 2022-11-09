@@ -12,12 +12,15 @@ using PersonnelManagement.Contracts.v1.Requests.Queries;
 using PersonnelManagement.Domain.Models.Filters;
 using PersonnelManagement.Server.Services.UriServices;
 using PersonnelManagement.Server.Services.PaginationServices.Departments;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace PersonnelManagement.Api.Controllers.v1
 {
     [ApiController]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class DepartmentController : ControllerBase
     {
         private readonly IDepartmentService _departmentService;

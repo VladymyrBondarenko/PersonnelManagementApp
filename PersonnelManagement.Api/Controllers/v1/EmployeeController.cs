@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PersonnelManagement.Application.Employees;
 using PersonnelManagement.Contracts.v1.Requests;
@@ -16,6 +18,7 @@ using PersonnelManagement.Server.Services.UriServices;
 namespace PersonnelManagement.Server.Controllers.v1
 {
     [ApiController]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class EmployeeController : ControllerBase
     {
         private readonly IEmployeeService _employeeService;

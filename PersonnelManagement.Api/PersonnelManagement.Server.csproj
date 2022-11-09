@@ -13,6 +13,7 @@
     <PackageReference Include="FluentValidation" Version="11.2.2" />
     <PackageReference Include="FluentValidation.AspNetCore" Version="11.2.2" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.2.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.10" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="6.0.9" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6.0.9" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="6.0.9" />
@@ -35,6 +36,10 @@
     <ProjectReference Include="..\PersonnelManagement.Contracts\PersonnelManagement.Contracts.csproj" />
     <ProjectReference Include="..\PersonnelManagement.Infrastracture\PersonnelManagement.Infrastracture.csproj" />
     <ProjectReference Include="..\PersonnelManagementApp\PersonnelManagement.Application.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Data\" />
   </ItemGroup>
 
 </Project>

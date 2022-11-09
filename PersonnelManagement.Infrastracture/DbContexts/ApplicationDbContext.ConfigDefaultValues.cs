@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using PersonnelManagement.Domain.Departments;
 using PersonnelManagement.Domain.Employees;
 using PersonnelManagement.Domain.Models.Originals;
@@ -12,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace PersonnelManagement.Infrastracture.DbContexts
 {
-    public partial class ApplicationDbContext : DbContext
+    public partial class ApplicationDbContext : IdentityDbContext
     {
         protected void ConfigureDefaultValues(ModelBuilder modelBuilder)
         {
@@ -27,35 +28,35 @@ namespace PersonnelManagement.Infrastracture.DbContexts
         {
             modelBuilder.Entity<Department>()
                 .Property(b => b.CreatedDate)
-                .HasDefaultValue(DateTime.UtcNow);
+                .HasDefaultValueSql("getdate()");
         }
 
         private void configuratePositionDefaults(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Position>()
                 .Property(b => b.CreatedDate)
-                .HasDefaultValue(DateTime.UtcNow);
+                .HasDefaultValueSql("getdate()");
         }
 
         private void configurateOrderDefaults(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Order>()
                 .Property(b => b.CreatedDate)
-                .HasDefaultValue(DateTime.UtcNow);
+                .HasDefaultValueSql("getdate()");
         }
 
         private void configurateEmployeeDefaults(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Employee>()
                 .Property(b => b.CreatedDate)
-                .HasDefaultValue(DateTime.UtcNow);
+                .HasDefaultValueSql("getdate()");
         }
 
         private void configurateOriginalDefaults(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Original>()
                 .Property(b => b.CreatedDate)
-                .HasDefaultValue(DateTime.UtcNow);
+                .HasDefaultValueSql("getdate()");
         }
     }
 }

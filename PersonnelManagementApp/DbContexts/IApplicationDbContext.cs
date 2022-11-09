@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PersonnelManagement.Domain.Departments;
 using PersonnelManagement.Domain.Employees;
+using PersonnelManagement.Domain.Models.Identities;
 using PersonnelManagement.Domain.Models.Originals;
 using PersonnelManagement.Domain.Orders;
 using PersonnelManagement.Domain.Positions;
@@ -25,6 +26,8 @@ namespace PersonnelManagement.Application.DbContexts
         public DbSet<Position> Positions { get; set; }
 
         public DbSet<Original> Originals { get; set; }
+
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
 
         public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     }

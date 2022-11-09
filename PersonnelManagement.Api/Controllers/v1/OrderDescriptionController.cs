@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PersonnelManagement.Application.Orders.Interfaces;
 using PersonnelManagement.Contracts.v1.Requests;
@@ -19,6 +21,7 @@ using PersonnelManagement.Server.Services.UriServices;
 namespace PersonnelManagement.Api.Controllers.v1
 {
     [ApiController]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class OrderDescriptionController : ControllerBase
     {
         private readonly IOrderDescriptionService _orderDescriptionService;

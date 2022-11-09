@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PersonnelManagement.Application.FileOperations.Originals;
 using PersonnelManagement.Application.Orders.Interfaces;
@@ -21,6 +23,7 @@ using System.Reflection;
 namespace PersonnelManagement.Api.Controllers.v1
 {
     [ApiController]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class OrderController : ControllerBase
     {
         private readonly IOrderService _orderService;

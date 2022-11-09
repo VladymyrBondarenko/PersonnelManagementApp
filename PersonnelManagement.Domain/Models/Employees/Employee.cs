@@ -1,4 +1,6 @@
-﻿using PersonnelManagement.Domain.Departments;
+﻿using Microsoft.AspNetCore.Identity;
+using PersonnelManagement.Domain.Departments;
+using PersonnelManagement.Domain.Models.Identities;
 using PersonnelManagement.Domain.Models.Originals;
 using PersonnelManagement.Domain.Orders;
 using PersonnelManagement.Domain.Positions;
@@ -39,6 +41,8 @@ namespace PersonnelManagement.Domain.Employees
         [ForeignKey(nameof(PositionId))]
         [AllowNull]
         public Position Position { get; set; }
+
+        public IdentityUserModel User { get; set; }
 
         public EmployeeState EmployeeState { get; set; }
 

@@ -1,5 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using PersonnelManagement.Domain.Employees;
+using PersonnelManagement.Domain.Models.Identities;
 using PersonnelManagement.Domain.Orders;
 using System;
 using System.Collections.Generic;
@@ -9,13 +12,15 @@ using System.Threading.Tasks;
 
 namespace PersonnelManagement.Infrastracture.DbContexts
 {
-    public partial class ApplicationDbContext : DbContext
+    public partial class ApplicationDbContext : IdentityDbContext
     {
         protected void ConfigureRelations(ModelBuilder modelBuilder)
         {
             configureEmployeesRelations(modelBuilder);
 
             configureOrdersRelations(modelBuilder);
+
+            configureIdentityRelations(modelBuilder);
         }
 
         private void configureEmployeesRelations(ModelBuilder modelBuilder)
@@ -43,6 +48,21 @@ namespace PersonnelManagement.Infrastracture.DbContexts
                 .WithOne(x => x.Employee)
                 .HasForeignKey(x => x.EmployeeId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Employee>()
+               .HasOne(x => x.User)
+               .WithOne(x => x.Employee)
+               .HasForeignKey<IdentityUserModel>(x => x.EmployeeId)
+               .OnDelete(DeleteBehavior.Restrict);
+        }
+
+        private void configureIdentityRelations(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<IdentityUserModel>()
+                .HasMany(x => x.RefreshTokens)
+                .WithOne(x => x.User)
+                .HasForeignKey(x => x.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
 
         private void configureOrdersRelations(ModelBuilder modelBuilder)

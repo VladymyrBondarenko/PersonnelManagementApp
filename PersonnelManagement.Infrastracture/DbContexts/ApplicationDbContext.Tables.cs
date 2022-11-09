@@ -1,14 +1,16 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using PersonnelManagement.Application.DbContexts;
 using PersonnelManagement.Domain.Departments;
 using PersonnelManagement.Domain.Employees;
+using PersonnelManagement.Domain.Models.Identities;
 using PersonnelManagement.Domain.Models.Originals;
 using PersonnelManagement.Domain.Orders;
 using PersonnelManagement.Domain.Positions;
 
 namespace PersonnelManagement.Infrastracture.DbContexts
 {
-    public partial class ApplicationDbContext : DbContext, IApplicationDbContext
+    public partial class ApplicationDbContext : IdentityDbContext, IApplicationDbContext
     {
         public ApplicationDbContext(DbContextOptions options) : base(options)
         {
@@ -25,5 +27,7 @@ namespace PersonnelManagement.Infrastracture.DbContexts
         public DbSet<Position> Positions { get; set; }
 
         public DbSet<Original> Originals { get; set; }
+
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
     }
 }
