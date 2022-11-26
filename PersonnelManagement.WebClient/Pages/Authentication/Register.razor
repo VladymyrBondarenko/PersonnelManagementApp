@@ -1,0 +1,101 @@
+﻿@page "/register"
+@using AutoMapper
+@using Microsoft.AspNetCore.Authorization
+@using PersonnelManagement.Contracts.v1.Requests.Identity
+@using PersonnelManagement.WebClient.Infrastructure.Managers.Identity
+@using PersonnelManagement.WebClient.Models
+@using Blazored.FluentValidation;
+@layout MainLayout
+@attribute [AllowAnonymous]
+
+@inject IIdentityManager identityManager
+@inject ISnackbar snackBar
+@inject IMapper mapper
+@inject NavigationManager navManager
+
+<EditForm Model="@registerModel" OnValidSubmit="SubmitAsync">
+    <FluentValidationValidator @ref="fluentValidationValidator" />
+    <MudGrid>
+        <MudItem xs="12">
+            <div class="d-flex justify-center">
+                <MudIcon Icon="@Icons.Filled.AppRegistration" Color="Color.Primary" Size="Size.Large" ViewBox="0 0 500 500" Style="width: 100px; height: 100px;" />
+            </div>
+        </MudItem>
+        <MudItem xs="12">
+            <div class="d-flex justify-center">
+                <MudText Typo="Typo.h4">Register</MudText>
+            </div>
+        </MudItem>
+        <MudItem  xs="12">
+            <div class="d-flex justify-center">
+                <MudText>Already have an account? <MudLink Href="/login">Sign In</MudLink></MudText>
+            </div>
+        </MudItem>
+        <MudItem  xs="12">
+            <MudTextField For="@(() => registerModel.UserName)" @bind-Value="registerModel.UserName" Label="User Name" />
+        </MudItem>
+        <MudItem  xs="12" sm="6" md="6">
+            <MudTextField For="@(() => registerModel.FirstName)" @bind-Value="registerModel.FirstName" Label="First Name" />
+        </MudItem>
+        <MudItem  xs="12" sm="6" md="6">
+            <MudTextField For="@(() => registerModel.LastName)" @bind-Value="registerModel.LastName" Label="Last Name" />
+        </MudItem>
+        <MudItem  xs="12" sm="6" md="6">
+            <MudTextField T="string" Label="E-mail" @bind-Value="registerModel.Email" For="@(() => registerModel.Email)" />
+        </MudItem>
+        <MudItem  xs="12" sm="6" md="6">
+            <MudTextField T="string" Label="Phone Number" @bind-Value="registerModel.PhoneNumber" For="@(() => registerModel.PhoneNumber)" />
+        </MudItem>
+        <MudItem  xs="12" sm="6" md="6">
+            <MudTextField For="@(() => registerModel.Password)" InputType="@passwordInput" Adornment="Adornment.End" AdornmentIcon="@passwordInputIcon" OnAdornmentClick="TogglePasswordVisibility" @bind-Value="registerModel.Password" Label="Password" />
+        </MudItem>
+        <MudItem  xs="12" sm="6" md="6">
+            <MudTextField For="@(() => registerModel.ConfirmPassword)" InputType="InputType.Password" @bind-Value="registerModel.ConfirmPassword" Label="Confirm Password" />
+        </MudItem>
+        <MudItem  xs="12" Class="d-flex justify-center">
+            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Disabled="@(!Validated)" Color="Color.Primary" Size="Size.Large" Style="width: 100%;">Register</MudButton>
+        </MudItem>
+    </MudGrid>
+</EditForm><h3>Register</h3>
+
+@code {
+    private RegisterModel registerModel = new();
+    private FluentValidationValidator fluentValidationValidator;
+    private bool Validated => fluentValidationValidator.Validate(options => { options.IncludeAllRuleSets(); });
+
+    private bool passwordVisibility;
+    private InputType passwordInput = InputType.Password;
+    private string passwordInputIcon = Icons.Material.Filled.VisibilityOff;
+
+    private async Task SubmitAsync()
+    {
+        var response = await identityManager.RegisterAsync(mapper.Map<UserRegistrationRequest>(registerModel));
+
+        if (!string.IsNullOrWhiteSpace(response?.Data?.Token))
+        {
+            snackBar.Add("Error", Severity.Success);
+            navManager.NavigateTo("/login");
+            registerModel = new RegisterModel();
+        }
+        else
+        {
+            snackBar.Add("Error", Severity.Error);
+        }
+    }
+
+    private void TogglePasswordVisibility()
+    {
+        if (passwordVisibility)
+        {
+            passwordVisibility = false;
+            passwordInputIcon = Icons.Material.Filled.VisibilityOff;
+            passwordInput = InputType.Password;
+        }
+        else
+        {
+            passwordVisibility = true;
+            passwordInputIcon = Icons.Material.Filled.Visibility;
+            passwordInput = InputType.Text;
+        }
+    }
+}

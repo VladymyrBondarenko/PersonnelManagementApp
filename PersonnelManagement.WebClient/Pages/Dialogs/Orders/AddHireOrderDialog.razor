@@ -10,6 +10,7 @@
 @using PersonnelManagement.WebClient.Infrastructure.Managers.Departments
 @using PersonnelManagement.WebClient.Infrastructure.Managers.Orders
 @using PersonnelManagement.WebClient.Infrastructure.Managers.Positions
+@using PersonnelManagement.WebClient.Models
 @using PersonnelManagement.WebClient.Pages.Dialogs
 @using static PersonnelManagement.WebClient.Pages.OrgStruct.Positions
 @using static PersonnelManagement.WebClient.Pages.Orders.Orders
@@ -169,7 +170,7 @@
     private async Task LoadPositions(string searchText = null)
     {
         var response = await positionManager.GetAllAsync(query: new GetAllPositionsQuery { SearchText = searchText });
-        var data = response.Content?.Data?.ToList();
+        var data = response?.Data?.ToList();
 
         if(data != null)
         {
@@ -180,7 +181,7 @@
     private async Task LoadDepartments(string searchText = null)
     {
         var response = await departmentManager.GetAllAsync(query: new GetAllDepartmentsQuery { SearchText = searchText });
-        var data = response.Content?.Data?.ToList();
+        var data = response?.Data?.ToList();
 
         if(data != null)
         {
@@ -245,8 +246,7 @@
 
                 var response = await orderManager.UpdateAsync(OrderModel.Id, updateRequest);
 
-                if (response.StatusCode == System.Net.HttpStatusCode.OK &&
-                    response.Content.Data != null)
+                if (response?.Data?.Id != default)
                 {
                     snackBar.Add("Order edited", Severity.Success);
                     OrderModel = new();
@@ -262,7 +262,7 @@
 
                 var response = await orderManager.CreateAsync(createRequest);
 
-                if (response.Content?.Data != null)
+                if (response?.Data != null)
                 {
                     snackBar.Add("Order added", Severity.Success);
                     OrderModel = new();

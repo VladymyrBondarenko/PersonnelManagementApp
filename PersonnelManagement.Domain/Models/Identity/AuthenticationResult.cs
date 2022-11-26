@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PersonnelManagement.Domain.Models.Identities
+namespace PersonnelManagement.Domain.Models.Identity
 {
     public class AuthenticationResult
     {

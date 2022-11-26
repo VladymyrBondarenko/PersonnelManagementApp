@@ -1,4 +1,5 @@
 ﻿@page "/originals/{EntityKey}/{OriginalEntity:int}"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize()]
 
 @using System.ComponentModel.DataAnnotations
 @using AutoMapper
@@ -7,6 +8,7 @@
 @using PersonnelManagement.Contracts.v1.Routes
 @using PersonnelManagement.Domain.Models.Originals
 @using PersonnelManagement.WebClient.Infrastructure.Managers.Originals
+@using PersonnelManagement.WebClient.Models
 @using PersonnelManagement.WebClient.Pages.Dialogs.Originals
 @using Refit
 
@@ -67,19 +69,6 @@
     private OriginalModel selectedItem = null;
     private int[] pageSizeOptions = new int[] { 5, 10, 15 };
 
-    public class OriginalModel
-    {
-        public Guid? Id { get; set; }
-
-        [Display(Name = "Title")]
-        public string OriginalTitle { get; set; }
-
-        public string OriginalPath { get; set; }
-
-        [Display(Name =  "Ext")]
-        public string OriginalFileExtension { get; set; }
-    }
-
     private MudTable<OriginalModel> table;
 
     private async Task Reset()
@@ -97,7 +86,7 @@
 
             var streamPart = new StreamPart(stream, file.Name, "multipart/form-data");
             var resp = await originalService.CreateAsync(OriginalEntity, new Guid(EntityKey), streamPart);
-            var data = resp.Content.Data;
+            var data = resp?.Data;
 
             if (data != null)
             {
@@ -145,13 +134,13 @@
             { 
                 PageNumber = state.Page + 1, PageSize = state.PageSize 
             }, query);
-        var data = response.Content?.Data?.ToList();
+        var data = response?.Data?.ToList();
 
         var grid = new TableData<OriginalModel>();
         if(data != null)
         {
             grid.Items = mapper.Map<List<OriginalModel>>(data);
-            grid.TotalItems = response.Content.TotalAmount;
+            grid.TotalItems = response.TotalAmount;
         }
         return grid;
     }

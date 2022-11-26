@@ -1,12 +1,15 @@
 ﻿using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using PersonnelManagement.Sdk.Departments;
+using PersonnelManagement.WebClient.Infrastructure.Authentication;
 using PersonnelManagement.WebClient.Infrastructure.Managers.Departments;
 using PersonnelManagement.WebClient.Infrastructure.Managers.Employees;
+using PersonnelManagement.WebClient.Infrastructure.Managers.Identity;
 using PersonnelManagement.WebClient.Infrastructure.Managers.Orders;
 using PersonnelManagement.WebClient.Infrastructure.Managers.Originals;
 using PersonnelManagement.WebClient.Infrastructure.Managers.Positions;
 using PersonnelManagement.WebClient.Options;
 using Refit;
+using System.Net.Http.Headers;
 
 namespace PersonnelManagement.WebClient.Installers
 {
@@ -21,7 +24,7 @@ namespace PersonnelManagement.WebClient.Installers
             builder.Services.AddHttpClient(managersOptions.ClientName, config =>
             {
                 config.BaseAddress = new Uri(managersOptions.ApiBaseUrl);
-            });
+            }).AddHttpMessageHandler<AuthenticationHeaderHandler>();
 
             builder.Services.AddScoped<IOriginalManager, OriginalManager>();
             builder.Services.AddScoped<IDepartmentManager, DepartmentManager>();
@@ -29,6 +32,7 @@ namespace PersonnelManagement.WebClient.Installers
             builder.Services.AddScoped<IOrderDescriptionManager, OrderDescriptionManager>();
             builder.Services.AddScoped<IOrderManager, OrderManager>();
             builder.Services.AddScoped<IEmployeeManager, EmployeeManager>();
+            builder.Services.AddScoped<IIdentityManager, IdentityManager>();
         }
     }
 }

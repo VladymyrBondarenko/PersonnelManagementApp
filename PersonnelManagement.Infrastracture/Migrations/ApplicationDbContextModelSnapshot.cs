@@ -299,7 +299,7 @@ namespace PersonnelManagement.Infrastracture.Migrations
                     b.ToTable("Employees");
                 });
 
-            modelBuilder.Entity("PersonnelManagement.Domain.Models.Identities.RefreshToken", b =>
+            modelBuilder.Entity("PersonnelManagement.Domain.Models.Identity.RefreshToken", b =>
                 {
                     b.Property<Guid>("Token")
                         .ValueGeneratedOnAdd()
@@ -465,12 +465,18 @@ namespace PersonnelManagement.Infrastracture.Migrations
                     b.ToTable("Positions");
                 });
 
-            modelBuilder.Entity("PersonnelManagement.Domain.Models.Identities.IdentityUserModel", b =>
+            modelBuilder.Entity("PersonnelManagement.Domain.Models.Identity.IdentityUserModel", b =>
                 {
                     b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityUser");
 
                     b.Property<Guid?>("EmployeeId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("FirstName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("LastName")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasIndex("EmployeeId")
                         .IsUnique()
@@ -547,9 +553,9 @@ namespace PersonnelManagement.Infrastracture.Migrations
                     b.Navigation("Position");
                 });
 
-            modelBuilder.Entity("PersonnelManagement.Domain.Models.Identities.RefreshToken", b =>
+            modelBuilder.Entity("PersonnelManagement.Domain.Models.Identity.RefreshToken", b =>
                 {
-                    b.HasOne("PersonnelManagement.Domain.Models.Identities.IdentityUserModel", "User")
+                    b.HasOne("PersonnelManagement.Domain.Models.Identity.IdentityUserModel", "User")
                         .WithMany("RefreshTokens")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
@@ -606,11 +612,11 @@ namespace PersonnelManagement.Infrastracture.Migrations
                     b.Navigation("Position");
                 });
 
-            modelBuilder.Entity("PersonnelManagement.Domain.Models.Identities.IdentityUserModel", b =>
+            modelBuilder.Entity("PersonnelManagement.Domain.Models.Identity.IdentityUserModel", b =>
                 {
                     b.HasOne("PersonnelManagement.Domain.Employees.Employee", "Employee")
                         .WithOne("User")
-                        .HasForeignKey("PersonnelManagement.Domain.Models.Identities.IdentityUserModel", "EmployeeId")
+                        .HasForeignKey("PersonnelManagement.Domain.Models.Identity.IdentityUserModel", "EmployeeId")
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Employee");
@@ -649,7 +655,7 @@ namespace PersonnelManagement.Infrastracture.Migrations
                     b.Navigation("Orders");
                 });
 
-            modelBuilder.Entity("PersonnelManagement.Domain.Models.Identities.IdentityUserModel", b =>
+            modelBuilder.Entity("PersonnelManagement.Domain.Models.Identity.IdentityUserModel", b =>
                 {
                     b.Navigation("RefreshTokens");
                 });

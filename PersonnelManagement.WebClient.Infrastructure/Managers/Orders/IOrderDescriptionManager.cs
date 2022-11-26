@@ -9,10 +9,10 @@ namespace PersonnelManagement.WebClient.Infrastructure.Managers.Orders
 {
     public interface IOrderDescriptionManager
     {
-        Task<ApiResponse<Response<GetOrderDescriptionResponse>>> CreateAsync(CreateOrderDescriptionRequest createRequest);
+        Task<Response<GetOrderDescriptionResponse>> CreateAsync(CreateOrderDescriptionRequest createRequest);
         Task<IApiResponse> DeleteAsync(Guid id);
-        Task<ApiResponse<PagedResponse<GetOrderDescriptionResponse>>> GetAllAsync(PaginationQueryRequest queryRequest = null, GetAllOrderDescriptionsQuery query = null);
-        Task<ApiResponse<Response<GetOrderDescriptionResponse>>> GetAsync(Guid id);
-        Task<ApiResponse<Response<GetOrderDescriptionResponse>>> UpdateAsync(Guid orderDescriptionId, UpdateOrderDescriptionRequest updateRequest);
+        Task<PagedResponse<GetOrderDescriptionResponse>> GetAllAsync(PaginationQueryRequest queryRequest = null, GetAllOrderDescriptionsQuery query = null);
+        Task<Response<GetOrderDescriptionResponse>> GetAsync(Guid id);
+        Task<Response<GetOrderDescriptionResponse>> UpdateAsync(Guid orderDescriptionId, UpdateOrderDescriptionRequest updateRequest);
     }
 }

@@ -9,11 +9,11 @@ namespace PersonnelManagement.WebClient.Infrastructure.Managers.Originals
 {
     public interface IOriginalManager
     {
-        Task<ApiResponse<Response<GetOriginalResponse>>> CreateAsync(int originalEntity, Guid entityId, StreamPart file);
+        Task<Response<GetOriginalResponse>> CreateAsync(int originalEntity, Guid entityId, StreamPart file);
         Task<IApiResponse> DeleteAsync(Guid originalId);
-        Task<ApiResponse<PagedResponse<GetOriginalResponse>>> GetAllAsync(PaginationQueryRequest queryRequest = null, GetAllOriginalsQuery query = null);
-        Task<ApiResponse<Response<GetOriginalResponse>>> GetAsync(Guid originalId);
+        Task<PagedResponse<GetOriginalResponse>> GetAllAsync(PaginationQueryRequest queryRequest = null, GetAllOriginalsQuery query = null);
+        Task<Response<GetOriginalResponse>> GetAsync(Guid originalId);
         string GetFileDownloadEndpoint(Guid originalId);
-        Task<ApiResponse<Response<GetOriginalResponse>>> UpdateAsync(Guid originalId, UpdateOriginalRequest updateRequest);
+        Task<Response<GetOriginalResponse>> UpdateAsync(Guid originalId, UpdateOriginalRequest updateRequest);
     }
 }

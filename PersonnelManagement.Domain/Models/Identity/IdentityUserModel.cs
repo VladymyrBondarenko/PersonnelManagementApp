@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PersonnelManagement.Domain.Models.Identities
+namespace PersonnelManagement.Domain.Models.Identity
 {
     public class IdentityUserModel : IdentityUser
     {
@@ -17,6 +17,10 @@ namespace PersonnelManagement.Domain.Models.Identities
         [ForeignKey(nameof(EmployeeId))]
         [AllowNull()]
         public Employee Employee { get; set; }
+
+        public string FirstName { get; set; }
+
+        public string LastName { get; set; }
 
         public ICollection<RefreshToken> RefreshTokens { get; set; }
     }

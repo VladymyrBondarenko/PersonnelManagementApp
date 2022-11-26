@@ -16,15 +16,19 @@ namespace PersonnelManagement.Sdk.Positions
     public interface IPositionRestService
     {
         [Get($"/{ApiRoutes.Positions.GetAll}")]
+        [Headers("Authorization: Bearer")]
         Task<ApiResponse<PagedResponse<GetPositionResponse>>> GetAllAsync(PaginationQueryRequest queryRequest = null, GetAllPositionsQuery query = null);
 
         [Post($"/{ApiRoutes.Positions.Create}")]
+        [Headers("Authorization: Bearer")]
         Task<ApiResponse<Response<GetPositionResponse>>> CreateAsync(CreatePositionRequest createRequest);
 
         [Put($"/{ApiRoutes.Positions.Update}")]
+        [Headers("Authorization: Bearer")]
         Task<ApiResponse<Response<GetPositionResponse>>> UpdateAsync(Guid positionId, UpdatePositionRequest updateRequest);
 
         [Delete($"/{ApiRoutes.Positions.Delete}")]
+        [Headers("Authorization: Bearer")]
         Task<IApiResponse> DeleteAsync(Guid positionId);
     }
 }

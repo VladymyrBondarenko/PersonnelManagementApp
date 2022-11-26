@@ -25,22 +25,55 @@ namespace PersonnelManagement.WebClient.Infrastructure.Managers.Positions
             _positionService = RestService.For<IPositionRestService>(httpClient);
         }
 
-        public async Task<ApiResponse<PagedResponse<GetPositionResponse>>> GetAllAsync(PaginationQueryRequest queryRequest = null, GetAllPositionsQuery query = null)
+        public async Task<PagedResponse<GetPositionResponse>> GetAllAsync(PaginationQueryRequest queryRequest = null, GetAllPositionsQuery query = null)
         {
-            var response = await _positionService.GetAllAsync(queryRequest, query);
-            return response;
+            try
+            {
+                var response = await _positionService.GetAllAsync(queryRequest, query);
+                return response?.Content;
+            }
+            catch (HttpRequestException)
+            {
+                return new PagedResponse<GetPositionResponse>();
+            }
+            catch (ApiException)
+            {
+                return new PagedResponse<GetPositionResponse>();
+            }
         }
 
-        public async Task<ApiResponse<Response<GetPositionResponse>>> CreateAsync(CreatePositionRequest createRequest)
+        public async Task<Response<GetPositionResponse>> CreateAsync(CreatePositionRequest createRequest)
         {
-            var response = await _positionService.CreateAsync(createRequest);
-            return response;
+            try
+            {
+                var response = await _positionService.CreateAsync(createRequest);
+                return response?.Content;
+            }
+            catch (HttpRequestException)
+            {
+                return new Response<GetPositionResponse>(new GetPositionResponse());
+            }
+            catch (ApiException)
+            {
+                return new Response<GetPositionResponse>(new GetPositionResponse());
+            }
         }
 
-        public async Task<ApiResponse<Response<GetPositionResponse>>> UpdateAsync(Guid positionId, UpdatePositionRequest updateRequest)
+        public async Task<Response<GetPositionResponse>> UpdateAsync(Guid positionId, UpdatePositionRequest updateRequest)
         {
-            var response = await _positionService.UpdateAsync(positionId, updateRequest);
-            return response;
+            try
+            {
+                var response = await _positionService.UpdateAsync(positionId, updateRequest);
+                return response?.Content;
+            }
+            catch (HttpRequestException)
+            {
+                return new Response<GetPositionResponse>(new GetPositionResponse());
+            }
+            catch (ApiException)
+            {
+                return new Response<GetPositionResponse>(new GetPositionResponse());
+            }
         }
 
         public async Task<IApiResponse> DeleteAsync(Guid id)

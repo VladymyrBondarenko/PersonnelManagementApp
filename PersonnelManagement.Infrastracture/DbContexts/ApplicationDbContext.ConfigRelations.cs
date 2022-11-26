@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using PersonnelManagement.Domain.Employees;
-using PersonnelManagement.Domain.Models.Identities;
+using PersonnelManagement.Domain.Models.Identity;
 using PersonnelManagement.Domain.Orders;
 using System;
 using System.Collections.Generic;

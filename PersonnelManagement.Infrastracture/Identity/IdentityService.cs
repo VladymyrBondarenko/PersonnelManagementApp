@@ -2,7 +2,7 @@
 using Microsoft.IdentityModel.Tokens;
 using PersonnelManagement.Application.DbContexts;
 using PersonnelManagement.Application.Identities;
-using PersonnelManagement.Domain.Models.Identities;
+using PersonnelManagement.Domain.Models.Identity;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
@@ -30,25 +30,28 @@ namespace PersonnelManagement.Infrastracture.Identity
             _dbContext = dbContext;
         }
 
-        public async Task<AuthenticationResult> RegisterAsync(string email, string password)
+        public async Task<AuthenticationResult> RegisterAsync(UserRegistrationQuery userRegistrationQuery)
         {
-            var existingUser = await _userManager.FindByEmailAsync(email);
+            var existingUser = await _userManager.FindByEmailAsync(userRegistrationQuery.Email);
 
             if (existingUser != null)
             {
                 return new AuthenticationResult
                 {
-                    Errors = new[] { $"User with email '{email}' already exists. Try to use another one." }
+                    Errors = new[] { $"User with email '{userRegistrationQuery.Email}' already exists. Try to use another one." }
                 };
             }
 
             var user = new IdentityUserModel
             {
-                Email = email,
-                UserName = email
+                Email = userRegistrationQuery.Email,
+                UserName = userRegistrationQuery.UserName,
+                FirstName = userRegistrationQuery.FirstName,
+                LastName = userRegistrationQuery.LastName,
+                PhoneNumber = userRegistrationQuery.PhoneNumber
             };
 
-            var createdUser = await _userManager.CreateAsync(user, password);
+            var createdUser = await _userManager.CreateAsync(user, userRegistrationQuery.Password);
 
             if (!createdUser.Succeeded)
             {

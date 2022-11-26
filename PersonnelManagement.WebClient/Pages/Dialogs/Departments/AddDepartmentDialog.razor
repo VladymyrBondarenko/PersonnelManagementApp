@@ -5,6 +5,7 @@
 @using PersonnelManagement.WebClient.Infrastructure.Managers.Departments
 @using System.Net.Http.Json
 @using System.ComponentModel.DataAnnotations
+@using PersonnelManagement.WebClient.Models
 @using PersonnelManagement.WebClient.Pages.Dialogs
 
 @inject IDialogService dialogService
@@ -63,8 +64,7 @@
                 };
                 var response = await departmentManager.UpdateAsync(model.Id, updateRequest);
 
-                if (response.StatusCode == System.Net.HttpStatusCode.OK &&
-                    response.Content.Data != null)
+                if (response?.Data?.Id != default)
                 {
                     snackBar.Add("Department edited", Severity.Success);
                     model = new();
@@ -84,7 +84,7 @@
                 };
                 var response = await departmentManager.CreateAsync(createRequest);
 
-                if (response.Content?.Data != null)
+                if (response?.Data != null)
                 {
                     snackBar.Add("Department added", Severity.Success);
                     model = new();

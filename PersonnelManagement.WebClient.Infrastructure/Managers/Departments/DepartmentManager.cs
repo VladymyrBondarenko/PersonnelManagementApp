@@ -25,22 +25,55 @@ namespace PersonnelManagement.WebClient.Infrastructure.Managers.Departments
             _departmentService = RestService.For<IDepartmentRestService>(httpClient);
         }
 
-        public async Task<ApiResponse<PagedResponse<GetDepartmentResponse>>> GetAllAsync(PaginationQueryRequest queryRequest = null, GetAllDepartmentsQuery query = null)
+        public async Task<PagedResponse<GetDepartmentResponse>> GetAllAsync(PaginationQueryRequest queryRequest = null, GetAllDepartmentsQuery query = null)
         {
-            var response = await _departmentService.GetAllAsync(queryRequest, query);
-            return response;
+            try
+            {
+                var response = await _departmentService.GetAllAsync(queryRequest, query);
+                return response?.Content;
+            }
+            catch (HttpRequestException)
+            {
+                return new PagedResponse<GetDepartmentResponse>();
+            }
+            catch (ApiException)
+            {
+                return new PagedResponse<GetDepartmentResponse>();
+            }
         }
 
-        public async Task<ApiResponse<Response<GetDepartmentResponse>>> CreateAsync(CreateDepartmentRequest createRequest)
+        public async Task<Response<GetDepartmentResponse>> CreateAsync(CreateDepartmentRequest createRequest)
         {
-            var response = await _departmentService.CreateAsync(createRequest);
-            return response;
+            try
+            {
+                var response = await _departmentService.CreateAsync(createRequest);
+                return response?.Content;
+            }
+            catch (HttpRequestException)
+            {
+                return new Response<GetDepartmentResponse>(new GetDepartmentResponse());
+            }
+            catch (ApiException)
+            {
+                return new Response<GetDepartmentResponse>(new GetDepartmentResponse());
+            }
         }
 
-        public async Task<ApiResponse<Response<GetDepartmentResponse>>> UpdateAsync(Guid departmentId, UpdateDepartmentRequest updateRequest)
+        public async Task<Response<GetDepartmentResponse>> UpdateAsync(Guid departmentId, UpdateDepartmentRequest updateRequest)
         {
-            var response = await _departmentService.UpdateAsync(departmentId, updateRequest);
-            return response;
+            try
+            {
+                var response = await _departmentService.UpdateAsync(departmentId, updateRequest);
+                return response?.Content;
+            }
+            catch (HttpRequestException)
+            {
+                return new Response<GetDepartmentResponse>(new GetDepartmentResponse());
+            }
+            catch (ApiException)
+            {
+                return new Response<GetDepartmentResponse>(new GetDepartmentResponse());
+            }
         }
 
         public async Task<IApiResponse> DeleteAsync(Guid id)

@@ -12,6 +12,7 @@
 @using PersonnelManagement.WebClient.Infrastructure.Managers.Employees
 @using PersonnelManagement.WebClient.Infrastructure.Managers.Orders
 @using PersonnelManagement.WebClient.Infrastructure.Managers.Positions
+@using PersonnelManagement.WebClient.Models
 @using PersonnelManagement.WebClient.Pages.Dialogs
 @using static PersonnelManagement.WebClient.Pages.Employees.Employees
 @using static PersonnelManagement.WebClient.Pages.OrgStruct.Positions
@@ -127,7 +128,7 @@
     private async Task LoadEmployees(string searchText = null)
     {
         var response = await employeeManager.GetAllAsync(query: new GetAllEmployeesQuery { SearchText = searchText });
-        var data = response.Content?.Data?.ToList();
+        var data = response?.Data?.ToList();
 
         if(data != null)
         {
@@ -179,8 +180,7 @@
 
                 var response = await orderManager.UpdateAsync(OrderModel.Id, updateRequest);
 
-                if (response.StatusCode == System.Net.HttpStatusCode.OK &&
-                    response.Content.Data != null)
+                if (response?.Data?.Id != default)
                 {
                     snackBar.Add("Order edited", Severity.Success);
                     OrderModel = new();
@@ -196,7 +196,7 @@
 
                 var response = await orderManager.CreateAsync(createRequest);
 
-                if (response.Content?.Data != null)
+                if (response?.Data != null)
                 {
                     snackBar.Add("Order added", Severity.Success);
                     OrderModel = new();

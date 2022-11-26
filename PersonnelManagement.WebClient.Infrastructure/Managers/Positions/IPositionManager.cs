@@ -9,9 +9,9 @@ namespace PersonnelManagement.WebClient.Infrastructure.Managers.Positions
 {
     public interface IPositionManager
     {
-        Task<ApiResponse<Response<GetPositionResponse>>> CreateAsync(CreatePositionRequest createRequest);
+        Task<Response<GetPositionResponse>> CreateAsync(CreatePositionRequest createRequest);
         Task<IApiResponse> DeleteAsync(Guid id);
-        Task<ApiResponse<PagedResponse<GetPositionResponse>>> GetAllAsync(PaginationQueryRequest queryRequest = null, GetAllPositionsQuery query = null);
-        Task<ApiResponse<Response<GetPositionResponse>>> UpdateAsync(Guid positionId, UpdatePositionRequest updateRequest);
+        Task<PagedResponse<GetPositionResponse>> GetAllAsync(PaginationQueryRequest queryRequest = null, GetAllPositionsQuery query = null);
+        Task<Response<GetPositionResponse>> UpdateAsync(Guid positionId, UpdatePositionRequest updateRequest);
     }
 }

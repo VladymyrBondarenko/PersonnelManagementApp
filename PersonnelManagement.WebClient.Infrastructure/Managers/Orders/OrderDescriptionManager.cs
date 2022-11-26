@@ -25,28 +25,72 @@ namespace PersonnelManagement.WebClient.Infrastructure.Managers.Orders
             _orderDescService = RestService.For<IOrderDescriptionRestService>(httpClient);
         }
 
-        public async Task<ApiResponse<Response<GetOrderDescriptionResponse>>> GetAsync(Guid id)
+        public async Task<Response<GetOrderDescriptionResponse>> GetAsync(Guid id)
         {
-            var response = await _orderDescService.Get(id);
-            return response;
+            try
+            {
+                var response = await _orderDescService.Get(id);
+                return response?.Content;
+            }
+            catch (HttpRequestException)
+            {
+                return new Response<GetOrderDescriptionResponse>(new GetOrderDescriptionResponse());
+            }
+            catch (ApiException)
+            {
+                return new Response<GetOrderDescriptionResponse>(new GetOrderDescriptionResponse());
+            }
         }
 
-        public async Task<ApiResponse<PagedResponse<GetOrderDescriptionResponse>>> GetAllAsync(PaginationQueryRequest queryRequest = null, GetAllOrderDescriptionsQuery query = null)
+        public async Task<PagedResponse<GetOrderDescriptionResponse>> GetAllAsync(PaginationQueryRequest queryRequest = null, GetAllOrderDescriptionsQuery query = null)
         {
-            var response = await _orderDescService.GetAllAsync(queryRequest, query);
-            return response;
+            try
+            {
+                var response = await _orderDescService.GetAllAsync(queryRequest, query);
+                return response?.Content;
+            }
+            catch (HttpRequestException)
+            {
+                return new PagedResponse<GetOrderDescriptionResponse>();
+            }
+            catch (ApiException)
+            {
+                return new PagedResponse<GetOrderDescriptionResponse>();
+            }
         }
 
-        public async Task<ApiResponse<Response<GetOrderDescriptionResponse>>> CreateAsync(CreateOrderDescriptionRequest createRequest)
+        public async Task<Response<GetOrderDescriptionResponse>> CreateAsync(CreateOrderDescriptionRequest createRequest)
         {
-            var response = await _orderDescService.CreateAsync(createRequest);
-            return response;
+            try
+            {
+                var response = await _orderDescService.CreateAsync(createRequest);
+                return response?.Content;
+            }
+            catch (HttpRequestException)
+            {
+                return new Response<GetOrderDescriptionResponse>(new GetOrderDescriptionResponse());
+            }
+            catch (ApiException)
+            {
+                return new Response<GetOrderDescriptionResponse>(new GetOrderDescriptionResponse());
+            }
         }
 
-        public async Task<ApiResponse<Response<GetOrderDescriptionResponse>>> UpdateAsync(Guid orderDescriptionId, UpdateOrderDescriptionRequest updateRequest)
+        public async Task<Response<GetOrderDescriptionResponse>> UpdateAsync(Guid orderDescriptionId, UpdateOrderDescriptionRequest updateRequest)
         {
-            var response = await _orderDescService.UpdateAsync(orderDescriptionId, updateRequest);
-            return response;
+            try
+            {
+                var response = await _orderDescService.UpdateAsync(orderDescriptionId, updateRequest);
+                return response?.Content;
+            }
+            catch (HttpRequestException)
+            {
+                return new Response<GetOrderDescriptionResponse>(new GetOrderDescriptionResponse());
+            }
+            catch (ApiException)
+            {
+                return new Response<GetOrderDescriptionResponse>(new GetOrderDescriptionResponse());
+            }
         }
 
         public async Task<IApiResponse> DeleteAsync(Guid id)

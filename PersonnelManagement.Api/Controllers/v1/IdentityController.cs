@@ -1,10 +1,13 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PersonnelManagement.Application.Identities;
 using PersonnelManagement.Contracts.v1.Requests.Identity;
+using PersonnelManagement.Contracts.v1.Responses;
 using PersonnelManagement.Contracts.v1.Responses.Identity;
 using PersonnelManagement.Contracts.v1.Routes;
+using PersonnelManagement.Domain.Models.Identity;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -14,23 +17,34 @@ namespace PersonnelManagement.Server.Controllers.v1
     public class IdentityController : ControllerBase
     {
         private readonly IIdentityService _identityService;
+        private readonly IMapper _mapper;
 
-        public IdentityController(IIdentityService identityService)
+        public IdentityController(IIdentityService identityService, IMapper mapper)
         {
             _identityService = identityService;
+            _mapper = mapper;
         }
 
         [HttpPost(ApiRoutes.Identity.Register)]
         public async Task<IActionResult> Register([FromBody] UserRegistrationRequest request)
         {
-            var res = await _identityService.RegisterAsync(request.Email, request.Password);
+            var registractionQuery = _mapper.Map<UserRegistrationQuery>(request);
+            var res = await _identityService.RegisterAsync(registractionQuery);
 
             if (!res.Success)
             {
-                return BadRequest(new AuthFailedResponse { Errors = res.Errors });
+                return BadRequest(new ErrorResponse 
+                { 
+                    Errors = res.Errors.Select(x => new ErrorModel { Message = x }).ToList()
+                });
             }
 
-            return Ok(new AuthSuccessResponse { Token = res.Token, RefreshToken = res.RefreshToken });
+            return Ok(new Response<AuthSuccessResponse>(
+                new AuthSuccessResponse 
+                { 
+                    Token = res.Token, 
+                    RefreshToken = res.RefreshToken 
+                }));
         }
 
         [HttpPost(ApiRoutes.Identity.Login)]
@@ -40,10 +54,18 @@ namespace PersonnelManagement.Server.Controllers.v1
 
             if (!res.Success)
             {
-                return BadRequest(new AuthFailedResponse { Errors = res.Errors });
+                return BadRequest(new ErrorResponse
+                {
+                    Errors = res.Errors.Select(x => new ErrorModel { Message = x }).ToList()
+                });
             }
-
-            return Ok(new AuthSuccessResponse { Token = res.Token, RefreshToken = res.RefreshToken });
+            ;
+            return Ok(new Response<AuthSuccessResponse>(
+                new AuthSuccessResponse 
+                { 
+                    Token = res.Token, 
+                    RefreshToken = res.RefreshToken 
+                }));
         }
 
         [HttpPost(ApiRoutes.Identity.Refresh)]
@@ -53,10 +75,18 @@ namespace PersonnelManagement.Server.Controllers.v1
 
             if (!res.Success)
             {
-                return BadRequest(new AuthFailedResponse { Errors = res.Errors });
+                return BadRequest(new ErrorResponse
+                {
+                    Errors = res.Errors.Select(x => new ErrorModel { Message = x }).ToList()
+                });
             }
 
-            return Ok(new AuthSuccessResponse { Token = res.Token, RefreshToken = res.RefreshToken });
+            return Ok(new Response<AuthSuccessResponse>(
+                new AuthSuccessResponse 
+                { 
+                    Token = res.Token, 
+                    RefreshToken = res.RefreshToken 
+                }));
         }
     }
 }

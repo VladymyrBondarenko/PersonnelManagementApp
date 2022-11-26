@@ -1,8 +1,9 @@
 ﻿@page "/ordersDescription"
-@using System.ComponentModel.DataAnnotations
+@attribute [Microsoft.AspNetCore.Authorization.Authorize()]
+
 @using PersonnelManagement.Contracts.v1.Requests.Queries
-@using PersonnelManagement.Domain.Orders
 @using PersonnelManagement.WebClient.Infrastructure.Managers.Orders
+@using PersonnelManagement.WebClient.Models
 @using PersonnelManagement.WebClient.Pages.Dialogs.Orders
 @using static PersonnelManagement.WebClient.Pages.Orders.Orders
 
@@ -55,21 +56,6 @@
     private bool isOpen;
 
     private MudTable<OrderDescriptionModel> table;
-
-    public class OrderDescriptionModel
-    {
-        public Guid Id { get; set; }
-
-        [Display(Name = "Type")]
-        [Required]
-        public OrderType OrderType { get; set; }
-
-        [Display(Name = "Title")]
-        [Required]
-        public string OrderDescriptionTitle { get; set; }
-
-        public List<OrderModel> Orders { get; set; }
-    }
 
     private async Task FilterFunc()
     {
@@ -126,7 +112,7 @@
                 PageNumber = state.Page + 1, PageSize = state.PageSize 
             }, query);
 
-        var data = response.Content?.Data?.ToList();
+        var data = response?.Data?.ToList();
 
         var grid = new TableData<OrderDescriptionModel>();
         if(data != null)
@@ -137,7 +123,7 @@
                     OrderDescriptionTitle = x.OrderDescriptionTitle, 
                     OrderType = x.OrderType 
                 }).ToList();
-            grid.TotalItems = response.Content.TotalAmount;
+            grid.TotalItems = response.TotalAmount;
         }
         return grid;
     }

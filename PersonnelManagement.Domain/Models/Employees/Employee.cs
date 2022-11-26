@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using PersonnelManagement.Domain.Departments;
-using PersonnelManagement.Domain.Models.Identities;
+using PersonnelManagement.Domain.Models.Identity;
 using PersonnelManagement.Domain.Models.Originals;
 using PersonnelManagement.Domain.Orders;
 using PersonnelManagement.Domain.Positions;

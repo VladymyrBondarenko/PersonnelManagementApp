@@ -18,21 +18,27 @@ namespace PersonnelManagement.Sdk.Orders
     public interface IOrderRestService
     {
         [Get($"/{ApiRoutes.Orders.GetAll}")]
+        [Headers("Authorization: Bearer")]
         Task<ApiResponse<PagedResponse<GetOrderResponse>>> GetAllAsync(PaginationQueryRequest queryRequest = null, GetAllOrdersQuery query = null);
 
         [Post($"/{ApiRoutes.Orders.Create}")]
+        [Headers("Authorization: Bearer")]
         Task<ApiResponse<Response<GetOrderResponse>>> CreateAsync(CreateOrderRequest createRequest);
 
         [Put($"/{ApiRoutes.Orders.Update}")]
+        [Headers("Authorization: Bearer")]
         Task<ApiResponse<Response<GetOrderResponse>>> UpdateAsync(Guid orderId, UpdateOrderRequest updateRequest);
 
         [Delete($"/{ApiRoutes.Orders.Delete}")]
+        [Headers("Authorization: Bearer")]
         Task<IApiResponse> DeleteAsync(Guid orderId);
 
         [Post($"/{ApiRoutes.Orders.AcceptOrder}")]
+        [Headers("Authorization: Bearer")]
         Task<ApiResponse<Response<AcceptOrderSuccessResponse>>> AcceptOrder(Guid orderId);
 
         [Post($"/{ApiRoutes.Orders.RollbackOrder}")]
+        [Headers("Authorization: Bearer")]
         Task<ApiResponse<Response<AcceptOrderSuccessResponse>>> RollbackOrder(Guid orderId);
     }
 }

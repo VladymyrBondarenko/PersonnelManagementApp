@@ -9,9 +9,9 @@ namespace PersonnelManagement.WebClient.Infrastructure.Managers.Employees
 {
     public interface IEmployeeManager
     {
-        Task<ApiResponse<Response<GetEmployeeResponse>>> CreateAsync(CreateEmployeeRequest createRequest);
+        Task<Response<GetEmployeeResponse>> CreateAsync(CreateEmployeeRequest createRequest);
         Task<IApiResponse> DeleteAsync(Guid id);
-        Task<ApiResponse<PagedResponse<GetEmployeeResponse>>> GetAllAsync(PaginationQueryRequest queryRequest = null, GetAllEmployeesQuery query = null);
-        Task<ApiResponse<Response<GetEmployeeResponse>>> UpdateAsync(Guid orderDescriptionId, UpdateEmployeeRequest updateRequest);
+        Task<PagedResponse<GetEmployeeResponse>> GetAllAsync(PaginationQueryRequest queryRequest = null, GetAllEmployeesQuery query = null);
+        Task<Response<GetEmployeeResponse>> UpdateAsync(Guid orderDescriptionId, UpdateEmployeeRequest updateRequest);
     }
 }

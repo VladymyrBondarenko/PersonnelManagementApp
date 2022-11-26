@@ -8,7 +8,7 @@ using PersonnelManagement.Application.FileOperations.Originals;
 using PersonnelManagement.Application.Identities;
 using PersonnelManagement.Application.Orders.Interfaces;
 using PersonnelManagement.Application.Positions;
-using PersonnelManagement.Domain.Models.Identities;
+using PersonnelManagement.Domain.Models.Identity;
 using PersonnelManagement.Infrastracture.DbContexts;
 using PersonnelManagement.Infrastracture.Departments;
 using PersonnelManagement.Infrastracture.Employees;

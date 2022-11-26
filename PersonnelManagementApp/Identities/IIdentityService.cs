@@ -1,4 +1,4 @@
-﻿using PersonnelManagement.Domain.Models.Identities;
+﻿using PersonnelManagement.Domain.Models.Identity;
 
 namespace PersonnelManagement.Application.Identities
 {
@@ -6,6 +6,6 @@ namespace PersonnelManagement.Application.Identities
     {
         Task<AuthenticationResult> LoginAsync(string email, string password);
         Task<AuthenticationResult> RefreshTokenAsync(string token, Guid refreshToken);
-        Task<AuthenticationResult> RegisterAsync(string email, string password);
+        Task<AuthenticationResult> RegisterAsync(UserRegistrationQuery userRegistrationQuery);
     }
 }

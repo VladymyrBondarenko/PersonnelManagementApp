@@ -27,14 +27,38 @@ namespace PersonnelManagement.WebClient.Infrastructure.Managers.Originals
             _originalService = RestService.For<IOriginalRestService>(_httpClient);
         }
 
-        public async Task<ApiResponse<PagedResponse<GetOriginalResponse>>> GetAllAsync(PaginationQueryRequest queryRequest = null, GetAllOriginalsQuery query = null)
+        public async Task<PagedResponse<GetOriginalResponse>> GetAllAsync(PaginationQueryRequest queryRequest = null, GetAllOriginalsQuery query = null)
         {
-            return await _originalService.GetAllAsync(queryRequest, query);
+            try
+            {
+                var response = await _originalService.GetAllAsync(queryRequest, query);
+                return response?.Content;
+            }
+            catch (HttpRequestException)
+            {
+                return new PagedResponse<GetOriginalResponse>();
+            }
+            catch (ApiException)
+            {
+                return new PagedResponse<GetOriginalResponse>();
+            }
         }
 
-        public async Task<ApiResponse<Response<GetOriginalResponse>>> GetAsync(Guid originalId)
+        public async Task<Response<GetOriginalResponse>> GetAsync(Guid originalId)
         {
-            return await _originalService.GetAsync(originalId);
+            try
+            {
+                var response = await _originalService.GetAsync(originalId);
+                return response?.Content;
+            }
+            catch (HttpRequestException)
+            {
+                return new Response<GetOriginalResponse>(new GetOriginalResponse());
+            }
+            catch (ApiException)
+            {
+                return new Response<GetOriginalResponse>(new GetOriginalResponse());
+            }
         }
 
         public string GetFileDownloadEndpoint(Guid originalId)
@@ -42,14 +66,38 @@ namespace PersonnelManagement.WebClient.Infrastructure.Managers.Originals
             return _httpClient.BaseAddress + $"{ApiRoutes.Originals.DownloadFile.Replace("{originalId}", originalId.ToString())}";
         }
 
-        public async Task<ApiResponse<Response<GetOriginalResponse>>> UpdateAsync(Guid originalId, UpdateOriginalRequest updateRequest)
+        public async Task<Response<GetOriginalResponse>> UpdateAsync(Guid originalId, UpdateOriginalRequest updateRequest)
         {
-            return await _originalService.UpdateAsync(originalId, updateRequest);
+            try
+            {
+                var response = await _originalService.UpdateAsync(originalId, updateRequest);
+                return response?.Content;
+            }
+            catch (HttpRequestException)
+            {
+                return new Response<GetOriginalResponse>(new GetOriginalResponse());
+            }
+            catch (ApiException)
+            {
+                return new Response<GetOriginalResponse>(new GetOriginalResponse());
+            }
         }
 
-        public async Task<ApiResponse<Response<GetOriginalResponse>>> CreateAsync(int originalEntity, Guid entityId, StreamPart file)
+        public async Task<Response<GetOriginalResponse>> CreateAsync(int originalEntity, Guid entityId, StreamPart file)
         {
-            return await _originalService.CreateAsync(originalEntity, entityId, file);
+            try
+            {
+                var response = await _originalService.CreateAsync(originalEntity, entityId, file);
+                return response?.Content;
+            }
+            catch (HttpRequestException)
+            {
+                return new Response<GetOriginalResponse>(new GetOriginalResponse());
+            }
+            catch (ApiException)
+            {
+                return new Response<GetOriginalResponse>(new GetOriginalResponse());
+            }
         }
 
         public async Task<IApiResponse> DeleteAsync(Guid originalId)

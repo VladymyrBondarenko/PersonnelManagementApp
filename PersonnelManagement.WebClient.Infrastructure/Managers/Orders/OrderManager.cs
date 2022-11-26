@@ -27,22 +27,55 @@ namespace PersonnelManagement.WebClient.Infrastructure.Managers.Orders
             _orderService = RestService.For<IOrderRestService>(httpClient);
         }
 
-        public async Task<ApiResponse<PagedResponse<GetOrderResponse>>> GetAllAsync(PaginationQueryRequest queryRequest = null, GetAllOrdersQuery query = null)
+        public async Task<PagedResponse<GetOrderResponse>> GetAllAsync(PaginationQueryRequest queryRequest = null, GetAllOrdersQuery query = null)
         {
-            var response = await _orderService.GetAllAsync(queryRequest, query);
-            return response;
+            try
+            {
+                var response = await _orderService.GetAllAsync(queryRequest, query);
+                return response?.Content;
+            }
+            catch (HttpRequestException)
+            {
+                return new PagedResponse<GetOrderResponse>();
+            }
+            catch (ApiException)
+            {
+                return new PagedResponse<GetOrderResponse>();
+            }
         }
 
-        public async Task<ApiResponse<Response<GetOrderResponse>>> CreateAsync(CreateOrderRequest createRequest)
+        public async Task<Response<GetOrderResponse>> CreateAsync(CreateOrderRequest createRequest)
         {
-            var response = await _orderService.CreateAsync(createRequest);
-            return response;
+            try
+            {
+                var response = await _orderService.CreateAsync(createRequest);
+                return response?.Content;
+            }
+            catch (HttpRequestException)
+            {
+                return new Response<GetOrderResponse>(new GetOrderResponse());
+            }
+            catch (ApiException)
+            {
+                return new Response<GetOrderResponse>(new GetOrderResponse());
+            }
         }
 
-        public async Task<ApiResponse<Response<GetOrderResponse>>> UpdateAsync(Guid orderId, UpdateOrderRequest updateRequest)
+        public async Task<Response<GetOrderResponse>> UpdateAsync(Guid orderId, UpdateOrderRequest updateRequest)
         {
-            var response = await _orderService.UpdateAsync(orderId, updateRequest);
-            return response;
+            try
+            {
+                var response = await _orderService.UpdateAsync(orderId, updateRequest);
+                return response?.Content;
+            }
+            catch (HttpRequestException)
+            {
+                return new Response<GetOrderResponse>(new GetOrderResponse());
+            }
+            catch (ApiException)
+            {
+                return new Response<GetOrderResponse>(new GetOrderResponse());
+            }
         }
 
         public async Task<IApiResponse> DeleteAsync(Guid id)
@@ -50,16 +83,38 @@ namespace PersonnelManagement.WebClient.Infrastructure.Managers.Orders
             return await _orderService.DeleteAsync(id);
         }
 
-        public async Task<ApiResponse<Response<AcceptOrderSuccessResponse>>> AcceptOrder(Guid orderId)
+        public async Task<Response<AcceptOrderSuccessResponse>> AcceptOrder(Guid orderId)
         {
-            var response = await _orderService.AcceptOrder(orderId);
-            return response;
+            try
+            {
+                var response = await _orderService.AcceptOrder(orderId);
+                return response?.Content;
+            }
+            catch (HttpRequestException)
+            {
+                return new Response<AcceptOrderSuccessResponse>(new AcceptOrderSuccessResponse { Success = false });
+            }
+            catch (ApiException)
+            {
+                return new Response<AcceptOrderSuccessResponse>(new AcceptOrderSuccessResponse { Success = false });
+            }
         }
 
-        public async Task<ApiResponse<Response<AcceptOrderSuccessResponse>>> RollbackOrder(Guid orderId)
+        public async Task<Response<AcceptOrderSuccessResponse>> RollbackOrder(Guid orderId)
         {
-            var response = await _orderService.RollbackOrder(orderId);
-            return response;
+            try
+            {
+                var response = await _orderService.RollbackOrder(orderId);
+                return response?.Content;
+            }
+            catch (HttpRequestException)
+            {
+                return new Response<AcceptOrderSuccessResponse>(new AcceptOrderSuccessResponse { Success = false });
+            }
+            catch (ApiException)
+            {
+                return new Response<AcceptOrderSuccessResponse>(new AcceptOrderSuccessResponse { Success = false });
+            }
         }
     }
 }

@@ -56,6 +56,7 @@ Features. Iteration 4:
 Features. Iteration 6: 
 
 // Add registration/authorization/authetication +
+// Add basic ui to registration/authorization/authetication
 
 Features. Iteration 7:
 
@@ -75,3 +76,6 @@ Some ideas:
 // Add progress bar to ui when waiting for response
 // Add buttons to go to previous page
 // Add ability to bind user account to employee
+// Add order by CreatedDate to all endpoints
+// Add registraction/authorization through google/facebook etc
+// Maybe add azure ad

@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PersonnelManagement.Domain.Departments;
 using PersonnelManagement.Domain.Employees;
-using PersonnelManagement.Domain.Models.Identities;
+using PersonnelManagement.Domain.Models.Identity;
 using PersonnelManagement.Domain.Models.Originals;
 using PersonnelManagement.Domain.Orders;
 using PersonnelManagement.Domain.Positions;

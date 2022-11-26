@@ -5,6 +5,7 @@
 @using System.ComponentModel.DataAnnotations
 @using PersonnelManagement.Contracts.v1.Requests.Positions
 @using PersonnelManagement.WebClient.Infrastructure.Managers.Positions
+@using PersonnelManagement.WebClient.Models
 @using PersonnelManagement.WebClient.Pages.Dialogs
 @using static PersonnelManagement.WebClient.Pages.OrgStruct.Positions
 
@@ -61,8 +62,7 @@
                 };
                 var response = await positionManager.UpdateAsync(model.Id, updateRequest);
 
-                if (response.StatusCode == System.Net.HttpStatusCode.OK &&
-                    response.Content.Data != null)
+                if (response?.Data?.Id != default)
                 {
                     snackBar.Add("Position edited", Severity.Success);
                     model = new();
@@ -81,7 +81,7 @@
                 };
                 var response = await positionManager.CreateAsync(createRequest);
 
-                if (response.Content?.Data != null)
+                if (response?.Data != null)
                 {
                     snackBar.Add("Position added", Severity.Success);
                     model = new();

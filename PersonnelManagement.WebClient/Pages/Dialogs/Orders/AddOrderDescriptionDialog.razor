@@ -7,6 +7,7 @@
 @using PersonnelManagement.Domain.Orders
 @using PersonnelManagement.WebClient.Helpers
 @using PersonnelManagement.WebClient.Infrastructure.Managers.Orders
+@using PersonnelManagement.WebClient.Models
 @using PersonnelManagement.WebClient.Pages.Dialogs
 @using static PersonnelManagement.WebClient.Pages.Orders.OrdersDescription
 
@@ -65,9 +66,7 @@
                     OrderDescriptionTitle = model.OrderDescriptionTitle
                 };
                 var response = await orderDescManager.UpdateAsync(model.Id, updateRequest);
-
-                if (response.StatusCode == System.Net.HttpStatusCode.OK &&
-                    response.Content.Data != null)
+                if (response?.Data?.Id != default)
                 {
                     snackBar.Add("Order description edited", Severity.Success);
                     model = new();
@@ -86,7 +85,7 @@
                 };
                 var response = await orderDescManager.CreateAsync(createRequest);
 
-                if (response.Content?.Data != null)
+                if (response != null)
                 {
                     snackBar.Add("Order description added", Severity.Success);
                     model = new();

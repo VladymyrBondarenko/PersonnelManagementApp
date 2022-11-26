@@ -1,4 +1,5 @@
 ﻿@page "/employees"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize()]
 
 @using System.ComponentModel.DataAnnotations
 @using AutoMapper
@@ -7,6 +8,7 @@
 @using PersonnelManagement.Domain.Models.Originals
 @using PersonnelManagement.WebClient.Infrastructure.Managers.Employees
 @using PersonnelManagement.WebClient.Infrastructure.Managers.Originals
+@using PersonnelManagement.WebClient.Models
 @using Refit
 @using static PersonnelManagement.WebClient.Pages.Originals.Originals
 @using static PersonnelManagement.WebClient.Pages.OrgStruct.Positions
@@ -78,42 +80,6 @@
 
     private MudTable<EmployeeModel> table;
 
-    public class EmployeeModel
-    {
-        public Guid Id { get; set; }
-
-        [Display(Name = "First Name")]
-        [Required]
-        public string FirstName { get; set; }
-
-        [Display(Name = "Last Name")]
-        [Required]
-        public string LastName { get; set; }
-
-        [Display(Name = "Hire Date")]
-        [Required]
-        public DateTime? HireDate { get; set; }
-
-        [Display(Name = "Fire Date")]
-        public DateTime? FireDate { get; set; }
-
-        [Display(Name = "Department")]
-        [Required]
-        public DepartmentModel Department { get; set; }
-
-        public Guid? DepartmentId { get; set; }
-
-        [Display(Name = "Position")]
-        [Required]
-        public PositionModel Position { get; set; }
-
-        public Guid? PositionId { get; set; }
-
-        public EmployeeState EmployeeState { get; set; }
-
-        public List<OriginalModel> Originals { get; set; }
-    }
-
     private async Task FilterFunc()
     {
         await Reset();
@@ -151,7 +117,7 @@
 
                 var streamPart = new StreamPart(stream, file.Name, "multipart/form-data");
                 var resp = await originalService.CreateAsync((int)OriginalEntity.Employees, employee.Id, streamPart);
-                var data = resp.Content.Data;
+                var data = resp?.Data;
 
                 if (data != null)
                 {
@@ -215,13 +181,13 @@
                 PageNumber = state.Page + 1, PageSize = state.PageSize 
             }, query);
 
-        var data = response.Content?.Data?.ToList();
+        var data = response?.Data?.ToList();
 
         var grid = new TableData<EmployeeModel>();
         if(data != null)
         {
             grid.Items = mapper.Map<List<EmployeeModel>>(data);
-            grid.TotalItems = response.Content.TotalAmount;
+            grid.TotalItems = response.TotalAmount;
         }
         return grid;
     }

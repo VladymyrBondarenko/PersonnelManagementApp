@@ -16,15 +16,19 @@ namespace PersonnelManagement.Sdk.Employees
     public interface IEmployeeRestService
     {
         [Get($"/{ApiRoutes.Employees.GetAll}")]
+        [Headers("Authorization: Bearer")]
         Task<ApiResponse<PagedResponse<GetEmployeeResponse>>> GetAllAsync(PaginationQueryRequest queryRequest = null, GetAllEmployeesQuery query = null);
 
         [Post($"/{ApiRoutes.Employees.Create}")]
+        [Headers("Authorization: Bearer")]
         Task<ApiResponse<Response<GetEmployeeResponse>>> CreateAsync(CreateEmployeeRequest createRequest);
 
         [Put($"/{ApiRoutes.Employees.Update}")]
+        [Headers("Authorization: Bearer")]
         Task<ApiResponse<Response<GetEmployeeResponse>>> UpdateAsync(Guid employeeId, UpdateEmployeeRequest updateRequest);
 
         [Delete($"/{ApiRoutes.Employees.Delete}")]
+        [Headers("Authorization: Bearer")]
         Task<IApiResponse> DeleteAsync(Guid employeeId);
     }
 }

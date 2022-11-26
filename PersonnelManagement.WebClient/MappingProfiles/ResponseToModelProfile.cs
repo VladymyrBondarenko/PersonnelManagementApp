@@ -7,6 +7,7 @@ using PersonnelManagement.Contracts.v1.Responses.OrdersDescription;
 using PersonnelManagement.Contracts.v1.Responses.Originals;
 using PersonnelManagement.Contracts.v1.Responses.Positions;
 using PersonnelManagement.Domain.Orders;
+using PersonnelManagement.WebClient.Models;
 using static PersonnelManagement.WebClient.Pages.Employees.Employees;
 using static PersonnelManagement.WebClient.Pages.Orders.Orders;
 using static PersonnelManagement.WebClient.Pages.Orders.OrdersDescription;

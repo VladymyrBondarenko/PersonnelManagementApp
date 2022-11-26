@@ -16,18 +16,23 @@ namespace PersonnelManagement.Sdk.Orders
     public interface IOrderDescriptionRestService
     {
         [Get($"/{ApiRoutes.OrderDescriptions.Get}")]
+        [Headers("Authorization: Bearer")]
         Task<ApiResponse<Response<GetOrderDescriptionResponse>>> Get(Guid orderDescriptionId);
 
         [Get($"/{ApiRoutes.OrderDescriptions.GetAll}")]
+        [Headers("Authorization: Bearer")]
         Task<ApiResponse<PagedResponse<GetOrderDescriptionResponse>>> GetAllAsync(PaginationQueryRequest queryRequest = null, GetAllOrderDescriptionsQuery query = null);
 
         [Post($"/{ApiRoutes.OrderDescriptions.Create}")]
+        [Headers("Authorization: Bearer")]
         Task<ApiResponse<Response<GetOrderDescriptionResponse>>> CreateAsync(CreateOrderDescriptionRequest createRequest);
 
         [Put($"/{ApiRoutes.OrderDescriptions.Update}")]
+        [Headers("Authorization: Bearer")]
         Task<ApiResponse<Response<GetOrderDescriptionResponse>>> UpdateAsync(Guid orderDescriptionId, UpdateOrderDescriptionRequest updateRequest);
 
         [Delete($"/{ApiRoutes.OrderDescriptions.Delete}")]
+        [Headers("Authorization: Bearer")]
         Task<IApiResponse> DeleteAsync(Guid orderDescriptionId);
     }
 }

@@ -15,15 +15,19 @@ namespace PersonnelManagement.Sdk.Departments
     public interface IDepartmentRestService
     {
         [Get($"/{ApiRoutes.Departments.GetAll}")]
+        [Headers("Authorization: Bearer")]
         Task<ApiResponse<PagedResponse<GetDepartmentResponse>>> GetAllAsync(PaginationQueryRequest queryRequest = null, GetAllDepartmentsQuery query = null);
 
         [Post($"/{ApiRoutes.Departments.Create}")]
+        [Headers("Authorization: Bearer")]
         Task<ApiResponse<Response<GetDepartmentResponse>>> CreateAsync(CreateDepartmentRequest createRequest);
 
         [Put($"/{ApiRoutes.Departments.Update}")]
+        [Headers("Authorization: Bearer")]
         Task<ApiResponse<Response<GetDepartmentResponse>>> UpdateAsync(Guid departmentId, UpdateDepartmentRequest updateRequest);
 
         [Delete($"/{ApiRoutes.Departments.Delete}")]
+        [Headers("Authorization: Bearer")]
         Task<IApiResponse> DeleteAsync(Guid departmentId);
     }
 }

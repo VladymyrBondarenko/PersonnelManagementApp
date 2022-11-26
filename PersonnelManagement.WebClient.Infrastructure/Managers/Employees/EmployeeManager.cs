@@ -25,22 +25,55 @@ namespace PersonnelManagement.WebClient.Infrastructure.Managers.Employees
             _employeeService = RestService.For<IEmployeeRestService>(httpClient);
         }
 
-        public async Task<ApiResponse<PagedResponse<GetEmployeeResponse>>> GetAllAsync(PaginationQueryRequest queryRequest = null, GetAllEmployeesQuery query = null)
+        public async Task<PagedResponse<GetEmployeeResponse>> GetAllAsync(PaginationQueryRequest queryRequest = null, GetAllEmployeesQuery query = null)
         {
-            var response = await _employeeService.GetAllAsync(queryRequest, query);
-            return response;
+            try
+            {
+                var response = await _employeeService.GetAllAsync(queryRequest, query);
+                return response?.Content;
+            }
+            catch (HttpRequestException)
+            {
+                return new PagedResponse<GetEmployeeResponse>();
+            }
+            catch (ApiException)
+            {
+                return new PagedResponse<GetEmployeeResponse>();
+            }
         }
 
-        public async Task<ApiResponse<Response<GetEmployeeResponse>>> CreateAsync(CreateEmployeeRequest createRequest)
+        public async Task<Response<GetEmployeeResponse>> CreateAsync(CreateEmployeeRequest createRequest)
         {
-            var response = await _employeeService.CreateAsync(createRequest);
-            return response;
+            try
+            {
+                var response = await _employeeService.CreateAsync(createRequest);
+                return response?.Content;
+            }
+            catch (HttpRequestException)
+            {
+                return new Response<GetEmployeeResponse>(new GetEmployeeResponse());
+            }
+            catch (ApiException)
+            {
+                return new Response<GetEmployeeResponse>(new GetEmployeeResponse());
+            }
         }
 
-        public async Task<ApiResponse<Response<GetEmployeeResponse>>> UpdateAsync(Guid orderDescriptionId, UpdateEmployeeRequest updateRequest)
+        public async Task<Response<GetEmployeeResponse>> UpdateAsync(Guid orderDescriptionId, UpdateEmployeeRequest updateRequest)
         {
-            var response = await _employeeService.UpdateAsync(orderDescriptionId, updateRequest);
-            return response;
+            try
+            {
+                var response = await _employeeService.UpdateAsync(orderDescriptionId, updateRequest);
+                return response?.Content;
+            }
+            catch (HttpRequestException)
+            {
+                return new Response<GetEmployeeResponse>(new GetEmployeeResponse());
+            }
+            catch (ApiException)
+            {
+                return new Response<GetEmployeeResponse>(new GetEmployeeResponse());
+            }
         }
 
         public async Task<IApiResponse> DeleteAsync(Guid id)

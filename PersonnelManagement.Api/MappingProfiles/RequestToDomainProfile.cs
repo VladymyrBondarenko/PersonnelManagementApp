@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using PersonnelManagement.Contracts.v1.Requests;
 using PersonnelManagement.Contracts.v1.Requests.Employees;
+using PersonnelManagement.Contracts.v1.Requests.Identity;
 using PersonnelManagement.Contracts.v1.Requests.Orders;
 using PersonnelManagement.Contracts.v1.Requests.Positions;
 using PersonnelManagement.Contracts.v1.Requests.Queries;
@@ -9,6 +10,7 @@ using PersonnelManagement.Domain.Departments;
 using PersonnelManagement.Domain.Employees;
 using PersonnelManagement.Domain.Models;
 using PersonnelManagement.Domain.Models.Filters;
+using PersonnelManagement.Domain.Models.Identity;
 using PersonnelManagement.Domain.Orders;
 using PersonnelManagement.Domain.Positions;
 
@@ -39,6 +41,9 @@ namespace PersonnelManagement.Api.MappingProfiles
 
             //originals
             CreateMap<GetAllOriginalsQuery, GetAllOriginalsFilter>();
+
+            //identity
+            CreateMap<UserRegistrationRequest, UserRegistrationQuery>();
 
             // other
             CreateMap<PaginationQueryRequest, PaginationQuery>();
