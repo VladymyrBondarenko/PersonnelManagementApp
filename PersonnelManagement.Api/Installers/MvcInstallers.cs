@@ -26,6 +26,7 @@ using PersonnelManagement.Server.Validators.OrderDescEndpointsValidators;
 using PersonnelManagement.Server.Validators.OrderEndpointsValidators;
 using PersonnelManagement.Server.Validators.OriginalEndpointsValidators;
 using PersonnelManagement.Server.Validators.PositionEndpointsValidators;
+using Serilog;
 using System.Text;
 
 namespace PersonnelManagement.Api.Installers
@@ -67,6 +68,10 @@ namespace PersonnelManagement.Api.Installers
                 var request = accessor.HttpContext.Request;
                 return new UriService($"{request.Scheme}://{request.Host.ToUriComponent()}");
             });
+
+            //var logger = new LoggerConfiguration()
+            //    .ReadFrom.Configuration(configuration).CreateLogger();
+
 
             var jwtSettings = new JwtSettingsOptions();
             configuration.GetSection(nameof(JwtSettingsOptions)).Bind(jwtSettings);

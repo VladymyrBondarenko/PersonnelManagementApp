@@ -1,5 +1,6 @@
 using PersonnelManagement.Api.Installers;
 using PersonnelManagement.Api.Options;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +12,14 @@ builder.WebHost.ConfigureKestrel(opt =>
 { 
     opt.Limits.MaxRequestBodySize = 1048576000; // server handles requests up to 1000MB (maybe move to appsettings)
 });
+builder.AddSerilogConfiguration();
+
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration)
+    .Enrich.FromLogContext()
+    .CreateLogger();
+builder.Logging.ClearProviders();
+builder.Logging.AddSerilog(Log.Logger);
 
 var app = builder.Build();
 
@@ -35,6 +44,8 @@ app.UseSwaggerUI(opt => opt.SwaggerEndpoint(swaggerOptions.UIEndpoint, swaggerOp
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
+app.UseSerilogRequestLogging();
+
 app.UseRouting();
 
 app.UseAuthentication();
@@ -48,4 +59,16 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 app.MapRazorPages();
 
-app.Run();
+try
+{
+    Log.Information("Web Api Server starting up");
+    app.Run();
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Web Api Server failed to start correctly");
+}
+finally
+{
+    Log.CloseAndFlush();
+}

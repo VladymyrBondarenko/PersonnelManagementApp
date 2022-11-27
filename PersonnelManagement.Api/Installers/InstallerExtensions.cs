@@ -1,4 +1,6 @@
-﻿namespace PersonnelManagement.Api.Installers
+﻿using Serilog;
+
+namespace PersonnelManagement.Api.Installers
 {
     public static class InstallerExtensions
     {
@@ -13,6 +15,17 @@
             installers.ForEach(installer =>
                 installer.InstallServices(configuration, services)
             );
+        }
+
+        public static void AddSerilogConfiguration(this WebApplicationBuilder builder)
+        {
+            builder.Host.UseSerilog((hostContext, services, loggerConfiguration) =>
+            {
+                loggerConfiguration
+                    .ReadFrom.Configuration(hostContext.Configuration)
+                    .Enrich.FromLogContext()
+                    .ReadFrom.Services(services);
+            });
         }
     }
 }

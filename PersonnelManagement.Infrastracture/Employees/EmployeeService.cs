@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using PersonnelManagement.Application.DbContexts;
 using PersonnelManagement.Application.Employees;
 using PersonnelManagement.Application.FileOperations.Originals;
@@ -13,12 +14,10 @@ namespace PersonnelManagement.Infrastracture.Employees
     public class EmployeeService : IEmployeeService
     {
         private readonly IApplicationDbContext _dbContext;
-        private readonly IOriginalService _originalService;
 
-        public EmployeeService(IApplicationDbContext dbContext, IOriginalService originalService)
+        public EmployeeService(IApplicationDbContext dbContext)
         {
             _dbContext = dbContext;
-            _originalService = originalService;
         }
 
         public async Task<int> GetEmployeesAmountAsync()

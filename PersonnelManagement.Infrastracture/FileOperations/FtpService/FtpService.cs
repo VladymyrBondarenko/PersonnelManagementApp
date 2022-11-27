@@ -1,4 +1,5 @@
 ﻿using FluentFTP;
+using Microsoft.Extensions.Logging;
 using PersonnelManagement.Application.FileOperations;
 using System;
 using System.Collections.Generic;
@@ -12,10 +13,12 @@ namespace PersonnelManagement.Infrastracture.FileOperations
     public class FtpService : IFtpService
     {
         private readonly FtpClientSettings _ftpClientSettings;
+        private readonly ILogger<FtpService> _logger;
 
-        public FtpService(FtpClientSettings ftpClientSettings)
+        public FtpService(FtpClientSettings ftpClientSettings, ILogger<FtpService> logger)
         {
             _ftpClientSettings = ftpClientSettings;
+            _logger = logger;
         }
 
         public async Task<bool> SaveFileToFtpAsync(string localPath, string remotePath)
@@ -27,10 +30,19 @@ namespace PersonnelManagement.Infrastracture.FileOperations
                      Password = _ftpClientSettings.Password
                  }, _ftpClientSettings.Port);
 
-            await ftp.Connect();
-            var status = await ftp.UploadFile(localPath, remotePath);
-            // TODO: log connection error
-            return status == FtpStatus.Success;
+            var ftpStatus = FtpStatus.Failed;
+            try
+            {
+                await ftp.Connect();
+                ftpStatus = await ftp.UploadFile(localPath, remotePath);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to connect to ftp when trying to save file on ftp.");
+                ftpStatus = FtpStatus.Failed;
+            }
+
+            return ftpStatus == FtpStatus.Success;
         }
 
         public async Task<bool> SaveFileToFtpAsync(byte[] bytes, string remotePath)
@@ -42,10 +54,19 @@ namespace PersonnelManagement.Infrastracture.FileOperations
                     Password = _ftpClientSettings.Password
                 }, _ftpClientSettings.Port);
 
-            await ftp.Connect();
-            var status = await ftp.UploadBytes(bytes, remotePath);
-            // TODO: log connection error
-            return status == FtpStatus.Success;
+            var ftpStatus = FtpStatus.Failed;
+            try
+            {
+                await ftp.Connect();
+                var status = await ftp.UploadBytes(bytes, remotePath);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to connect to ftp when trying to save file on ftp.");
+                ftpStatus = FtpStatus.Failed;
+            }
+
+            return ftpStatus == FtpStatus.Success;
         }
 
         public async Task DeleteFileFromFtpAsync(string filePath)
@@ -57,9 +78,15 @@ namespace PersonnelManagement.Infrastracture.FileOperations
                     Password = _ftpClientSettings.Password
                 }, _ftpClientSettings.Port);
 
-            // TODO: log connection error
-            await ftp.Connect();
-            await ftp.DeleteFile(filePath);
+            try
+            {
+                await ftp.Connect();
+                await ftp.DeleteFile(filePath);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to connect to ftp when trying to save file on ftp.");
+            }
         } 
 
         public async Task<byte[]> ReadAllBytesAsync(string remotePath, CancellationToken cancellationToken = default)
@@ -70,9 +97,19 @@ namespace PersonnelManagement.Infrastracture.FileOperations
                     UserName = _ftpClientSettings.UserName,
                     Password = _ftpClientSettings.Password
                 }, _ftpClientSettings.Port);
-            // TODO: log connection error
-            await ftp.Connect();
-            var bytes = await ftp.DownloadBytes(remotePath, cancellationToken);
+
+            byte[] bytes;
+            try
+            {
+                await ftp.Connect();
+                bytes = await ftp.DownloadBytes(remotePath, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                bytes = new byte[0];
+                _logger.LogError(ex, "Failed to connect to ftp when trying to read file from ftp.");
+            }
+
             return bytes;
         }
     }
