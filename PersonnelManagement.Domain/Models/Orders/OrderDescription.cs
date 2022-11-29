@@ -18,5 +18,7 @@ namespace PersonnelManagement.Domain.Orders
         public OrderType OrderType { get; set; }
 
         public ICollection<Order> Orders { get; set; }
+
+        public DateTime CreatedDate { get; set; }
     }
 }

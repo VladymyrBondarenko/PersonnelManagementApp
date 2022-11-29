@@ -2,7 +2,7 @@
 
 The application for managing your staff.
 
-Features. Iteration 1:
+Features. Task 1:
 
 // Hiring/Firing employees
 1. Adding new employees to the employee collection manualy +
@@ -23,7 +23,7 @@ Features. Iteration 1:
 1. Stores basic info about order +
 2. *Stores attached files in order (could be moved to next iteration) - pushed to next
 
-Features. Iteration 2:
+Features. Task 2:
 
 // Employees data
 1. *Stores image of employee (could be moved to next iteration) +
@@ -31,11 +31,11 @@ Features. Iteration 2:
 // Order data
 1. *Stores attached files in order (could be moved to next iteration) +
 
-Features. Iteration 3:
+Features. Task 3:
 
 // Create Api for orders, employees, departments, positions +
 
-Features. Iteration 4:
+Features. Task 4:
 
 // Create some web UI for with use of Api (Crud operations)
 
@@ -49,26 +49,26 @@ Features. Iteration 4:
 8. Add logic to move files from orders to employees when accepting order +
 9. *** Add file viewer (images, pdf, docx)
 
-Features. Iteration 4:
+Features. Task 4:
 
 // Add validations/middleware to handle exceptions to api +
 
-Features. Iteration 6: 
+Features. Task 6: 
 
 // Add registration/authorization/authetication +
 // Add basic ui to registration/authorization/authetication
 
-Features. Iteration 7:
+Features. Task 7:
 
 // Add logging (Serilog?)
 
-Features. Iteration 8:
-
-// Add caching to api (redis or monobd)
-
-Features. Iteration 9:
+Features. Task 8:
 
 // Add integration tests to api + unit tests (if needed) + health checks
+
+Features. Task 9:
+
+// Add order by CreatedDate to all endpoints
 
 Some ideas:
 
@@ -76,6 +76,6 @@ Some ideas:
 // Add progress bar to ui when waiting for response
 // Add buttons to go to previous page
 // Add ability to bind user account to employee
-// Add order by CreatedDate to all endpoints
 // Add registraction/authorization through google/facebook etc
 // Maybe add azure ad
+// Add caching to api (redis or monobd)

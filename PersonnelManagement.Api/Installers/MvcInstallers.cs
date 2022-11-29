@@ -69,10 +69,6 @@ namespace PersonnelManagement.Api.Installers
                 return new UriService($"{request.Scheme}://{request.Host.ToUriComponent()}");
             });
 
-            //var logger = new LoggerConfiguration()
-            //    .ReadFrom.Configuration(configuration).CreateLogger();
-
-
             var jwtSettings = new JwtSettingsOptions();
             configuration.GetSection(nameof(JwtSettingsOptions)).Bind(jwtSettings);
             services.AddSingleton(jwtSettings);

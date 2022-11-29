@@ -28,7 +28,7 @@ namespace PersonnelManagement.Infrastracture.Positions
 
         public async Task<List<Position>> GetAllAsync(PaginationQuery paginationFilter = null, GetAllPositionsFilter filter = null)
         {
-            var queryable = _dbContext.Positions.AsQueryable();
+            var queryable = _dbContext.Positions.OrderByDescending(x => x.CreatedDate).AsQueryable();
 
             if (filter != null)
             {
@@ -47,7 +47,7 @@ namespace PersonnelManagement.Infrastracture.Positions
 
         public async Task<List<Position>> GetAllAsync()
         {
-            return await _dbContext.Positions.ToListAsync();
+            return await _dbContext.Positions.OrderByDescending(x => x.CreatedDate).ToListAsync();
         }
 
         public async Task<Position> GetAsync(Guid Id)

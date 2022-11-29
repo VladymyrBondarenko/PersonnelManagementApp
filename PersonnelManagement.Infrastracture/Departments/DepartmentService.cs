@@ -28,7 +28,7 @@ namespace PersonnelManagement.Infrastracture.Departments
 
         public async Task<List<Department>> GetAllAsync(PaginationQuery paginationFilter = null, GetAllDepartmentsFilter filter = null)
         {
-            var queryable = _dbContext.Departments.AsQueryable();
+            var queryable = _dbContext.Departments.OrderByDescending(x => x.CreatedDate).AsQueryable();
 
             if (filter != null)
             {
@@ -47,7 +47,7 @@ namespace PersonnelManagement.Infrastracture.Departments
 
         public async Task<List<Department>> GetAllAsync()
         {
-            return await _dbContext.Departments.ToListAsync();
+            return await _dbContext.Departments.OrderByDescending(x => x.CreatedDate).ToListAsync();
         }
 
         public async Task<Department> GetAsync(Guid Id)

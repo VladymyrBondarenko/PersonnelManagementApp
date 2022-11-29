@@ -23,7 +23,7 @@ namespace PersonnelManagement.Infrastracture.FileOperations.Originals
 
         public async Task<List<Original>> GetAllAsync(PaginationQuery paginationFilter = null, GetAllOriginalsFilter filter = null)
         {
-            var queryable = _dbContext.Originals.AsQueryable();
+            var queryable = _dbContext.Originals.OrderByDescending(x => x.CreatedDate).AsQueryable();
 
             if (filter != null)
             {

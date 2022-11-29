@@ -152,10 +152,8 @@ namespace PersonnelManagement.Infrastracture.FileOperations.Originals
                 var createdOrig = await _originalRepo.CreateAsync(original);
                 return createdOrig;
             }
-            else
-            {
-                throw new OriginalNotSavedException("Original was not saved.");
-            }
+
+            return null;
         }
 
         private string getDirectoryPath(OriginalEntity originalEntity)

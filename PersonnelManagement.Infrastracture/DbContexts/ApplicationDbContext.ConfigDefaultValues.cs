@@ -17,46 +17,29 @@ namespace PersonnelManagement.Infrastracture.DbContexts
     {
         protected void ConfigureDefaultValues(ModelBuilder modelBuilder)
         {
-            configurateDepartmentDefaults(modelBuilder);
-            configuratePositionDefaults(modelBuilder);
-            configurateOrderDefaults(modelBuilder);
-            configurateEmployeeDefaults(modelBuilder);
-            configurateOriginalDefaults(modelBuilder);
-        }
-
-        private void configurateDepartmentDefaults(ModelBuilder modelBuilder)
-        {
             modelBuilder.Entity<Department>()
                 .Property(b => b.CreatedDate)
                 .HasDefaultValueSql("getdate()");
-        }
 
-        private void configuratePositionDefaults(ModelBuilder modelBuilder)
-        {
             modelBuilder.Entity<Position>()
                 .Property(b => b.CreatedDate)
                 .HasDefaultValueSql("getdate()");
-        }
 
-        private void configurateOrderDefaults(ModelBuilder modelBuilder)
-        {
             modelBuilder.Entity<Order>()
                 .Property(b => b.CreatedDate)
                 .HasDefaultValueSql("getdate()");
-        }
 
-        private void configurateEmployeeDefaults(ModelBuilder modelBuilder)
-        {
             modelBuilder.Entity<Employee>()
                 .Property(b => b.CreatedDate)
                 .HasDefaultValueSql("getdate()");
-        }
 
-        private void configurateOriginalDefaults(ModelBuilder modelBuilder)
-        {
             modelBuilder.Entity<Original>()
                 .Property(b => b.CreatedDate)
                 .HasDefaultValueSql("getdate()");
+
+            modelBuilder.Entity<OrderDescription>()
+               .Property(b => b.CreatedDate)
+               .HasDefaultValueSql("getdate()");
         }
     }
 }

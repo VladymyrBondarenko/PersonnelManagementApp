@@ -23,7 +23,7 @@ namespace PersonnelManagement.Infrastracture.Orders.OrderBase
 
         public async Task<int> GetOrdersAmountAsync(GetAllOrdersFilter filter = null)
         {
-            var queryable = _dbContext.Orders.AsQueryable();
+            var queryable = _dbContext.Orders.OrderByDescending(x => x.CreatedDate).AsQueryable();
 
             if (filter == null)
             {
@@ -56,7 +56,8 @@ namespace PersonnelManagement.Infrastracture.Orders.OrderBase
                 .Include(x => x.Position)
                 .Include(x => x.Department)
                 .Include(x => x.OrderDescription)
-                .Include(x => x.Originals).AsQueryable();
+                .Include(x => x.Originals)
+                .OrderByDescending(x => x.CreatedDate).AsQueryable();
 
             if (filter != null)
             {

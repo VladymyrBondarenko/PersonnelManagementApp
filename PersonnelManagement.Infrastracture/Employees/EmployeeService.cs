@@ -31,7 +31,8 @@ namespace PersonnelManagement.Infrastracture.Employees
                 .Include(x => x.Department)
                 .Include(x => x.Position)
                 .Include(x => x.Orders)
-                .Include(x => x.Originals).AsQueryable();
+                .Include(x => x.Originals)
+                .OrderByDescending(x => x.CreatedDate).AsQueryable();
 
             if (filter != null)
             {
@@ -54,7 +55,8 @@ namespace PersonnelManagement.Infrastracture.Employees
                 .Include(x => x.Department)
                 .Include(x => x.Position)
                 .Include(x => x.Orders)
-                .Include(x => x.Originals).ToListAsync();
+                .Include(x => x.Originals)
+                .OrderByDescending(x => x.CreatedDate).ToListAsync();
         }
 
         public async Task<Employee> CreateAsync(Employee employee)

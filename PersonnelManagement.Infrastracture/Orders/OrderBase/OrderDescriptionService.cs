@@ -41,6 +41,7 @@ namespace PersonnelManagement.Infrastracture.Orders.OrderBase
         {
             var queryable = _dbContext.OrdersDescription
                 .Include(x => x.Orders)
+                .OrderByDescending(x => x.CreatedDate)
                 .AsQueryable();
 
             if (filter != null)
