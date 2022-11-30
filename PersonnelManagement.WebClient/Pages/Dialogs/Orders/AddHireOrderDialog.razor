@@ -6,9 +6,11 @@
 @using System.ComponentModel.DataAnnotations
 @using PersonnelManagement.Contracts.v1.Requests.Orders
 @using PersonnelManagement.Contracts.v1.Requests.Queries
+@using PersonnelManagement.Domain.Models.Originals
 @using PersonnelManagement.Domain.Orders
 @using PersonnelManagement.WebClient.Infrastructure.Managers.Departments
 @using PersonnelManagement.WebClient.Infrastructure.Managers.Orders
+@using PersonnelManagement.WebClient.Infrastructure.Managers.Originals
 @using PersonnelManagement.WebClient.Infrastructure.Managers.Positions
 @using PersonnelManagement.WebClient.Models
 @using PersonnelManagement.WebClient.Pages.Dialogs
@@ -23,6 +25,7 @@
 @inject IMapper mapper
 @inject IPositionManager positionManager
 @inject IDepartmentManager departmentManager
+@inject IOriginalManager originalManager
 
 <MudDialog>
     <DialogContent>
@@ -33,6 +36,17 @@
             <MudForm Model="@OrderModel" onsubmit="@(() => SaveData())">
                 <div class="orderdesc-form-content">
                     <MudCardContent>
+                        <div>
+                            <MudMenu ActivationEvent="@MouseEvent.RightClick">
+                                <ActivatorContent>
+                                    <MudCardMedia Image="@GetPersonImageLink(OrderModel)" Height="250" />
+                                </ActivatorContent>
+                                <ChildContent>
+                                    <MudMenuItem>Add</MudMenuItem>
+                                    <MudMenuItem>Delete</MudMenuItem>
+                                </ChildContent>
+                            </MudMenu>
+                        </div>
                         <MudTextField @bind-Value="OrderModel.FirstName" For="@(() => OrderModel.FirstName)" Label="First Name" />
                         <MudTextField @bind-Value="OrderModel.LastName" For="@(() => OrderModel.LastName)" Label="Last Name" />
                         <MudDatePicker @bind-Date="@OrderModel.DateFrom" For="@(() => OrderModel.DateFrom)" Label="Hire Date" />
@@ -193,7 +207,7 @@
     {
         if (args.Key == "Enter")
         {
-             isPositionPopoverOpen = false;
+            isPositionPopoverOpen = false;
         }
         else
         {
@@ -213,7 +227,7 @@
     {
         if (args.Key == "Enter")
         {
-             isDepartmentPopoverOpen = false;
+            isDepartmentPopoverOpen = false;
         }
         else
         {
@@ -279,6 +293,19 @@
         {
             snackBar.Add("Form was not validated", Severity.Error);
         }
+    }
+
+    private string GetPersonImageLink(OrderModel order)
+    {
+        var imageOriginal = order.Originals
+            .FirstOrDefault(x => ((OriginalType)x.OriginalType) == OriginalType.EntityImage);
+
+        if(imageOriginal != null)
+        {
+            return originalManager.GetFileDownloadEndpoint(imageOriginal?.Id ?? default);
+        }
+
+        return @"images/EmptyIcon.jpg";
     }
 
     void Cancel() => MudDialog.Cancel();

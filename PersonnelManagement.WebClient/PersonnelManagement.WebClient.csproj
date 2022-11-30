@@ -25,4 +25,8 @@
     <ProjectReference Include="..\PersonnelManagement.WebClient.Infrastructure\PersonnelManagement.WebClient.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\images\" />
+  </ItemGroup>
+
 </Project>

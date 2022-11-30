@@ -12,6 +12,8 @@ namespace PersonnelManagement.Contracts.v1.Requests.Originals
     {
         public int OriginalEntity { get; set; }
 
+        public int OriginalEntityId { get; set; }
+
         public Guid EntityId { get; set; }
 
         public IFormFile File { get; set; }

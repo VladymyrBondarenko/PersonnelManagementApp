@@ -13,5 +13,7 @@ namespace PersonnelManagement.WebClient.Models
 
         [Display(Name = "Ext")]
         public string OriginalFileExtension { get; set; }
+
+        public int OriginalType { get; set; }
     }
 }
