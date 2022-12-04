@@ -72,7 +72,8 @@ namespace PersonnelManagement.Api.MappingProfiles
                         Id = x.Id,
                         OriginalTitle = x.OriginalTitle,
                         OriginalPath = x.OriginalPath,
-                        OriginalFileExtension = x.OriginalFileExtension
+                        OriginalFileExtension = x.OriginalFileExtension,
+                        OriginalType = (int)x.OriginalType
                     }));
                 });
 
@@ -122,7 +123,8 @@ namespace PersonnelManagement.Api.MappingProfiles
                         Id = x.Id,
                         OriginalTitle = x.OriginalTitle,
                         OriginalPath = x.OriginalPath,
-                        OriginalFileExtension = x.OriginalFileExtension
+                        OriginalFileExtension = x.OriginalFileExtension,
+                        OriginalType = (int)x.OriginalType
                     }));
                 });
         }

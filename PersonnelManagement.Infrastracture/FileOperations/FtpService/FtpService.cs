@@ -5,6 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Net.Security;
+using System.Reflection.Metadata.Ecma335;
+using System.Security.Authentication;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -28,7 +31,7 @@ namespace PersonnelManagement.Infrastracture.FileOperations
                  {
                      UserName = _ftpClientSettings.UserName,
                      Password = _ftpClientSettings.Password
-                 }, _ftpClientSettings.Port);
+                 }, _ftpClientSettings.Port, logger: _logger);
 
             var ftpStatus = FtpStatus.Failed;
             try
@@ -53,6 +56,8 @@ namespace PersonnelManagement.Infrastracture.FileOperations
                     UserName = _ftpClientSettings.UserName,
                     Password = _ftpClientSettings.Password
                 }, _ftpClientSettings.Port);
+            ftp.ValidateCertificate += new FtpSslValidation((client, e) => { e.Accept = true; });
+            ftp.Config.EncryptionMode = FtpEncryptionMode.Auto;
 
             var ftpStatus = FtpStatus.Failed;
             try
@@ -77,6 +82,8 @@ namespace PersonnelManagement.Infrastracture.FileOperations
                     UserName = _ftpClientSettings.UserName,
                     Password = _ftpClientSettings.Password
                 }, _ftpClientSettings.Port);
+            ftp.ValidateCertificate += new FtpSslValidation((client, e) => { e.Accept = true; });
+            ftp.Config.EncryptionMode = FtpEncryptionMode.Auto;
 
             try
             {
@@ -97,6 +104,8 @@ namespace PersonnelManagement.Infrastracture.FileOperations
                     UserName = _ftpClientSettings.UserName,
                     Password = _ftpClientSettings.Password
                 }, _ftpClientSettings.Port);
+            ftp.ValidateCertificate += new FtpSslValidation((client, e) => { e.Accept = true; }); 
+            ftp.Config.EncryptionMode = FtpEncryptionMode.Auto;
 
             byte[] bytes;
             try

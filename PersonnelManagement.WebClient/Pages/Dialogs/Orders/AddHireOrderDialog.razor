@@ -1,6 +1,8 @@
 ﻿@using static PersonnelManagement.WebClient.Pages.OrgStruct.Departments
 @using System.Globalization
 @using AutoMapper
+@using Blazored.FluentValidation;
+@using Blazored.LocalStorage;
 @using PersonnelManagement.Contracts.v1.Requests
 @using System.Net.Http.Json
 @using System.ComponentModel.DataAnnotations
@@ -8,12 +10,14 @@
 @using PersonnelManagement.Contracts.v1.Requests.Queries
 @using PersonnelManagement.Domain.Models.Originals
 @using PersonnelManagement.Domain.Orders
+@using PersonnelManagement.WebClient.Infrastructure.Constants.Storage;
 @using PersonnelManagement.WebClient.Infrastructure.Managers.Departments
 @using PersonnelManagement.WebClient.Infrastructure.Managers.Orders
 @using PersonnelManagement.WebClient.Infrastructure.Managers.Originals
 @using PersonnelManagement.WebClient.Infrastructure.Managers.Positions
 @using PersonnelManagement.WebClient.Models
 @using PersonnelManagement.WebClient.Pages.Dialogs
+@using Refit;
 @using static PersonnelManagement.WebClient.Pages.OrgStruct.Positions
 @using static PersonnelManagement.WebClient.Pages.Orders.Orders
 @using static PersonnelManagement.WebClient.Pages.Orders.OrdersDescription
@@ -26,23 +30,30 @@
 @inject IPositionManager positionManager
 @inject IDepartmentManager departmentManager
 @inject IOriginalManager originalManager
+@inject ILocalStorageService localStorage
 
-<MudDialog>
+<MudDialog Style="width: 1000px">
     <DialogContent>
         <MudText></MudText>
     </DialogContent>
     <DialogActions>
-        <MudCard>
+        <MudCard Style="width: 100%">
             <MudForm Model="@OrderModel" onsubmit="@(() => SaveData())">
                 <div class="orderdesc-form-content">
                     <MudCardContent>
                         <div>
+                            <InputFile AdditionalAttributes="@FileInputAttributes" OnChange="@((e) => MemorizeChoosenImage(e))" />
+                            <MudFab id="add-orig-btn" HtmlTag="label" for="fileInput" hidden />
                             <MudMenu ActivationEvent="@MouseEvent.RightClick">
                                 <ActivatorContent>
-                                    <MudCardMedia Image="@GetPersonImageLink(OrderModel)" Height="250" />
+                                    <MudCardMedia Image="@GetPersonImageLink(OrderModel).Result" Style="width:200px" Height="200" />
                                 </ActivatorContent>
                                 <ChildContent>
-                                    <MudMenuItem>Add</MudMenuItem>
+                                     <div onclick="document.getElementById('add-orig-btn').click()">
+                                        <MudMenuItem>
+                                            Add
+                                        </MudMenuItem>
+                                     </div>
                                     <MudMenuItem>Delete</MudMenuItem>
                                 </ChildContent>
                             </MudMenu>
@@ -126,9 +137,20 @@
 
     [Parameter] public Guid OrderDescId { get; set; }
 
+    public Dictionary<string, object> FileInputAttributes =
+        new Dictionary<string, object> { { "id", "fileInput" }, { "type", "image" }, { "hidden", "" } };
+
     private bool isPositionPopoverOpen;
 
     private string position;
+
+    private string token;
+
+    private IBrowserFile personImage;
+
+    private string defaultPersonImageSrc = "images/EmptyIcon.jpg";
+
+    private string choosenImageSrc;
 
     public string Position 
     {
@@ -176,6 +198,7 @@
         OrderModel.OrderDescriptionId = OrderDescId;
         department = OrderModel.Department?.DepartmentTitle;
         position = OrderModel.Position?.PositionTitle;
+        token = await localStorage.GetItemAsync<string>(StorageConstants.AuthToken);
 
         await LoadPositions();
         await LoadDepartments();
@@ -260,8 +283,11 @@
 
                 var response = await orderManager.UpdateAsync(OrderModel.Id, updateRequest);
 
-                if (response?.Data?.Id != default)
+                var data = response?.Data;
+                if (data != null && data.Id != default)
                 {
+                    await AddPersonImage(data.Id);
+
                     snackBar.Add("Order edited", Severity.Success);
                     OrderModel = new();
                 }
@@ -276,8 +302,11 @@
 
                 var response = await orderManager.CreateAsync(createRequest);
 
-                if (response?.Data != null)
+                var data = response?.Data;
+                if (data != null && data.Id != default)
                 {
+                    await AddPersonImage(data.Id);
+
                     snackBar.Add("Order added", Severity.Success);
                     OrderModel = new();
                 }
@@ -295,17 +324,49 @@
         }
     }
 
-    private string GetPersonImageLink(OrderModel order)
+    private async Task<string> GetPersonImageLink(OrderModel order)
     {
-        var imageOriginal = order.Originals
+        var imageOriginal = order.Originals?
             .FirstOrDefault(x => ((OriginalType)x.OriginalType) == OriginalType.EntityImage);
 
         if(imageOriginal != null)
         {
-            return originalManager.GetFileDownloadEndpoint(imageOriginal?.Id ?? default);
+            choosenImageSrc = originalManager.GetFileDownloadEndpoint(imageOriginal.Id, token);
         }
 
-        return @"images/EmptyIcon.jpg";
+        return string.IsNullOrWhiteSpace(choosenImageSrc) ? defaultPersonImageSrc : choosenImageSrc;
+    }
+
+    private async void MemorizeChoosenImage(InputFileChangeEventArgs e)
+    {
+        personImage = await e.File.RequestImageFileAsync("image", 200, 200);
+
+        if (personImage != null)
+        {
+            var buffer = new byte[personImage.Size];
+            await personImage.OpenReadStream().ReadAsync(buffer);
+            choosenImageSrc = $"data: image;base64,{Convert.ToBase64String(buffer)}";
+
+            StateHasChanged();
+        }
+    }
+
+    private async Task AddPersonImage(Guid orderId)
+    {
+        if (personImage != null)
+        {
+            using var stream = personImage.OpenReadStream(personImage.Size);
+
+            var streamPart = new StreamPart(stream, personImage.Name, "multipart/form-data");
+            var resp = await originalManager.CreateAsync(
+                (int)OriginalEntity.Orders, (int)OriginalType.EntityImage, orderId, streamPart);
+            var data = resp?.Data;
+
+            if (data == null)
+            {
+                snackBar.Add("Image has not been added due to error! Please, contact developing team.", Severity.Error);
+            }
+        }
     }
 
     void Cancel() => MudDialog.Cancel();

@@ -26,16 +26,20 @@ namespace PersonnelManagement.WebClient.Models
         [Required]
         public DepartmentModel Department { get; set; }
 
+        [Required]
         public Guid? DepartmentId { get; set; }
 
         [Display(Name = "Position")]
         [Required]
         public PositionModel Position { get; set; }
 
+        [Required]
         public Guid? PositionId { get; set; }
 
+        [Required]
         public OrderDescriptionModel OrderDescription { get; set; }
 
+        [Required]
         public Guid? OrderDescriptionId { get; set; }
 
         public Guid? EmployeeId { get; set; }

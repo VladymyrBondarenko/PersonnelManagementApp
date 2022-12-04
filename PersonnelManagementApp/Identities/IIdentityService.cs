@@ -7,5 +7,6 @@ namespace PersonnelManagement.Application.Identities
         Task<AuthenticationResult> LoginAsync(string email, string password);
         Task<AuthenticationResult> RefreshTokenAsync(string token, Guid refreshToken);
         Task<AuthenticationResult> RegisterAsync(UserRegistrationQuery userRegistrationQuery);
+        bool ValidateToken(string token);
     }
 }

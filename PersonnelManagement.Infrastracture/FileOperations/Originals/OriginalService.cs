@@ -159,12 +159,7 @@ namespace PersonnelManagement.Infrastracture.FileOperations.Originals
 
         private string getDirectoryPath(OriginalEntity originalEntity)
         {
-            return originalEntity switch
-            {
-                OriginalEntity.Orders => _entityOriginalSettings.OrdersDirectoryPath,
-                OriginalEntity.Employees => _entityOriginalSettings.EmpoloyeesDirectoryPath,
-                _ => throw new NotImplementedException("Specified original type could not be handled")
-            };
+            return $"{_entityOriginalSettings.FtpRootFolder}\\{_entityOriginalSettings.EntityFilesFolder}";
         }
     }
 }

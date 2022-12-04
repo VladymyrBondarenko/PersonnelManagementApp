@@ -61,9 +61,10 @@ namespace PersonnelManagement.WebClient.Infrastructure.Managers.Originals
             }
         }
 
-        public string GetFileDownloadEndpoint(Guid originalId)
+        public string GetFileDownloadEndpoint(Guid originalId, string token)
         {
-            return _httpClient.BaseAddress + $"{ApiRoutes.Originals.DownloadFile.Replace("{originalId}", originalId.ToString())}";
+            return _httpClient.BaseAddress + 
+                $"{ApiRoutes.Originals.DownloadFile.Replace("{originalId}", originalId.ToString())}?token={token}";
         }
 
         public async Task<Response<GetOriginalResponse>> UpdateAsync(Guid originalId, UpdateOriginalRequest updateRequest)
@@ -83,11 +84,11 @@ namespace PersonnelManagement.WebClient.Infrastructure.Managers.Originals
             }
         }
 
-        public async Task<Response<GetOriginalResponse>> CreateAsync(int originalEntity, Guid entityId, StreamPart file)
+        public async Task<Response<GetOriginalResponse>> CreateAsync(int originalEntity, int originalType, Guid entityId, StreamPart file)
         {
             try
             {
-                var response = await _originalService.CreateAsync(originalEntity, entityId, file);
+                var response = await _originalService.CreateAsync(originalEntity, originalType, entityId, file);
                 return response?.Content;
             }
             catch (HttpRequestException)

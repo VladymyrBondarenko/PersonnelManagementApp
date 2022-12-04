@@ -16,7 +16,7 @@ namespace PersonnelManagement.Contracts.v1.Routes
 
             public const string Update = BaseUrl + "/originals/{originalId}";
 
-            public const string Create = BaseUrl + "/originals/{originalEntity}/{entityId}";
+            public const string Create = BaseUrl + "/originals/{originalEntity}/{originalType}/{entityId}";
 
             public const string DownloadFile = BaseUrl + "/originals/download/{originalId}";
 

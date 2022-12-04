@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.IdentityModel.Tokens;
 using PersonnelManagement.Application.DbContexts;
 using PersonnelManagement.Application.Identities;
@@ -128,6 +129,28 @@ namespace PersonnelManagement.Infrastracture.Identity
             var user = await _userManager.FindByIdAsync(validatedToken.Claims.Single(x => x.Type == "id").Value);
 
             return await generateAuthResultAsync(user);
+        }
+
+        public bool ValidateToken(string token)
+        {
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var validationParameters = new TokenValidationParameters 
+            {
+                ValidateLifetime = true,
+                ValidateAudience = false,
+                ValidateIssuer = false,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_jwtSettings.Secret))
+            };
+
+            try
+            {
+                tokenHandler.ValidateToken(token, validationParameters, out var validatedToken);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         private ClaimsPrincipal getPrincipalFromToken(string token)

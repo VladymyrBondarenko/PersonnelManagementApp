@@ -30,7 +30,7 @@ namespace PersonnelManagement.Sdk.Originals
         [Multipart]
         [Post($"/{ApiRoutes.Originals.Create}")]
         [Headers("Authorization: Bearer")]
-        Task<ApiResponse<Response<GetOriginalResponse>>> CreateAsync(int originalEntity, Guid entityId, [AliasAs("file")] StreamPart file);
+        Task<ApiResponse<Response<GetOriginalResponse>>> CreateAsync(int originalEntity, int originalType, Guid entityId, [AliasAs("file")] StreamPart file);
 
         [Delete($"/{ApiRoutes.Originals.Delete}")]
         [Headers("Authorization: Bearer")]

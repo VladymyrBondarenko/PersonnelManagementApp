@@ -27,8 +27,8 @@ namespace PersonnelManagement.UnitTests.OriginalsTests
         {
             _ftpStructSettings = new FtpStructureSettings
             {
-                EmpoloyeesDirectoryPath = "Employees",
-                OrdersDirectoryPath = "Orders"
+                FtpRootFolder = "ftp",
+                EntityFilesFolder = "Folder"
             };
 
             _originalService = new OriginalService(_ftpServiceMock.Object,
@@ -59,12 +59,7 @@ namespace PersonnelManagement.UnitTests.OriginalsTests
 
             File.Delete(filePath);
 
-            var remotePath = origType switch
-            {
-                OriginalEntity.Orders => _ftpStructSettings.OrdersDirectoryPath,
-                OriginalEntity.Employees => _ftpStructSettings.EmpoloyeesDirectoryPath,
-                _ => throw new NotImplementedException("Specified original type could not be handled")
-            };
+            var remotePath = $"{_ftpStructSettings.FtpRootFolder}\\{_ftpStructSettings.EntityFilesFolder}";
 
             var resultFilePath = Path.Combine(remotePath, Path.GetRandomFileName() + Path.GetExtension(fileName));
 

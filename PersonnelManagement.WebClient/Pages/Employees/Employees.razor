@@ -116,7 +116,8 @@
                 using var stream = file.OpenReadStream(file.Size);
 
                 var streamPart = new StreamPart(stream, file.Name, "multipart/form-data");
-                var resp = await originalService.CreateAsync((int)OriginalEntity.Employees, employee.Id, streamPart);
+                var resp = await originalService.CreateAsync((int)OriginalEntity.Employees, 
+                    (int)OriginalType.SimpleOriginal, employee.Id, streamPart);
                 var data = resp?.Data;
 
                 if (data != null)

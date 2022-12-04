@@ -72,7 +72,8 @@ namespace PersonnelManagement.WebClient.MappingProfiles
                         Id = x.Id,
                         OriginalFileExtension = x.OriginalFileExtension,
                         OriginalTitle = x.OriginalTitle,
-                        OriginalPath = x.OriginalPath
+                        OriginalPath = x.OriginalPath,
+                        OriginalType= x.OriginalType
                     }));
                 });
 
