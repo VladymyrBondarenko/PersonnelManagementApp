@@ -113,6 +113,7 @@ namespace PersonnelManagement.Infrastracture.FileOperations.Originals
                 return queryable;
             }
 
+            // TODO: add filter by original type
             if (filter.EntityKey != default)
             {
                 queryable = queryable.Where(x =>

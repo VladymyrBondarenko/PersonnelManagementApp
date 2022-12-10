@@ -46,7 +46,7 @@
                             <MudFab id="add-orig-btn" HtmlTag="label" for="fileInput" hidden />
                             <MudMenu ActivationEvent="@MouseEvent.RightClick">
                                 <ActivatorContent>
-                                    <MudCardMedia Image="@GetPersonImageLink(OrderModel).Result" Style="width:200px" Height="200" />
+                                    <MudCardMedia Image="@ChoosenImageSrc" Style="width:200px" Height="200" />
                                 </ActivatorContent>
                                 <ChildContent>
                                      <div onclick="document.getElementById('add-orig-btn').click()">
@@ -54,7 +54,7 @@
                                             Add
                                         </MudMenuItem>
                                      </div>
-                                    <MudMenuItem>Delete</MudMenuItem>
+                                    <MudMenuItem OnClick="DeleteImage">Delete</MudMenuItem>
                                 </ChildContent>
                             </MudMenu>
                         </div>
@@ -150,6 +150,20 @@
 
     private string defaultPersonImageSrc = "images/EmptyIcon.jpg";
 
+    public string ChoosenImageSrc
+    {
+        get => choosenImageSrc;
+        set
+        {
+            if (choosenImageSrc == value)
+            {
+                return;
+            }
+
+            choosenImageSrc = value;
+            StateHasChanged();
+        }
+    }
     private string choosenImageSrc;
 
     public string Position 
@@ -199,6 +213,7 @@
         department = OrderModel.Department?.DepartmentTitle;
         position = OrderModel.Position?.PositionTitle;
         token = await localStorage.GetItemAsync<string>(StorageConstants.AuthToken);
+        ChoosenImageSrc = await GetPersonImageLink();
 
         await LoadPositions();
         await LoadDepartments();
@@ -288,7 +303,6 @@
                 {
                     await AddPersonImage(data.Id);
 
-                    snackBar.Add("Order edited", Severity.Success);
                     OrderModel = new();
                 }
                 else
@@ -306,8 +320,6 @@
                 if (data != null && data.Id != default)
                 {
                     await AddPersonImage(data.Id);
-
-                    snackBar.Add("Order added", Severity.Success);
                     OrderModel = new();
                 }
                 else
@@ -324,20 +336,28 @@
         }
     }
 
-    private async Task<string> GetPersonImageLink(OrderModel order)
-    {
-        var imageOriginal = order.Originals?
-            .FirstOrDefault(x => ((OriginalType)x.OriginalType) == OriginalType.EntityImage);
+    private OriginalModel _displayedImage;
 
-        if(imageOriginal != null)
+    private async Task<string> GetPersonImageLink()
+    {
+        var originals = await originalManager
+            .GetAllAsync(query: new GetAllOriginalsQuery { EntityKey = OrderModel.Id });
+
+        var original = originals?.Data?.FirstOrDefault(x => x.OriginalType == (int)OriginalType.EntityImage);
+        if(original != null)
         {
-            choosenImageSrc = originalManager.GetFileDownloadEndpoint(imageOriginal.Id, token);
+            _displayedImage = mapper.Map<OriginalModel>(original);
         }
 
-        return string.IsNullOrWhiteSpace(choosenImageSrc) ? defaultPersonImageSrc : choosenImageSrc;
+        if (_displayedImage != null)
+        {
+            ChoosenImageSrc = originalManager.GetFileDownloadEndpoint(_displayedImage.Id, token);
+        }
+
+        return string.IsNullOrWhiteSpace(ChoosenImageSrc) ? defaultPersonImageSrc : ChoosenImageSrc;
     }
 
-    private async void MemorizeChoosenImage(InputFileChangeEventArgs e)
+    private async Task MemorizeChoosenImage(InputFileChangeEventArgs e)
     {
         personImage = await e.File.RequestImageFileAsync("image", 200, 200);
 
@@ -345,9 +365,21 @@
         {
             var buffer = new byte[personImage.Size];
             await personImage.OpenReadStream().ReadAsync(buffer);
-            choosenImageSrc = $"data: image;base64,{Convert.ToBase64String(buffer)}";
+            ChoosenImageSrc = $"data: image;base64,{Convert.ToBase64String(buffer)}";
+        }
+    }
 
-            StateHasChanged();
+    private async Task DeleteImage()
+    {
+        if(_displayedImage != null)
+        {
+            var res = await originalManager.DeleteAsync(_displayedImage.Id);
+
+            if (res.IsSuccessStatusCode)
+            {
+                _displayedImage = null;
+                ChoosenImageSrc = defaultPersonImageSrc;
+            }
         }
     }
 
