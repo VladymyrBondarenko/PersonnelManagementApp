@@ -3,10 +3,12 @@
 
 @using System.ComponentModel.DataAnnotations
 @using AutoMapper
+@using Blazored.LocalStorage;
 @using PersonnelManagement.Contracts.v1.Requests
 @using PersonnelManagement.Contracts.v1.Requests.Queries
 @using PersonnelManagement.Contracts.v1.Routes
 @using PersonnelManagement.Domain.Models.Originals
+@using PersonnelManagement.WebClient.Infrastructure.Constants.Storage;
 @using PersonnelManagement.WebClient.Infrastructure.Managers.Originals
 @using PersonnelManagement.WebClient.Models
 @using PersonnelManagement.WebClient.Pages.Dialogs.Originals
@@ -17,6 +19,7 @@
 @inject ISnackbar snackBar
 @inject IDialogService dialogService
 @inject IJSRuntime jsRuntime
+@inject ILocalStorageService localStorage
 
 <div>
     <InputFile id="fileInput" OnChange="@((e) => AddOriginal(e))" hidden />
@@ -46,7 +49,7 @@
                 <MudMenuItem OnClick="@(() => DeleteRow(context))" Icon="@Icons.Material.Filled.Delete">Delete</MudMenuItem>
                 <div onclick="document.getElementById('download-link').click()">
                     <MudMenuItem Icon="@Icons.Material.Filled.Download">
-                        <MudLink id="download-link" Href="@GetFileDownloadEndpoint(context.Id ?? default)" download hidden></MudLink>
+                        <MudLink id="download-link" Href="@GetFileDownloadEndpoint(context.Id)" download hidden></MudLink>
                         Download
                     </MudMenuItem>
                 </div>
@@ -65,11 +68,17 @@
     [Parameter()]
     public int OriginalEntity { get; set; }
 
+    private string token;
     private string searchItem = "";
     private OriginalModel selectedItem = null;
     private int[] pageSizeOptions = new int[] { 5, 10, 15 };
 
     private MudTable<OriginalModel> table;
+
+    protected async override Task OnInitializedAsync()
+    {
+        token = await localStorage.GetItemAsync<string>(StorageConstants.AuthToken);
+    }
 
     private async Task Reset()
     {
@@ -85,7 +94,8 @@
             using var stream = file.OpenReadStream(file.Size);
 
             var streamPart = new StreamPart(stream, file.Name, "multipart/form-data");
-            var resp = await originalService.CreateAsync(OriginalEntity, new Guid(EntityKey), streamPart);
+            var resp = await originalService.CreateAsync(OriginalEntity, 
+                (int)OriginalType.SimpleOriginal, new Guid(EntityKey), streamPart);
             var data = resp?.Data;
 
             if (data != null)
@@ -103,7 +113,7 @@
 
     private string GetFileDownloadEndpoint(Guid originalId)
     {
-        return originalService.GetFileDownloadEndpoint(originalId);
+        return originalService.GetFileDownloadEndpoint(originalId, token);
     }
 
     private async Task DeleteRow(OriginalModel element)

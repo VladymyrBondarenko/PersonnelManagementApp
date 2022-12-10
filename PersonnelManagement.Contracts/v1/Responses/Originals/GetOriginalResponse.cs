@@ -15,5 +15,7 @@ namespace PersonnelManagement.Contracts.v1.Responses.Originals
         public string OriginalPath { get; set; }
 
         public string OriginalFileExtension { get; set; }
+
+        public int OriginalType { get; set; }
     }
 }

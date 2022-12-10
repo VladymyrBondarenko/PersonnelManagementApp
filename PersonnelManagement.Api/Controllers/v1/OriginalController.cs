@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PersonnelManagement.Application.FileOperations.Originals;
+using PersonnelManagement.Application.Identities;
 using PersonnelManagement.Contracts.v1.Requests;
 using PersonnelManagement.Contracts.v1.Requests.Originals;
 using PersonnelManagement.Contracts.v1.Requests.Queries;
@@ -14,6 +15,7 @@ using PersonnelManagement.Domain.Models.Filters;
 using PersonnelManagement.Domain.Models.Originals;
 using PersonnelManagement.Server.Services.PaginationServices.Originals;
 using PersonnelManagement.Server.Services.UriServices;
+using System.IdentityModel.Tokens.Jwt;
 using System.Reflection;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -28,14 +30,17 @@ namespace PersonnelManagement.Server.Controllers.v1
         private readonly IMapper _mapper;
         private readonly IOriginalPaginationService _paginationService;
         private readonly IUriService _uriService;
+        private readonly IIdentityService _identityService;
 
         public OriginalController(IOriginalService originalService, 
-            IMapper mapper, IOriginalPaginationService paginationService, IUriService uriService)
+            IMapper mapper, IOriginalPaginationService paginationService, 
+            IUriService uriService, IIdentityService identityService)
         {
             _originalService = originalService;
             _mapper = mapper;
             _paginationService = paginationService;
             _uriService = uriService;
+            _identityService = identityService;
         }
 
         // GET: api/originals
@@ -64,9 +69,15 @@ namespace PersonnelManagement.Server.Controllers.v1
         }
 
         // GET api/originals/download/5
+        [AllowAnonymous()]
         [HttpGet(ApiRoutes.Originals.DownloadFile)]
-        public async Task<IActionResult> DownloadFile(Guid originalId)
+        public async Task<IActionResult> DownloadFile(Guid originalId, string token)
         {
+            if (!_identityService.ValidateToken(token))
+            {
+                return Unauthorized();
+            }
+
             var original = await _originalService.GetOriginalAsync(originalId);
 
             if(original == null)
@@ -80,7 +91,7 @@ namespace PersonnelManagement.Server.Controllers.v1
 
         // POST api/originals
         [HttpPost(ApiRoutes.Originals.Create)]
-        public async Task<IActionResult> Post(int originalEntity, Guid entityId, [FromForm] IFormFile file)
+        public async Task<IActionResult> Post(int originalEntity, int originalType, Guid entityId, [FromForm] IFormFile file)
         {
             var filePath = getFilePath(file);
 
@@ -89,7 +100,8 @@ namespace PersonnelManagement.Server.Controllers.v1
                 FileName = file.FileName,
                 EntityId = entityId,
                 OriginalEntity = (OriginalEntity)originalEntity,
-                Bytes = System.IO.File.ReadAllBytes(filePath)
+                Bytes = System.IO.File.ReadAllBytes(filePath),
+                OriginalType = (OriginalType)originalType
             });
 
             if(original == null)

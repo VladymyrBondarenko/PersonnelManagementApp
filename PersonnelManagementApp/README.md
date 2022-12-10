@@ -68,14 +68,22 @@ Features. Task 8:
 
 Features. Task 9:
 
-// Add order by CreatedDate to all endpoints
+// Add order by CreatedDate to all endpoints+
+
+Features. Task 10:
+// Add feature to add image of employee as original
+
+Features. Task 11:
+// Add icon of user to ui
+// Add ability to bind user account to employee
+// Add ability to register users
+
+Features. Task 12:
+// Add progress bar to ui when waiting for response
+// Add buttons to go to previous page
 
 Some ideas:
 
-// Add feature to add image of employee as original
-// Add progress bar to ui when waiting for response
-// Add buttons to go to previous page
-// Add ability to bind user account to employee
 // Add registraction/authorization through google/facebook etc
 // Maybe add azure ad
 // Add caching to api (redis or monobd)

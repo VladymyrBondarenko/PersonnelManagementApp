@@ -37,6 +37,8 @@ namespace PersonnelManagement.Domain.Models.Originals
         [AllowNull]
         public Employee Employee { get; set; }
 
+        public OriginalType OriginalType { get; set; }
+
         public DateTime CreatedDate { get; set; }
     }
 }

@@ -1,17 +1,23 @@
 ﻿@using static PersonnelManagement.WebClient.Pages.OrgStruct.Departments
 @using System.Globalization
 @using AutoMapper
+@using Blazored.FluentValidation;
+@using Blazored.LocalStorage;
 @using PersonnelManagement.Contracts.v1.Requests
 @using System.Net.Http.Json
 @using System.ComponentModel.DataAnnotations
 @using PersonnelManagement.Contracts.v1.Requests.Orders
 @using PersonnelManagement.Contracts.v1.Requests.Queries
+@using PersonnelManagement.Domain.Models.Originals
 @using PersonnelManagement.Domain.Orders
+@using PersonnelManagement.WebClient.Infrastructure.Constants.Storage;
 @using PersonnelManagement.WebClient.Infrastructure.Managers.Departments
 @using PersonnelManagement.WebClient.Infrastructure.Managers.Orders
+@using PersonnelManagement.WebClient.Infrastructure.Managers.Originals
 @using PersonnelManagement.WebClient.Infrastructure.Managers.Positions
 @using PersonnelManagement.WebClient.Models
 @using PersonnelManagement.WebClient.Pages.Dialogs
+@using Refit;
 @using static PersonnelManagement.WebClient.Pages.OrgStruct.Positions
 @using static PersonnelManagement.WebClient.Pages.Orders.Orders
 @using static PersonnelManagement.WebClient.Pages.Orders.OrdersDescription
@@ -23,16 +29,35 @@
 @inject IMapper mapper
 @inject IPositionManager positionManager
 @inject IDepartmentManager departmentManager
+@inject IOriginalManager originalManager
+@inject ILocalStorageService localStorage
 
-<MudDialog>
+<MudDialog Style="width: 1000px">
     <DialogContent>
         <MudText></MudText>
     </DialogContent>
     <DialogActions>
-        <MudCard>
+        <MudCard Style="width: 100%">
             <MudForm Model="@OrderModel" onsubmit="@(() => SaveData())">
                 <div class="orderdesc-form-content">
                     <MudCardContent>
+                        <div>
+                            <InputFile AdditionalAttributes="@FileInputAttributes" OnChange="@((e) => MemorizeChoosenImage(e))" />
+                            <MudFab id="add-orig-btn" HtmlTag="label" for="fileInput" hidden />
+                            <MudMenu ActivationEvent="@MouseEvent.RightClick">
+                                <ActivatorContent>
+                                    <MudCardMedia Image="@ChoosenImageSrc" Style="width:200px" Height="200" />
+                                </ActivatorContent>
+                                <ChildContent>
+                                     <div onclick="document.getElementById('add-orig-btn').click()">
+                                        <MudMenuItem>
+                                            Add
+                                        </MudMenuItem>
+                                     </div>
+                                    <MudMenuItem OnClick="DeleteImage">Delete</MudMenuItem>
+                                </ChildContent>
+                            </MudMenu>
+                        </div>
                         <MudTextField @bind-Value="OrderModel.FirstName" For="@(() => OrderModel.FirstName)" Label="First Name" />
                         <MudTextField @bind-Value="OrderModel.LastName" For="@(() => OrderModel.LastName)" Label="Last Name" />
                         <MudDatePicker @bind-Date="@OrderModel.DateFrom" For="@(() => OrderModel.DateFrom)" Label="Hire Date" />
@@ -112,9 +137,34 @@
 
     [Parameter] public Guid OrderDescId { get; set; }
 
+    public Dictionary<string, object> FileInputAttributes =
+        new Dictionary<string, object> { { "id", "fileInput" }, { "type", "image" }, { "hidden", "" } };
+
     private bool isPositionPopoverOpen;
 
     private string position;
+
+    private string token;
+
+    private IBrowserFile personImage;
+
+    private string defaultPersonImageSrc = "images/EmptyIcon.jpg";
+
+    public string ChoosenImageSrc
+    {
+        get => choosenImageSrc;
+        set
+        {
+            if (choosenImageSrc == value)
+            {
+                return;
+            }
+
+            choosenImageSrc = value;
+            StateHasChanged();
+        }
+    }
+    private string choosenImageSrc;
 
     public string Position 
     {
@@ -162,6 +212,8 @@
         OrderModel.OrderDescriptionId = OrderDescId;
         department = OrderModel.Department?.DepartmentTitle;
         position = OrderModel.Position?.PositionTitle;
+        token = await localStorage.GetItemAsync<string>(StorageConstants.AuthToken);
+        ChoosenImageSrc = await GetPersonImageLink();
 
         await LoadPositions();
         await LoadDepartments();
@@ -193,7 +245,7 @@
     {
         if (args.Key == "Enter")
         {
-             isPositionPopoverOpen = false;
+            isPositionPopoverOpen = false;
         }
         else
         {
@@ -213,7 +265,7 @@
     {
         if (args.Key == "Enter")
         {
-             isDepartmentPopoverOpen = false;
+            isDepartmentPopoverOpen = false;
         }
         else
         {
@@ -246,9 +298,11 @@
 
                 var response = await orderManager.UpdateAsync(OrderModel.Id, updateRequest);
 
-                if (response?.Data?.Id != default)
+                var data = response?.Data;
+                if (data != null && data.Id != default)
                 {
-                    snackBar.Add("Order edited", Severity.Success);
+                    await AddPersonImage(data.Id);
+
                     OrderModel = new();
                 }
                 else
@@ -262,9 +316,10 @@
 
                 var response = await orderManager.CreateAsync(createRequest);
 
-                if (response?.Data != null)
+                var data = response?.Data;
+                if (data != null && data.Id != default)
                 {
-                    snackBar.Add("Order added", Severity.Success);
+                    await AddPersonImage(data.Id);
                     OrderModel = new();
                 }
                 else
@@ -278,6 +333,71 @@
         else
         {
             snackBar.Add("Form was not validated", Severity.Error);
+        }
+    }
+
+    private OriginalModel _displayedImage;
+
+    private async Task<string> GetPersonImageLink()
+    {
+        var originals = await originalManager
+            .GetAllAsync(query: new GetAllOriginalsQuery { EntityKey = OrderModel.Id });
+
+        var original = originals?.Data?.FirstOrDefault(x => x.OriginalType == (int)OriginalType.EntityImage);
+        if(original != null)
+        {
+            _displayedImage = mapper.Map<OriginalModel>(original);
+        }
+
+        if (_displayedImage != null)
+        {
+            ChoosenImageSrc = originalManager.GetFileDownloadEndpoint(_displayedImage.Id, token);
+        }
+
+        return string.IsNullOrWhiteSpace(ChoosenImageSrc) ? defaultPersonImageSrc : ChoosenImageSrc;
+    }
+
+    private async Task MemorizeChoosenImage(InputFileChangeEventArgs e)
+    {
+        personImage = await e.File.RequestImageFileAsync("image", 200, 200);
+
+        if (personImage != null)
+        {
+            var buffer = new byte[personImage.Size];
+            await personImage.OpenReadStream().ReadAsync(buffer);
+            ChoosenImageSrc = $"data: image;base64,{Convert.ToBase64String(buffer)}";
+        }
+    }
+
+    private async Task DeleteImage()
+    {
+        if(_displayedImage != null)
+        {
+            var res = await originalManager.DeleteAsync(_displayedImage.Id);
+
+            if (res.IsSuccessStatusCode)
+            {
+                _displayedImage = null;
+                ChoosenImageSrc = defaultPersonImageSrc;
+            }
+        }
+    }
+
+    private async Task AddPersonImage(Guid orderId)
+    {
+        if (personImage != null)
+        {
+            using var stream = personImage.OpenReadStream(personImage.Size);
+
+            var streamPart = new StreamPart(stream, personImage.Name, "multipart/form-data");
+            var resp = await originalManager.CreateAsync(
+                (int)OriginalEntity.Orders, (int)OriginalType.EntityImage, orderId, streamPart);
+            var data = resp?.Data;
+
+            if (data == null)
+            {
+                snackBar.Add("Image has not been added due to error! Please, contact developing team.", Severity.Error);
+            }
         }
     }
 

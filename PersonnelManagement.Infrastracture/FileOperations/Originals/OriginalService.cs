@@ -63,13 +63,12 @@ namespace PersonnelManagement.Infrastracture.FileOperations.Originals
 
             if (createParams.Bytes != null && !string.IsNullOrWhiteSpace(createParams.FileName))
             {
-                original = await addOriginalAsync(
-                    createParams.FileName, createParams.Bytes, createParams.OriginalEntity, createParams.EntityId);
+                original = await addOriginalAsync(createParams);
             }
             else if (!string.IsNullOrWhiteSpace(createParams.SourceFilePath))
             {
                 original = await addOriginalAsync(
-                    createParams.SourceFilePath, createParams.OriginalEntity, createParams.EntityId);
+                    createParams.SourceFilePath, createParams.OriginalEntity, createParams.OriginalType, createParams.EntityId);
             }
 
             return original;
@@ -94,28 +93,29 @@ namespace PersonnelManagement.Infrastracture.FileOperations.Originals
             return false;
         }
 
-        private async Task<Original> addOriginalAsync(string fileName, byte[] bytes, OriginalEntity originalEntity,
-            Guid bindedEntityKey = default)
+        private async Task<Original> addOriginalAsync(OriginalCreateParams createParams)
         {
             string executableLocation = Path.GetDirectoryName(
                 Assembly.GetExecutingAssembly().Location);
-            var filePath = Path.Combine(executableLocation, fileName);
+            var filePath = Path.Combine(executableLocation, createParams.FileName);
 
-            await File.WriteAllBytesAsync(filePath, bytes);
+            await File.WriteAllBytesAsync(filePath, createParams.Bytes);
 
             if (!File.Exists(filePath))
             {
                 return null;
             }
 
-            var original = await addOriginalAsync(filePath, originalEntity, bindedEntityKey);
+            var original = await addOriginalAsync(filePath, 
+                createParams.OriginalEntity, createParams.OriginalType, createParams.EntityId);
 
             File.Delete(filePath);
 
             return original;
         }
 
-        private async Task<Original> addOriginalAsync(string sourceFilePath, OriginalEntity originalEntity,
+        private async Task<Original> addOriginalAsync(string sourceFilePath, 
+            OriginalEntity originalEntity, OriginalType originalType,
             Guid bindedEntityKey = default)
         {
             var remotePath = getDirectoryPath(originalEntity);
@@ -132,7 +132,8 @@ namespace PersonnelManagement.Infrastracture.FileOperations.Originals
                     OriginalPath = resultFilePath,
                     OriginalTitle = Path.GetFileNameWithoutExtension(sourceFilePath),
                     FileName = Path.GetFileName(sourceFilePath),
-                    OriginalFileExtension = ext
+                    OriginalFileExtension = ext,
+                    OriginalType = originalType
                 };
                 if(bindedEntityKey != default)
                 {
@@ -158,12 +159,7 @@ namespace PersonnelManagement.Infrastracture.FileOperations.Originals
 
         private string getDirectoryPath(OriginalEntity originalEntity)
         {
-            return originalEntity switch
-            {
-                OriginalEntity.Orders => _entityOriginalSettings.OrdersDirectoryPath,
-                OriginalEntity.Employees => _entityOriginalSettings.EmpoloyeesDirectoryPath,
-                _ => throw new NotImplementedException("Specified original type could not be handled")
-            };
+            return $"{_entityOriginalSettings.FtpRootFolder}\\{_entityOriginalSettings.EntityFilesFolder}";
         }
     }
 }

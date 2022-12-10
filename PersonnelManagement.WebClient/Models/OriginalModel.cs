@@ -4,7 +4,7 @@ namespace PersonnelManagement.WebClient.Models
 {
     public class OriginalModel
     {
-        public Guid? Id { get; set; }
+        public Guid Id { get; set; }
 
         [Display(Name = "Title")]
         public string OriginalTitle { get; set; }
@@ -13,5 +13,7 @@ namespace PersonnelManagement.WebClient.Models
 
         [Display(Name = "Ext")]
         public string OriginalFileExtension { get; set; }
+
+        public int OriginalType { get; set; }
     }
 }

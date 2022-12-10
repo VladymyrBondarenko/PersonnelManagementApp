@@ -17,6 +17,8 @@ namespace PersonnelManagement.Application.FileOperations.Originals
 
         public OriginalEntity OriginalEntity { get; set; }
 
+        public OriginalType OriginalType { get; set; }
+
         public Guid EntityId { get; set; }
     }
 }

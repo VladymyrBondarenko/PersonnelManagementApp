@@ -8,8 +8,8 @@ namespace PersonnelManagement.Infrastracture.FileOperations.Originals
 {
     public class FtpStructureSettings
     {
-        public string OrdersDirectoryPath { get; set; }
+        public string FtpRootFolder { get; set; }
 
-        public string EmpoloyeesDirectoryPath { get; set; }
+        public string EntityFilesFolder { get; set; }
     }
 }
