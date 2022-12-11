@@ -1,12 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components.Authorization;
 using Blazored.LocalStorage;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Security.Claims;
-using System.Net.Http.Headers;
 using System.Text.Json;
 using PersonnelManagement.WebClient.Infrastructure.Constants.Storage;
 
@@ -41,6 +35,14 @@ namespace PersonnelManagement.WebClient.Infrastructure.Authentication
         public async Task StateChangedAsync()
         {
             var authState = Task.FromResult(await GetAuthenticationStateAsync());
+
+            NotifyAuthenticationStateChanged(authState);
+        }
+
+        public void MarkUserAsLoggedOut()
+        {
+            var anonymousUser = new ClaimsPrincipal(new ClaimsIdentity());
+            var authState = Task.FromResult(new AuthenticationState(anonymousUser));
 
             NotifyAuthenticationStateChanged(authState);
         }

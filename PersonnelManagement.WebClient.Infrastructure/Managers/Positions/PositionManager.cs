@@ -1,25 +1,26 @@
-﻿using PersonnelManagement.Contracts.v1.Requests;
+﻿using Blazored.LocalStorage;
+using Microsoft.AspNetCore.Components.Authorization;
+using PersonnelManagement.Contracts.v1.Requests;
 using PersonnelManagement.Contracts.v1.Requests.Positions;
 using PersonnelManagement.Contracts.v1.Requests.Queries;
 using PersonnelManagement.Contracts.v1.Responses;
 using PersonnelManagement.Contracts.v1.Responses.Positions;
 using PersonnelManagement.Sdk.Positions;
+using PersonnelManagement.WebClient.Infrastructure.Managers.Identity;
 using PersonnelManagement.WebClient.Options;
 using Refit;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Net;
 
 namespace PersonnelManagement.WebClient.Infrastructure.Managers.Positions
 {
-    public class PositionManager : IPositionManager
+    public class PositionManager : BaseManager, IPositionManager
     {
         private IPositionRestService _positionService;
 
         public PositionManager(IHttpClientFactory httpClientFactory,
-            ManagersApiOptions apiOptions)
+            ManagersApiOptions apiOptions, ILocalStorageService localStorage,
+            IIdentityManager identityManager, AuthenticationStateProvider authenticationStateProvider)
+            : base(identityManager, localStorage, authenticationStateProvider)
         {
             var httpClient = httpClientFactory.CreateClient(apiOptions.ClientName);
             _positionService = RestService.For<IPositionRestService>(httpClient);
@@ -30,6 +31,15 @@ namespace PersonnelManagement.WebClient.Infrastructure.Managers.Positions
             try
             {
                 var response = await _positionService.GetAllAsync(queryRequest, query);
+
+                if (response?.Error?.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    if (await TryRefreshTokenOrLogout())
+                    {
+                        response = await _positionService.GetAllAsync(queryRequest, query);
+                    }
+                }
+
                 return response?.Content;
             }
             catch (HttpRequestException)
@@ -47,6 +57,15 @@ namespace PersonnelManagement.WebClient.Infrastructure.Managers.Positions
             try
             {
                 var response = await _positionService.CreateAsync(createRequest);
+
+                if (response?.Error?.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    if (await TryRefreshTokenOrLogout())
+                    {
+                        response = await _positionService.CreateAsync(createRequest);
+                    }
+                }
+
                 return response?.Content;
             }
             catch (HttpRequestException)
@@ -64,6 +83,15 @@ namespace PersonnelManagement.WebClient.Infrastructure.Managers.Positions
             try
             {
                 var response = await _positionService.UpdateAsync(positionId, updateRequest);
+
+                if (response?.Error?.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    if (await TryRefreshTokenOrLogout())
+                    {
+                        response = await _positionService.UpdateAsync(positionId, updateRequest);
+                    }
+                }
+
                 return response?.Content;
             }
             catch (HttpRequestException)

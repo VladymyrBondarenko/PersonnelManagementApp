@@ -1,25 +1,26 @@
-﻿using PersonnelManagement.Contracts.v1.Requests;
+﻿using Blazored.LocalStorage;
+using Microsoft.AspNetCore.Components.Authorization;
+using PersonnelManagement.Contracts.v1.Requests;
 using PersonnelManagement.Contracts.v1.Requests.Orders;
 using PersonnelManagement.Contracts.v1.Requests.Queries;
 using PersonnelManagement.Contracts.v1.Responses;
 using PersonnelManagement.Contracts.v1.Responses.OrdersDescription;
 using PersonnelManagement.Sdk.Orders;
+using PersonnelManagement.WebClient.Infrastructure.Managers.Identity;
 using PersonnelManagement.WebClient.Options;
 using Refit;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Net;
 
 namespace PersonnelManagement.WebClient.Infrastructure.Managers.Orders
 {
-    public class OrderDescriptionManager : IOrderDescriptionManager
+    public class OrderDescriptionManager : BaseManager, IOrderDescriptionManager
     {
-        private IOrderDescriptionRestService _orderDescService;
+        private readonly IOrderDescriptionRestService _orderDescService;
 
         public OrderDescriptionManager(IHttpClientFactory httpClientFactory,
-            ManagersApiOptions apiOptions)
+            ManagersApiOptions apiOptions, IIdentityManager identityManager,
+            ILocalStorageService localStorage, AuthenticationStateProvider authenticationStateProvider) 
+            : base(identityManager, localStorage, authenticationStateProvider)
         {
             var httpClient = httpClientFactory.CreateClient(apiOptions.ClientName);
             _orderDescService = RestService.For<IOrderDescriptionRestService>(httpClient);
@@ -30,6 +31,15 @@ namespace PersonnelManagement.WebClient.Infrastructure.Managers.Orders
             try
             {
                 var response = await _orderDescService.Get(id);
+
+                if (response?.Error?.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    if (await TryRefreshTokenOrLogout())
+                    {
+                        response = await _orderDescService.Get(id);
+                    }
+                }
+
                 return response?.Content;
             }
             catch (HttpRequestException)
@@ -47,6 +57,15 @@ namespace PersonnelManagement.WebClient.Infrastructure.Managers.Orders
             try
             {
                 var response = await _orderDescService.GetAllAsync(queryRequest, query);
+
+                if(response?.Error?.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    if (await TryRefreshTokenOrLogout())
+                    {
+                        response = await _orderDescService.GetAllAsync(queryRequest, query);
+                    }
+                }
+
                 return response?.Content;
             }
             catch (HttpRequestException)
@@ -64,6 +83,15 @@ namespace PersonnelManagement.WebClient.Infrastructure.Managers.Orders
             try
             {
                 var response = await _orderDescService.CreateAsync(createRequest);
+
+                if (response?.Error?.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    if (await TryRefreshTokenOrLogout())
+                    {
+                        response = await _orderDescService.CreateAsync(createRequest);
+                    }
+                }
+
                 return response?.Content;
             }
             catch (HttpRequestException)
@@ -81,6 +109,15 @@ namespace PersonnelManagement.WebClient.Infrastructure.Managers.Orders
             try
             {
                 var response = await _orderDescService.UpdateAsync(orderDescriptionId, updateRequest);
+
+                if (response?.Error?.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    if (await TryRefreshTokenOrLogout())
+                    {
+                        response = await _orderDescService.UpdateAsync(orderDescriptionId, updateRequest);
+                    }
+                }
+
                 return response?.Content;
             }
             catch (HttpRequestException)

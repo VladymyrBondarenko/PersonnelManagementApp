@@ -4,7 +4,16 @@ using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// TODO: add jwt/facebook/google authorization to api
+// TODO : change to specific origins
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("CorsPolicy",
+        builder => builder
+            .AllowAnyMethod()
+            .AllowCredentials()
+            .SetIsOriginAllowed((host) => true)
+            .AllowAnyHeader());
+});
 
 builder.Services.InstallServicesInAssembly(builder.Configuration);
 builder.Services.AddAutoMapper(typeof(Program));
@@ -48,11 +57,10 @@ app.UseSerilogRequestLogging();
 
 app.UseRouting();
 
+app.UseCors("CorsPolicy");
+
 app.UseAuthentication();
 app.UseAuthorization();
-
-// TODO : change to specific origins
-app.UseCors(opt => opt.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 
 app.MapControllerRoute(
     name: "default",

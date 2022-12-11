@@ -1,27 +1,26 @@
-﻿using PersonnelManagement.Contracts.v1.Requests;
+﻿using Blazored.LocalStorage;
+using Microsoft.AspNetCore.Components.Authorization;
+using PersonnelManagement.Contracts.v1.Requests;
 using PersonnelManagement.Contracts.v1.Requests.Orders;
-using PersonnelManagement.Contracts.v1.Requests.Originals;
 using PersonnelManagement.Contracts.v1.Requests.Queries;
 using PersonnelManagement.Contracts.v1.Responses;
 using PersonnelManagement.Contracts.v1.Responses.Orders;
-using PersonnelManagement.Contracts.v1.Responses.Originals;
 using PersonnelManagement.Sdk.Orders;
+using PersonnelManagement.WebClient.Infrastructure.Managers.Identity;
 using PersonnelManagement.WebClient.Options;
 using Refit;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Net;
 
 namespace PersonnelManagement.WebClient.Infrastructure.Managers.Orders
 {
-    public class OrderManager : IOrderManager
+    public class OrderManager : BaseManager, IOrderManager
     {
-        private IOrderRestService _orderService;
+        private readonly IOrderRestService _orderService;
 
         public OrderManager(IHttpClientFactory httpClientFactory,
-            ManagersApiOptions apiOptions)
+            ManagersApiOptions apiOptions, IIdentityManager identityManager,
+            ILocalStorageService localStorage, AuthenticationStateProvider authenticationStateProvider)
+            : base(identityManager, localStorage, authenticationStateProvider)
         {
             var httpClient = httpClientFactory.CreateClient(apiOptions.ClientName);
             _orderService = RestService.For<IOrderRestService>(httpClient);
@@ -32,6 +31,15 @@ namespace PersonnelManagement.WebClient.Infrastructure.Managers.Orders
             try
             {
                 var response = await _orderService.GetAllAsync(queryRequest, query);
+
+                if (response?.Error?.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    if (await TryRefreshTokenOrLogout())
+                    {
+                        response = await _orderService.GetAllAsync(queryRequest, query);
+                    }
+                }
+
                 return response?.Content;
             }
             catch (HttpRequestException)
@@ -49,6 +57,15 @@ namespace PersonnelManagement.WebClient.Infrastructure.Managers.Orders
             try
             {
                 var response = await _orderService.CreateAsync(createRequest);
+
+                if (response?.Error?.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    if (await TryRefreshTokenOrLogout())
+                    {
+                        response = await _orderService.CreateAsync(createRequest);
+                    }
+                }
+
                 return response?.Content;
             }
             catch (HttpRequestException)
@@ -66,6 +83,15 @@ namespace PersonnelManagement.WebClient.Infrastructure.Managers.Orders
             try
             {
                 var response = await _orderService.UpdateAsync(orderId, updateRequest);
+
+                if (response?.Error?.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    if (await TryRefreshTokenOrLogout())
+                    {
+                        response = await _orderService.UpdateAsync(orderId, updateRequest);
+                    }
+                }
+
                 return response?.Content;
             }
             catch (HttpRequestException)
@@ -88,6 +114,15 @@ namespace PersonnelManagement.WebClient.Infrastructure.Managers.Orders
             try
             {
                 var response = await _orderService.AcceptOrder(orderId);
+
+                if (response?.Error?.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    if (await TryRefreshTokenOrLogout())
+                    {
+                        response = await _orderService.AcceptOrder(orderId);
+                    }
+                }
+
                 return response?.Content;
             }
             catch (HttpRequestException)
@@ -105,6 +140,15 @@ namespace PersonnelManagement.WebClient.Infrastructure.Managers.Orders
             try
             {
                 var response = await _orderService.RollbackOrder(orderId);
+
+                if (response?.Error?.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    if (await TryRefreshTokenOrLogout())
+                    {
+                        response = await _orderService.RollbackOrder(orderId);
+                    }
+                }
+
                 return response?.Content;
             }
             catch (HttpRequestException)

@@ -1,27 +1,28 @@
-﻿using PersonnelManagement.Contracts.v1.Requests;
+﻿using Blazored.LocalStorage;
+using Microsoft.AspNetCore.Components.Authorization;
+using PersonnelManagement.Contracts.v1.Requests;
 using PersonnelManagement.Contracts.v1.Requests.Originals;
 using PersonnelManagement.Contracts.v1.Requests.Queries;
 using PersonnelManagement.Contracts.v1.Responses;
 using PersonnelManagement.Contracts.v1.Responses.Originals;
 using PersonnelManagement.Contracts.v1.Routes;
 using PersonnelManagement.Sdk.Originals;
+using PersonnelManagement.WebClient.Infrastructure.Managers.Identity;
 using PersonnelManagement.WebClient.Options;
 using Refit;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Net;
 
 namespace PersonnelManagement.WebClient.Infrastructure.Managers.Originals
 {
-    public class OriginalManager : IOriginalManager
+    public class OriginalManager : BaseManager, IOriginalManager
     {
         private IOriginalRestService _originalService;
         private HttpClient _httpClient;
 
         public OriginalManager(IHttpClientFactory httpClientFactory,
-            ManagersApiOptions apiOptions)
+            ManagersApiOptions apiOptions, IIdentityManager identityManager,
+            ILocalStorageService localStorage, AuthenticationStateProvider authenticationStateProvider)
+            : base(identityManager, localStorage, authenticationStateProvider)
         {
             _httpClient = httpClientFactory.CreateClient(apiOptions.ClientName);
             _originalService = RestService.For<IOriginalRestService>(_httpClient);
@@ -32,6 +33,15 @@ namespace PersonnelManagement.WebClient.Infrastructure.Managers.Originals
             try
             {
                 var response = await _originalService.GetAllAsync(queryRequest, query);
+
+                if (response?.Error?.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    if (await TryRefreshTokenOrLogout())
+                    {
+                        response = await _originalService.GetAllAsync(queryRequest, query);
+                    }
+                }
+
                 return response?.Content;
             }
             catch (HttpRequestException)
@@ -49,6 +59,15 @@ namespace PersonnelManagement.WebClient.Infrastructure.Managers.Originals
             try
             {
                 var response = await _originalService.GetAsync(originalId);
+
+                if (response?.Error?.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    if (await TryRefreshTokenOrLogout())
+                    {
+                        response = await _originalService.GetAsync(originalId);
+                    }
+                }
+
                 return response?.Content;
             }
             catch (HttpRequestException)
@@ -72,6 +91,15 @@ namespace PersonnelManagement.WebClient.Infrastructure.Managers.Originals
             try
             {
                 var response = await _originalService.UpdateAsync(originalId, updateRequest);
+
+                if (response?.Error?.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    if (await TryRefreshTokenOrLogout())
+                    {
+                        response = await _originalService.UpdateAsync(originalId, updateRequest);
+                    }
+                }
+
                 return response?.Content;
             }
             catch (HttpRequestException)
@@ -89,6 +117,15 @@ namespace PersonnelManagement.WebClient.Infrastructure.Managers.Originals
             try
             {
                 var response = await _originalService.CreateAsync(originalEntity, originalType, entityId, file);
+
+                if (response?.Error?.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    if (await TryRefreshTokenOrLogout())
+                    {
+                        response = await _originalService.CreateAsync(originalEntity, originalType, entityId, file);
+                    }
+                }
+
                 return response?.Content;
             }
             catch (HttpRequestException)

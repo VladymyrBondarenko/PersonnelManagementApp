@@ -8,6 +8,7 @@ namespace PersonnelManagement.WebClient.Infrastructure.Managers.Identity
     public interface IIdentityManager
     {
         Task<Response<AuthSuccessResponse>> LoginAsync(UserLoginRequest registrationRequest);
+        Task LogoutAsync();
         Task<Response<AuthSuccessResponse>> RefreshAsync(RefreshTokenRequest request);
         Task<Response<AuthSuccessResponse>> RegisterAsync(UserRegistrationRequest registrationRequest);
     }

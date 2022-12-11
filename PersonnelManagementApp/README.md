@@ -71,7 +71,15 @@ Features. Task 9:
 // Add order by CreatedDate to all endpoints+
 
 Features. Task 10:
-// Add feature to add image of employee as original
+// Add feature to add image of employee as original to hire order+
+
+Features. Task 10.1:
+// User accounts
+// Fix. Deleting token from local storage when invalidated+
+
+Features. Task 11:
+// Add feature to add image of employee as original to employees (pass from order to employee)
+...
 
 Features. Task 11:
 // Add icon of user to ui

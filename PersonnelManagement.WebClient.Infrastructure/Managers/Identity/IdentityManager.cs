@@ -8,17 +8,12 @@ using PersonnelManagement.WebClient.Infrastructure.Authentication;
 using PersonnelManagement.WebClient.Infrastructure.Constants.Storage;
 using PersonnelManagement.WebClient.Options;
 using Refit;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PersonnelManagement.WebClient.Infrastructure.Managers.Identity
 {
     public class IdentityManager : IIdentityManager
     {
-        private IIdentityRestService _identityService;
+        private readonly IIdentityRestService _identityService;
         private readonly ILocalStorageService _localStorage;
         private readonly AuthenticationStateProvider _authenticationStateProvider;
 
@@ -80,6 +75,13 @@ namespace PersonnelManagement.WebClient.Infrastructure.Managers.Identity
             {
                 return new Response<AuthSuccessResponse>(new AuthSuccessResponse());
             }
+        }
+
+        public async Task LogoutAsync()
+        {
+            await _localStorage.RemoveItemAsync(StorageConstants.AuthToken);
+            await _localStorage.RemoveItemAsync(StorageConstants.RefreshToken);
+            ((AuthStateProvider)_authenticationStateProvider).MarkUserAsLoggedOut();
         }
 
         public async Task<Response<AuthSuccessResponse>> RefreshAsync(RefreshTokenRequest request)

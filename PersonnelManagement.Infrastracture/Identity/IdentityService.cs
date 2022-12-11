@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using PersonnelManagement.Application.DbContexts;
 using PersonnelManagement.Application.Identities;
@@ -20,15 +21,18 @@ namespace PersonnelManagement.Infrastracture.Identity
         private readonly JwtSettingsOptions _jwtSettings;
         private readonly TokenValidationParameters _tokenParams;
         private readonly IApplicationDbContext _dbContext;
+        private readonly ILogger<IdentityService> _logger;
 
         public IdentityService(
             UserManager<IdentityUserModel> userManager, JwtSettingsOptions jwtSettings,
-            TokenValidationParameters tokenParams, IApplicationDbContext dbContext)
+            TokenValidationParameters tokenParams, IApplicationDbContext dbContext, 
+            ILogger<IdentityService> logger)
         {
             _userManager = userManager;
             _jwtSettings = jwtSettings;
             _tokenParams = tokenParams;
             _dbContext = dbContext;
+            _logger = logger;
         }
 
         public async Task<AuthenticationResult> RegisterAsync(UserRegistrationQuery userRegistrationQuery)
@@ -113,7 +117,7 @@ namespace PersonnelManagement.Infrastracture.Identity
             var storedRefreshToken = await _dbContext.RefreshTokens.FindAsync(refreshToken);
 
             if (storedRefreshToken == null ||
-                DateTime.UtcNow > expityDateUtc ||
+                DateTime.UtcNow > storedRefreshToken.ExpiryDate ||
                 storedRefreshToken.Invalidated ||
                 storedRefreshToken.IsUsed ||
                 storedRefreshToken.JwtId != jti)
@@ -147,8 +151,9 @@ namespace PersonnelManagement.Infrastracture.Identity
                 tokenHandler.ValidateToken(token, validationParameters, out var validatedToken);
                 return true;
             }
-            catch
+            catch(Exception ex)
             {
+                _logger.LogError(ex, "Error while token validation.");
                 return false;
             }
         }
@@ -159,7 +164,10 @@ namespace PersonnelManagement.Infrastracture.Identity
 
             try
             {
-                var principal = tokenHandler.ValidateToken(token, _tokenParams, out SecurityToken validateToken);
+                var param = _tokenParams.Clone();
+                param.ValidateLifetime = false;
+
+                var principal = tokenHandler.ValidateToken(token, param, out SecurityToken validateToken);
 
                 if (!isJwtValidSecurityAlgorithm(validateToken))
                 {

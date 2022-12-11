@@ -39,7 +39,6 @@ namespace PersonnelManagement.UnitTests.OriginalsTests
         public async Task AddOriginalAsync_ShouldReturnAddedOriginal_WhenAddingOriginalToOrder()
         {
             // Arrange
-            var origType = OriginalEntity.Orders;
             var fileText = "Some text";
             var fileName = "tst.txt";
 
